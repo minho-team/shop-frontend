@@ -26,4 +26,3 @@ export const getList = async (pageParam) =>{
     const res = await axios.get(`${prefix}/list`,{params:{page:page,size:size}})
     return res.data
 }
-
