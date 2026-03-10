@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Container, Nav } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
+import { logout } from "../api/shopApi";
 import "../css/Header.css";
 
 const menCategories = {
@@ -19,6 +21,20 @@ const womenCategories = {
 
 const Header = () => {
   const [openMenu, setOpenMenu] = useState(null);
+  const { user, setUser } = useUser();
+  const nav = useNavigate();
+
+  const isAdmin = user?.roles?.includes("ROLE_ADMIN");
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setUser(null);
+      nav("/");
+    } catch (err) {
+      console.log("로그아웃 실패", err);
+    }
+  };
 
   const renderMegaMenu = (categories, basePath) => {
     return (
@@ -78,23 +94,56 @@ const Header = () => {
       </div>
 
       <Container fluid className="utility-row">
-        <Nav className="utility-left">
-          <Nav.Link as={Link} to="/login" className="utility-link">
-            로그인
-          </Nav.Link>
-          <Nav.Link as={Link} to="/signup" className="utility-link">
-            회원가입
-          </Nav.Link>
-          <Nav.Link as={Link} to="/cart" className="utility-link">
-            장바구니
-          </Nav.Link>
-          <Nav.Link as={Link} to="/mypage" className="utility-link">
-            마이페이지
-          </Nav.Link>
-          <Nav.Link as={Link} to="/community" className="utility-link">
-            커뮤니티
-          </Nav.Link>
-        </Nav>
+        <div className="utility-inner">
+          <Nav className="utility-left">
+            {!user && (
+              <>
+                <Nav.Link as={Link} to="/login" className="utility-link">
+                  로그인
+                </Nav.Link>
+                <Nav.Link as={Link} to="/register" className="utility-link">
+                  회원가입
+                </Nav.Link>
+              </>
+            )}
+
+            <Nav.Link as={Link} to="/cart" className="utility-link">
+              장바구니
+            </Nav.Link>
+            <Nav.Link as={Link} to="/mypage" className="utility-link">
+              마이페이지
+            </Nav.Link>
+            <Nav.Link as={Link} to="/community" className="utility-link">
+              커뮤니티
+            </Nav.Link>
+          </Nav>
+
+          {user && (
+            <Nav className="utility-right">
+              {isAdmin && (
+                <Nav.Link
+                  as={Link}
+                  to="/admin"
+                  className="utility-link admin-page-btn"
+                >
+                  관리자 페이지로
+                </Nav.Link>
+              )}
+
+              <span className="utility-link utility-user-text">
+                {user.memberId}님
+              </span>
+
+              <Nav.Link
+                as="button"
+                onClick={handleLogout}
+                className="utility-link utility-logout-btn"
+              >
+                로그아웃
+              </Nav.Link>
+            </Nav>
+          )}
+        </div>
       </Container>
 
       <Container fluid className="brand-row">
@@ -107,10 +156,7 @@ const Header = () => {
         </Link>
       </Container>
 
-      <div
-        className="nav-area"
-        onMouseLeave={() => setOpenMenu(null)}
-      >
+      <div className="nav-area" onMouseLeave={() => setOpenMenu(null)}>
         <Container fluid className="nav-row">
           <button type="button" className="menu-button" aria-label="menu">
             <span />
