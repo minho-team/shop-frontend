@@ -6,6 +6,10 @@ import { useUser, UserProvider } from "../context/UserContext";
 const MainHome = lazy(() => import("../pages/MainHome"));
 const LoginPage = lazy(() => import("../pages/LoginPage"));
 const AdminHome = lazy(() => import("../pages/AdminHome"));
+const CartPage = lazy(() => import("../pages/CartPage"));
+const MyPage = lazy(() => import("../pages/MyPage"));
+const InquiryPage = lazy(() => import("../pages/InquiryPage"));
+const RegisterPage = lazy(() => import("../pages/RegisterPage"));
 
 // 로그인이 안 돼 있으면 /login페이지로 리다이렉트
 const ProtectedRouteWrapper = ({ Component }) => {
@@ -39,10 +43,19 @@ const AdminRouteWrapper = ({ Component }) => {
 // 라우터 정의
 const AppRouterContent = () => {
     const router = createBrowserRouter([
-        { path: "/login", element: <LoginPage /> },
+        /*누구나 들어올 수 있는 페이지*/
         { path: "/", element: <MainHome /> },
-        // { path: "/main", element: <ProtectedRouteWrapper Component={MainPage} /> },
+        { path: "/login", element: <LoginPage /> },
+        { path: "/inquiry", element: <InquiryPage/> },
+        { path: "/register", element: <RegisterPage/> },
+
+        /* 관리자마 들어올 수 있는 페이지 */
         { path: "/admin", element: <AdminRouteWrapper Component={AdminHome} /> },
+
+
+        /*로그인해야만 들어올 수 있는 페이지*/
+        { path: "/cart", element: <ProtectedRouteWrapper Component={CartPage} /> },
+        { path: "/mypage", element: <ProtectedRouteWrapper Component={MyPage} /> },
     ]);
 
     return <RouterProvider router={router} />;

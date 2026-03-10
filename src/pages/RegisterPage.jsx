@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { register } from "../api/shopApi";
+import { register } from "../api/authApi";
 import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {

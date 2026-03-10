@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Container, Nav } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
-import { logout } from "../api/shopApi";
+import { logout } from "../api/authApi";
 import "../css/Header.css";
 
 const menCategories = {
@@ -113,8 +113,8 @@ const Header = () => {
             <Nav.Link as={Link} to="/mypage" className="utility-link">
               마이페이지
             </Nav.Link>
-            <Nav.Link as={Link} to="/community" className="utility-link">
-              커뮤니티
+            <Nav.Link as={Link} to="/inquiry" className="utility-link">
+              문의
             </Nav.Link>
           </Nav>
 

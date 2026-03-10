@@ -1,15 +1,23 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import { Button, Container, Form } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-import { login } from "../api/shopApi";
+import { Navigate, useNavigate } from "react-router-dom";
+import { login } from "../api/authApi";
 import { useUser } from "../context/UserContext";
+import Loading from "./Loading";
 
 const LoginPage = () => {
 
     const nav = useNavigate();
-    const { fetchMe } = useUser();
-    const [input, setInput] = useState({});
+    const { fetchMe, user, loading } = useUser();
+    const [input, setInput] = useState({
+        memberId:"",
+        password:""
+    });
+
+    if (loading) return <Loading/>
+    //로그인한 사용자가 주소창에 억지로 /login을 입력할 때의 방어
+    if (user) return <Navigate to="/" replace />;
 
     const observeInput = (e) => {
         setInput({
@@ -25,9 +33,9 @@ const LoginPage = () => {
     const clickLoginBtn = async () => {
         try {
             const data = await login(input);
-            await fetchMe(); 
+            await fetchMe();
             console.log(data);
-            nav('/')
+            nav("/", { replace: true });
         } catch (err) {
             console.log(err);
         }
