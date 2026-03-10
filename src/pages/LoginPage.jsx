@@ -25,6 +25,7 @@ const LoginPage = () => {
         try {
             const data = await login(input);
             console.log(data);
+            nav('/')
         }catch(err){
             console.log(err);
         }
@@ -40,7 +41,7 @@ const LoginPage = () => {
                 <h2 className="mb-4">로그인</h2>
 
                 <Form>
-                    <Form.Group className="mb-3" controlId="loginEmail">
+                    <Form.Group className="mb-3" controlId="loginId">
                         <Form.Control name="memberId" onChange={observeInput} type="text" placeholder="아이디 입력" />
                     </Form.Group>
 
