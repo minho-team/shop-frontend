@@ -3,11 +3,12 @@ import Header from "../components/Header";
 import { Button, Container, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { login } from "../api/shopApi";
+import { useUser } from "../context/UserContext";
 
 const LoginPage = () => {
 
     const nav = useNavigate();
-
+    const { fetchMe } = useUser();
     const [input, setInput] = useState({});
 
     const observeInput = (e) => {
@@ -24,9 +25,10 @@ const LoginPage = () => {
     const clickLoginBtn = async () => {
         try {
             const data = await login(input);
+            await fetchMe(); 
             console.log(data);
             nav('/')
-        }catch(err){
+        } catch (err) {
             console.log(err);
         }
 

@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 export const API_SERVER_HOST = 'http://localhost:8080'
-const prefix = `${API_SERVER_HOST}/api`;
+const prefix = `${API_SERVER_HOST}/api/auth`;
 
 const api = axios.create({
   baseURL: prefix,
@@ -10,13 +10,23 @@ const api = axios.create({
 });
 
 export const login = async(formData) =>{
-    const res = await axios.post(`${prefix}/auth/login`,formData)
+    const res = await api.post(`${prefix}/login`,formData)
     return res.data;
 }
 export const register = async(formData) =>{
-    const res = await axios.post(`${prefix}/auth/register`,formData)
+    const res = await api.post(`${prefix}/register`,formData)
     return res.data;
 }
+
+export const getMe = async () => {
+  const res = await api.get(`${prefix}/me`);
+  return res.data;
+};
+
+export const logout = async () => {
+  const res = await api.post(`${prefix}/logout`);
+  return res.data;
+};
 
 //예시용 코드
 // export const getOne = async(no)=>{
