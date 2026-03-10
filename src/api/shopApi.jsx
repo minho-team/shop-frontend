@@ -4,6 +4,10 @@ import axios from "axios";
 export const API_SERVER_HOST = 'http://localhost:8080'
 const prefix = `${API_SERVER_HOST}/api`;
 
+const api = axios.create({
+  baseURL: prefix,
+  withCredentials: true,
+});
 
 export const login = async(formData) =>{
     const res = await axios.post(`${prefix}/auth/login`,formData)

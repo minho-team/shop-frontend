@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Container, Nav, Navbar } from "react-bootstrap";
+import { Container, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import "../css//Header.css";
+import "../css/Header.css";
 
 const menCategories = {
   아우터: ["코트", "패딩", "자켓", "가디건"],
@@ -22,22 +22,26 @@ const Header = () => {
 
   const renderMegaMenu = (categories, basePath) => {
     return (
-      <div
-        className="mega-menu"
-        onMouseEnter={() => setOpenMenu(basePath)}
-        onMouseLeave={() => setOpenMenu(null)}
-      >
-        <div className="mega-menu-inner">
+      <div className="mega-menu">
+        <Container fluid className="mega-menu-inner">
           <div className="mega-menu-side">
-            <Link to={`${basePath}`} className="mega-side-link">
+            <Nav.Link as={Link} to={`${basePath}`} className="mega-side-link">
               ALL
-            </Link>
-            <Link to={`${basePath}/new`} className="mega-side-link">
+            </Nav.Link>
+            <Nav.Link
+              as={Link}
+              to={`${basePath}/new`}
+              className="mega-side-link"
+            >
               NEW
-            </Link>
-            <Link to={`${basePath}/outlet`} className="mega-side-link outlet">
+            </Nav.Link>
+            <Nav.Link
+              as={Link}
+              to={`${basePath}/outlet`}
+              className="mega-side-link outlet"
+            >
               OUTLET
-            </Link>
+            </Nav.Link>
           </div>
 
           <div className="mega-menu-columns">
@@ -45,13 +49,14 @@ const Header = () => {
               <div key={title} className="mega-column">
                 <h6>{title}</h6>
                 {items.map((item) => (
-                  <Link
+                  <Nav.Link
+                    as={Link}
                     key={item}
                     to={`${basePath}/category/${encodeURIComponent(item)}`}
                     className="mega-item"
                   >
                     {item}
-                  </Link>
+                  </Nav.Link>
                 ))}
               </div>
             ))}
@@ -61,68 +66,82 @@ const Header = () => {
             <div className="mega-preview-box">이미지영역1</div>
             <div className="mega-preview-box">이미지영역2</div>
           </div>
-        </div>
+        </Container>
       </div>
     );
   };
 
   return (
-    <header
-      className="header-wrapper"
-      onMouseLeave={() => setOpenMenu(null)}
-    >
-      <Navbar expand="lg" className="header-navbar">
-        <Container fluid>
-          <Navbar.Brand as={Link} to="/" className="brand-logo">
-            민호팀
-          </Navbar.Brand>
+    <header className="header-wrapper">
+      <div className="top-banner">
+        1.신규회원! 3000원 할인쿠폰 즉시 사용가능!
+      </div>
 
-          <Navbar.Toggle aria-controls="main-navbar-nav" />
+      <Container fluid className="utility-row">
+        <Nav className="utility-left">
+          <Nav.Link as={Link} to="/login" className="utility-link">
+            로그인
+          </Nav.Link>
+          <Nav.Link as={Link} to="/signup" className="utility-link">
+            회원가입
+          </Nav.Link>
+          <Nav.Link as={Link} to="/cart" className="utility-link">
+            장바구니
+          </Nav.Link>
+          <Nav.Link as={Link} to="/mypage" className="utility-link">
+            마이페이지
+          </Nav.Link>
+          <Nav.Link as={Link} to="/community" className="utility-link">
+            커뮤니티
+          </Nav.Link>
+        </Nav>
+      </Container>
 
-          <Navbar.Collapse id="main-navbar-nav">
-            <Nav className="main-nav">
-              <div
-                className="nav-hover-item"
-                onMouseEnter={() => setOpenMenu("/men")}
-              >
-                <Nav.Link as={Link} to="/men" className="nav-link-custom">
-                  남성
-                </Nav.Link>
-              </div>
+      <Container fluid className="brand-row">
+        <Link to="/" className="brand-center">
+          <div className="brand-logo-image">LOGO</div>
+          <div className="brand-copy">
+            <strong>민호팀</strong>
+            <span>쇼핑몰</span>
+          </div>
+        </Link>
+      </Container>
 
-              <div
-                className="nav-hover-item"
-                onMouseEnter={() => setOpenMenu("/women")}
-              >
-                <Nav.Link as={Link} to="/women" className="nav-link-custom">
-                  여성
-                </Nav.Link>
-              </div>
-            </Nav>
+      <div
+        className="nav-area"
+        onMouseLeave={() => setOpenMenu(null)}
+      >
+        <Container fluid className="nav-row">
+          <button type="button" className="menu-button" aria-label="menu">
+            <span />
+            <span />
+            <span />
+          </button>
 
-            <Nav className="icon-text-nav ms-auto">
-              <Nav.Link as={Link} to="/contact" className="nav-link-custom">
-                문의
+          <Nav className="category-nav">
+            <div
+              className="nav-hover-item"
+              onMouseEnter={() => setOpenMenu("/men")}
+            >
+              <Nav.Link as={Link} to="/men" className="nav-link-custom">
+                남성
               </Nav.Link>
-              <Nav.Link as={Link} to="/mypage" className="nav-link-custom">
-                마이페이지
+            </div>
+
+            <div
+              className="nav-hover-item"
+              onMouseEnter={() => setOpenMenu("/women")}
+            >
+              <Nav.Link as={Link} to="/women" className="nav-link-custom">
+                여성
               </Nav.Link>
-              <Nav.Link as={Link} to="/search" className="nav-link-custom">
-                검색
-              </Nav.Link>
-              <Nav.Link as={Link} to="/wishlist" className="nav-link-custom">
-                찜
-              </Nav.Link>
-              <Nav.Link as={Link} to="/cart" className="nav-link-custom">
-                장바구니
-              </Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
+            </div>
+          </Nav>
         </Container>
-      </Navbar>
 
-      {openMenu === "/men" && renderMegaMenu(menCategories, "/men")}
-      {openMenu === "/women" && renderMegaMenu(womenCategories, "/women")}
+        {openMenu === "/men" && renderMegaMenu(menCategories, "/men")}
+        {openMenu === "/women" && renderMegaMenu(womenCategories, "/women")}
+      </div>
     </header>
   );
 };
