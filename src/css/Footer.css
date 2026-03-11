@@ -1,0 +1,162 @@
+.footer {
+  width: 100%;
+  background-color: #f7f7f7;
+  margin-top: 80px;
+  border-top: 1px solid #dcdcdc;
+}
+
+.footer-top-menu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 42px;
+  padding: 18px 20px;
+  background-color: #fff;
+  border-bottom: 1px solid #e5e5e5;
+  flex-wrap: wrap;
+}
+
+.footer-top-link {
+  font-size: 12px;
+  color: #222;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.footer-top-link:hover {
+  color: #000;
+}
+
+.footer-top-link.strong {
+  font-weight: 700;
+}
+
+.footer-main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 42px 40px 36px;
+  display: grid;
+  grid-template-columns: 1.4fr 1.2fr 0.8fr;
+  gap: 40px;
+}
+
+.footer-col {
+  min-width: 0;
+}
+
+.footer-company {
+  padding-right: 40px;
+  border-right: 1px solid #d9d9d9;
+}
+
+.footer-logo {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #3a3a3a;
+  margin: 0 0 22px;
+}
+
+.footer-company p,
+.footer-center p,
+.footer-bank p {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #666;
+}
+
+.footer-inline-link {
+  color: #222;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.footer-inline-link:hover {
+  text-decoration: underline;
+}
+
+.footer-center {
+  padding: 0 10px;
+}
+
+.footer-block h3,
+.footer-bank h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 14px;
+}
+
+.footer-phone {
+  display: block;
+  font-size: 40px;
+  font-weight: 800;
+  color: #000;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.footer-divider {
+  margin: 28px 0 24px;
+  border-top: 1px solid #d9d9d9;
+}
+
+.footer-bank {
+  padding-left: 20px;
+}
+
+.footer-bank-line {
+  margin-top: 34px;
+  width: 85%;
+  border-top: 1px solid #d9d9d9;
+}
+
+@media (max-width: 1024px) {
+  .footer-main {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 36px 24px 30px;
+  }
+
+  .footer-company {
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid #d9d9d9;
+    padding-bottom: 24px;
+  }
+
+  .footer-bank {
+    padding-left: 0;
+  }
+
+  .footer-bank-line {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-top-menu {
+    gap: 18px;
+    padding: 16px 12px;
+  }
+
+  .footer-logo {
+    font-size: 32px;
+  }
+
+  .footer-block h3,
+  .footer-bank h3 {
+    font-size: 20px;
+  }
+
+  .footer-phone {
+    font-size: 30px;
+  }
+
+  .footer-company p,
+  .footer-center p,
+  .footer-bank p {
+    font-size: 13px;
+  }
+}

@@ -1,0 +1,147 @@
+.main-carousel-section {
+  width: 100%;
+  margin-bottom: 80px;
+}
+
+.carousel-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 78vh;
+  min-height: 650px;
+  max-height: 900px;
+  overflow: hidden;
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  animation: zoomEffect 6s ease-in-out infinite;
+}
+
+.carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.55),
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0.15)
+  );
+}
+
+.carousel-caption-custom {
+  position: absolute;
+  left: 10%;
+  right: auto;
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+  text-align: left;
+  max-width: 650px;
+  z-index: 5;
+}
+
+.carousel-subtitle {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: #f3f3f3;
+}
+
+.carousel-caption-custom h2 {
+  font-size: 64px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 18px;
+}
+
+.carousel-caption-custom p {
+  font-size: 20px;
+  color: #f5f5f5;
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+.carousel-btn {
+  display: inline-block;
+  padding: 14px 30px;
+  background-color: #fff;
+  color: #111;
+  text-decoration: none;
+  border-radius: 999px;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+
+.carousel-btn:hover {
+  background-color: #111;
+  color: #fff;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  width: 7%;
+}
+
+.carousel-indicators [data-bs-target] {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+
+@keyframes zoomEffect {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 992px) {
+  .carousel-image-wrap {
+    height: 65vh;
+    min-height: 520px;
+  }
+
+  .carousel-caption-custom h2 {
+    font-size: 44px;
+  }
+
+  .carousel-caption-custom p {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-image-wrap {
+    height: 58vh;
+    min-height: 420px;
+  }
+
+  .carousel-caption-custom {
+    left: 7%;
+    max-width: 90%;
+  }
+
+  .carousel-caption-custom h2 {
+    font-size: 32px;
+  }
+
+  .carousel-caption-custom p {
+    font-size: 15px;
+  }
+
+  .carousel-btn {
+    padding: 12px 22px;
+    font-size: 14px;
+  }
+}
