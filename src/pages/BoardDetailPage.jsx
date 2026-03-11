@@ -1,0 +1,152 @@
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import Header from "../components/Header";
+import { getOneBoard } from "../api/boardApi";
+import { API_SERVER_HOST } from "../api/authApi";
+
+const BoardDetailPage = () => {
+    const { boardNo } = useParams();
+    const navigate    = useNavigate();
+
+    // 게시글 데이터
+    const [board, setBoard] = useState(null);
+
+    // 첨부파일 목록
+    const [files, setFiles] = useState([]);
+
+    // 관리자 답변 목록
+    const [comments, setComments] = useState([]);
+
+    // 로딩 상태
+    const [loading, setLoading] = useState(true);
+
+    // 컴포넌트 마운트 시 상세 조회
+    useEffect(() => {
+        fetchDetail();
+    }, [boardNo]);
+
+    const fetchDetail = async () => {
+        setLoading(true);
+        try {
+            // 반환값: { board, files, comments }
+            const data = await getOneBoard(boardNo);
+            setBoard(data.board);
+            setFiles(data.files       || []);
+            setComments(data.comments || []);
+        } catch (e) {
+            console.error("게시글 조회 실패:", e);
+            alert("게시글을 불러올 수 없습니다.");
+            navigate(-1);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 날짜 포맷 (YYYY-MM-DD HH:mm)
+    const formatDate = (timestamp) => {
+        if (!timestamp) return "";
+        return new Date(timestamp).toLocaleString("ko-KR");
+    };
+
+    if (loading) return <><Header /><p style={{ textAlign: "center", padding: "60px" }}>로딩 중...</p></>;
+
+    return (
+        <>
+            <Header />
+            <div style={{ maxWidth: "800px", margin: "40px auto", padding: "0 20px" }}>
+
+                {/* 뒤로가기 버튼 */}
+                <button
+                    onClick={() => navigate(-1)}
+                    style={{ background: "none", border: "none", cursor: "pointer", fontSize: "14px", color: "#666", marginBottom: "20px" }}
+                >
+                    ← 목록으로
+                </button>
+
+                {/* 게시글 헤더 (카테고리, 상태, 제목, 작성일) */}
+                <div style={{ borderTop: "2px solid #222", borderBottom: "1px solid #eee", padding: "20px 0" }}>
+                    <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
+                        {/* 카테고리 배지 */}
+                        <span style={{ fontSize: "12px", color: "#999", background: "#f5f5f5", padding: "3px 10px", borderRadius: "12px" }}>
+                            {board.category}
+                        </span>
+                        {/* 답변 상태 배지 */}
+                        <span style={{
+                            fontSize: "12px", padding: "3px 10px", borderRadius: "12px",
+                            background: board.status === "답변완료" ? "#e8f5e9" : "#fff3e0",
+                            color: board.status === "답변완료" ? "#2e7d32" : "#e65100",
+                        }}>
+                            {board.status}
+                        </span>
+                        {/* 비밀글 표시 */}
+                        {board.secretYn === "Y" && <span style={{ fontSize: "12px", color: "#999" }}>🔒 비밀글</span>}
+                    </div>
+                    <h2 style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "8px" }}>{board.title}</h2>
+                    <div style={{ fontSize: "13px", color: "#999" }}>
+                        작성일: {formatDate(board.createdAt)} · 조회수: {board.viewCount}
+                    </div>
+                </div>
+
+                {/* 게시글 내용 */}
+                <div style={{ padding: "24px 0", borderBottom: "1px solid #eee", fontSize: "14px", lineHeight: "1.8", whiteSpace: "pre-wrap" }}>
+                    {board.content}
+                </div>
+
+                {/* 첨부파일 목록 (이미지면 미리보기, 아니면 다운로드 링크) */}
+                {files.length > 0 && (
+                    <div style={{ padding: "16px 0", borderBottom: "1px solid #eee" }}>
+                        <p style={{ fontSize: "13px", fontWeight: "bold", marginBottom: "10px" }}>첨부파일</p>
+                        {files.map((file) => (
+                            <div key={file.fileNo} style={{ marginBottom: "10px" }}>
+                                {file.fileType && file.fileType.startsWith("image/") ? (
+                                    // 이미지 파일 - 미리보기
+                                    <img
+                                        src={`${API_SERVER_HOST}${file.fileUrl}`}
+                                        alt={file.fileName}
+                                        style={{ maxWidth: "100%", maxHeight: "400px", borderRadius: "4px", border: "1px solid #eee" }}
+                                    />
+                                ) : (
+                                    // 일반 파일 - 다운로드 링크
+                                    <a
+                                        href={`${API_SERVER_HOST}${file.fileUrl}`}
+                                        download={file.fileName}
+                                        style={{ fontSize: "13px", color: "#1a73e8" }}
+                                    >
+                                        📎 {file.fileName}
+                                    </a>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* 관리자 답변 영역 */}
+                <div style={{ margin: "24px 0" }}>
+                    <p style={{ fontSize: "13px", fontWeight: "bold", marginBottom: "12px" }}>관리자 답변</p>
+                    {comments.length > 0 ? (
+                        comments.map((comment) => (
+                            <div
+                                key={comment.commentNo}
+                                style={{ background: "#f9f9f9", border: "1px solid #eee", borderRadius: "4px", padding: "16px", marginBottom: "10px" }}
+                            >
+                                <div style={{ fontSize: "14px", color: "#555", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>
+                                    {comment.content}
+                                </div>
+                                <div style={{ fontSize: "12px", color: "#999", marginTop: "8px" }}>
+                                    {formatDate(comment.createdAt)}
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        // 아직 답변 없을 때
+                        <div style={{ textAlign: "center", padding: "30px 0", color: "#999", fontSize: "14px", background: "#f9f9f9", borderRadius: "4px" }}>
+                            아직 답변이 등록되지 않았습니다.
+                        </div>
+                    )}
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default BoardDetailPage;
