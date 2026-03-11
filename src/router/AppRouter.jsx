@@ -54,7 +54,7 @@ const AppRouterContent = () => {
         { path: "/login", element: <LoginPage /> },
         { path: "/inquiry", element: <InquiryPage /> },
         { path: "/register", element: <RegisterPage /> },
-        { path: "/product/:id", element: <ProductDetailPage /> },
+        { path: "/product/detail/:id", element: <ProductDetailPage /> },
         { path: "/faq/detail/:id", element: <FaqDetailPage /> },
 
         /* 관리자만 들어올 수 있는 페이지 */

@@ -62,7 +62,7 @@ const MainProductList = () => {
 
             return (
               <Link
-                to={`/product/${item.productNo}`}
+                to={`/product/detail/${item.productNo}`}
                 className="product-card"
                 key={item.productNo ?? index}
               >
