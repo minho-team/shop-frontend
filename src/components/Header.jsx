@@ -41,14 +41,10 @@ const Header = () => {
       <div className="mega-menu">
         <Container fluid className="mega-menu-inner">
           <div className="mega-menu-side">
-            <Nav.Link as={Link} to={`${basePath}`} className="mega-side-link">
+            <Nav.Link as={Link} to={basePath} className="mega-side-link">
               ALL
             </Nav.Link>
-            <Nav.Link
-              as={Link}
-              to={`${basePath}/new`}
-              className="mega-side-link"
-            >
+            <Nav.Link as={Link} to={`${basePath}/new`} className="mega-side-link">
               NEW
             </Nav.Link>
             <Nav.Link
@@ -90,7 +86,7 @@ const Header = () => {
   return (
     <header className="header-wrapper">
       <div className="top-banner">
-        1.신규회원! 3000원 할인쿠폰 즉시 사용가능!
+        1. 신규회원! 3000원 할인쿠폰 즉시 사용가능!
       </div>
 
       <Container fluid className="utility-row">

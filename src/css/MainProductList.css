@@ -1,0 +1,203 @@
+.main-product-section {
+  padding: 30px 0 100px;
+  background-color: #fff;
+}
+
+.main-product-inner {
+  width: 90%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.main-product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  margin-bottom: 36px;
+}
+
+.main-product-label {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.main-product-header h2 {
+  font-size: 34px;
+  font-weight: 800;
+  margin: 0;
+  color: #111;
+}
+
+.main-product-more {
+  text-decoration: none;
+  color: #111;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+}
+
+.product-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.product-thumb {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background-color: #f6f6f6;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.product-thumb img {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.product-card:hover .product-thumb img {
+  transform: scale(1.06);
+}
+
+.product-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #fff;
+  z-index: 2;
+}
+
+.badge-new {
+  background-color: #111;
+}
+
+.badge-hot {
+  background-color: #e53935;
+}
+
+.badge-best {
+  background-color: #1565c0;
+}
+
+.badge-sale {
+  background-color: #2e7d32;
+}
+
+.product-info {
+  padding: 16px 4px 6px;
+}
+
+.product-brand {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.product-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.product-price-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.product-price {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111;
+  margin: 0;
+}
+
+.product-price-sale {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111;
+}
+
+.product-price-original {
+  font-size: 14px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+@media (max-width: 1200px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .product-thumb img {
+    height: 360px;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-product-inner {
+    width: 94%;
+  }
+
+  .main-product-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .main-product-header h2 {
+    font-size: 28px;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .product-thumb img {
+    height: 250px;
+  }
+
+  .product-name {
+    font-size: 15px;
+  }
+
+  .product-price,
+  .product-price-sale {
+    font-size: 16px;
+  }
+
+  .product-badge {
+    top: 10px;
+    left: 10px;
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+}
