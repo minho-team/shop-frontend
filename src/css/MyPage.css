@@ -1,0 +1,280 @@
+/* 1. 글로벌 레이아웃 통일 */
+.mypage-container {
+  background: #fff;
+  color: #222;
+  font-family: inherit;
+}
+
+/* 2. 상단 대시보드 */
+.user-summary-bg {
+  background: #fafafa;
+  border-bottom: 1px solid #e9e9e9;
+}
+
+.user-summary {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-info .welcome-text {
+  font-size: 12px;
+  letter-spacing: -0.2px;
+  color: #888;
+  font-weight: 400;
+}
+
+.user-info h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111;
+  margin-top: 4px;
+}
+
+.btn-grade-check {
+  margin-top: 12px;
+  background: #fff;
+  border: 1px solid #e3e3e3;
+  padding: 8px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #666;
+}
+
+.grade-badge .label {
+  display: block;
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 8px; /* 등급과 SILVER 사이 간격 확보 */
+  letter-spacing: 0.5px;
+}
+
+.grade-badge strong {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
+  color: #111;
+  line-height: 1.2;
+}
+
+/* 3. 컨텐츠 영역 레이아웃 */
+.mypage-wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-left: 28px;
+  padding-right: 28px;
+  padding-bottom: 100px; /* 푸터와의 간격 */
+}
+
+.mypage-body {
+  display: flex;
+  padding-top: 50px;
+  gap: 60px;
+}
+
+/* 4. 좌측 사이드바 */
+.sidebar {
+  width: 180px;
+  flex-shrink: 0;
+}
+
+.menu-group {
+  margin-bottom: 35px;
+}
+
+.menu-group h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+}
+
+.menu-item {
+  font-size: 13px;
+  color: #666;
+  padding: 7px 0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.menu-item:hover,
+.menu-item.active {
+  color: #000;
+  font-weight: 500;
+}
+
+/* 5. 우측 본문 영역 */
+.content-area {
+  flex: 1;
+}
+
+.content-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 30px;
+}
+
+/* 6. 탭 메뉴 (양쪽 끝 정렬 반영) */
+.order-tab-container {
+  display: flex;
+  justify-content: space-between; /* 양쪽 끝으로 밀어내기 */
+  align-items: center;
+  border-bottom: 1px solid #ececec;
+  margin-bottom: 25px;
+}
+
+.modern-tab-btn {
+  background: none;
+  border: none;
+  padding: 12px 0; /* 좌우 패딩을 제거해 선 끝에 맞춤 */
+  font-size: 14px;
+  color: #999;
+  cursor: pointer;
+  position: relative;
+}
+
+.modern-tab-btn span {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.modern-tab-btn.active {
+  color: #111;
+  font-weight: 600;
+}
+
+.modern-tab-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #111;
+}
+
+/* 7. 테이블 디자인 */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.custom-table th {
+  text-align: left;
+  padding: 15px 10px;
+  border-bottom: 1px solid #111;
+  font-weight: 600;
+  color: #111;
+}
+
+.custom-table td {
+  padding: 18px 10px;
+  border-bottom: 1px solid #f4f4f4;
+  color: #444;
+}
+
+.status-cancel {
+  color: #999;
+}
+.status-delivery {
+  color: #222;
+  font-weight: 500;
+}
+
+/* 8. 푸터 디자인 (홈 푸터 스타일 동기화) */
+.footer {
+  background: #fff;
+  border-top: 1px solid #e9e9e9;
+  padding-bottom: 60px;
+}
+
+.footer-top-menu {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px 28px;
+  display: flex;
+  gap: 25px;
+  border-bottom: 1px solid #f4f4f4;
+}
+
+.footer-top-link {
+  font-size: 13px;
+  color: #666;
+  text-decoration: none;
+}
+
+.footer-top-link.strong {
+  color: #111;
+  font-weight: 600;
+}
+
+.footer-main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 45px 28px;
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr;
+  gap: 40px;
+}
+
+.footer-logo {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+}
+
+.footer-col h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #111;
+}
+
+.footer-col p {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.8;
+  margin: 0 0 5px 0;
+}
+
+.footer-phone {
+  font-size: 22px;
+  font-weight: 600;
+  color: #111;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.footer-divider {
+  height: 1px;
+  background: #f1f1f1;
+  margin: 20px 0;
+}
+
+.footer-inline-link {
+  color: #888;
+  text-decoration: none;
+  font-size: 11px;
+}
+
+/* 공통 로딩/에러 */
+.loading-container,
+.empty-row,
+.empty-content {
+  padding: 80px 0;
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+}
