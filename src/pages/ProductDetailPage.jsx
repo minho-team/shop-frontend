@@ -121,7 +121,7 @@ const ProductDetailPage = () => {
     };
 
     console.log("주문 페이지로 넘길 데이터", orderItem);
-    navigate("/order");
+    navigate("/order/write");
   };
 
   return (
