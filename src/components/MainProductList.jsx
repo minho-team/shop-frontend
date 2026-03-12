@@ -3,24 +3,13 @@ import "../css/MainProductList.css";
 import { useEffect, useState } from "react";
 import { getProductList } from "../api/productApi";
 
-const fallbackImages = [
-  "https://picsum.photos/id/1011/700/900",
-  "https://picsum.photos/id/1005/700/900",
-  "https://picsum.photos/id/1025/700/900",
-  "https://picsum.photos/id/1035/700/900",
-  "https://picsum.photos/id/1041/700/900",
-  "https://picsum.photos/id/1050/700/900",
-  "https://picsum.photos/id/1062/700/900",
-  "https://picsum.photos/id/1074/700/900",
-  "https://picsum.photos/id/1080/700/900",
-  "https://picsum.photos/id/1084/700/900",
-];
-
 const tagOptions = ["NEW", "HOT", "BEST", "SALE"];
 
 const getRandomTag = (productNo = 0) => {
   return tagOptions[productNo % tagOptions.length] || "NEW";
 };
+
+const API_BASE_URL = "http://localhost:8080";
 
 const MainProductList = () => {
   const [product, setProduct] = useState([]);
@@ -32,6 +21,7 @@ const MainProductList = () => {
         setProduct(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("상품 목록 불러오기 실패:", error);
+        setProduct([]);
       }
     };
 
@@ -54,8 +44,12 @@ const MainProductList = () => {
 
         <div className="product-grid">
           {product.map((item, index) => {
-            const imageSrc =
-              item.imageUrl || fallbackImages[index % fallbackImages.length];
+            console.log("상품명:", item.name);
+            console.log("imageUrl 원본:", JSON.stringify(item.imageUrl));
+            console.log("최종 src:", `${API_BASE_URL}${item.imageUrl}`);
+            const imageSrc = item.imageUrl
+              ? `${API_BASE_URL}${item.imageUrl}`
+              : "";
 
             const tag = getRandomTag(item.productNo ?? index);
             const badgeClass = `product-badge badge-${String(tag).toLowerCase()}`;
@@ -67,14 +61,11 @@ const MainProductList = () => {
                 key={item.productNo ?? index}
               >
                 <div className="product-thumb">
-                  <img
-                    src={imageSrc}
-                    alt={item.name}
-                    onError={(e) => {
-                      e.currentTarget.src =
-                        "https://picsum.photos/700/900?random=999";
-                    }}
-                  />
+                  {item.imageUrl ? (
+                    <img src={imageSrc} alt={item.name} />
+                  ) : (
+                    <div className="product-no-image">NO IMAGE</div>
+                  )}
 
                   <span className={badgeClass}>{tag}</span>
                 </div>
