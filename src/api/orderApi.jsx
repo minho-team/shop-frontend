@@ -14,8 +14,4 @@ export const asd = async (formData) => {
   return res.data;
 }
 
-// 내 모든 주문내역 불러오기
-export const getMyOrderList = async () => {
-  const res = await api.get();
-  return res.data;
-};
+
