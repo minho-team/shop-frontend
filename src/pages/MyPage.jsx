@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'; // 푸터 링크를 위해 추가
 import Header from '../components/Header';
 import { useUser } from "../context/UserContext";
 import '../css/MyPage.css';
+import { getMyOrderList } from '../api/orderApi';
 
 /**
  * [컴포넌트] 주문 내역 테이블
@@ -11,18 +12,14 @@ import '../css/MyPage.css';
 const OrderHistory = ({ currentUser, type }) => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-
+    const { user } = useUser();
     useEffect(() => {
         const fetchOrders = async () => {
-            if (!currentUser?.memberNo) return;
+            if (!user) return;
             try {
-                const res = await axios.get(`http://localhost:8080/api/order/my/${currentUser.memberNo}`);
-                const data = res.data;
-                if (type === 'CANCEL') {
-                    setOrders(data.filter(o => o.orderStatus === 'CANCEL' || o.orderStatus === 'RETURN'));
-                } else {
-                    setOrders(data.filter(o => o.orderStatus !== 'CANCEL' && o.orderStatus !== 'RETURN'));
-                }
+                const data = await getMyOrderList();
+                setOrders(data.orderList);
+
             } catch (err) {
                 console.error("데이터 로드 실패:", err);
             } finally {
@@ -30,9 +27,8 @@ const OrderHistory = ({ currentUser, type }) => {
             }
         };
         fetchOrders();
-    }, [currentUser, type]);
+    }, [currentUser, type, user]);
 
-    if (loading) return <div className="loading-text">Loading...</div>;
 
     return (
         <div className="table-responsive">
@@ -89,7 +85,7 @@ const MyPage = () => {
                 <section className="user-summary">
                     <div className="user-info">
                         <span className="welcome-text">WELCOME</span>
-                        <h2>{user?.name || '홍길동'} 님</h2>
+                        <h2>{user?.memberName || '홍길동'} 님</h2>
                         <button className="btn-grade-check">멤버쉽 등급확인 {'>'}</button>
                     </div>
                     <div className="grade-badge">
