@@ -96,7 +96,7 @@ const AppRouterContent = () => {
         { path: "/inquiry/my", element: <ProtectedRouteWrapper Component={InquiryMyPage} /> },
         { path: "/inquiry/my/detail/:id", element: <ProtectedRouteWrapper Component={InquiryMyDetailPage} /> },
         { path: "/order/write", element: <ProtectedRouteWrapper Component={OrderWritePage} /> },
-        { path: "/my/order/detail", element: <ProtectedRouteWrapper Component={MyOrderDetailPage} /> },
+        { path: "/my/order/detail/:orderNo", element: <ProtectedRouteWrapper Component={MyOrderDetailPage} /> },
 
 
     ]);
