@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import { createBoard } from "../api/boardApi";
+import { createBoard } from "../api/inquiryApi";
 
 // 문의 카테고리 목록
 const CATEGORIES = ["배송", "주문/결제", "취소/교환/반품", "상품/AS문의", "회원정보", "서비스", "이용안내"];

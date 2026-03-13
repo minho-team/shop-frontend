@@ -1,3 +1,7 @@
+
+//자주묻는 질문 하나 클릭하면 들어오는 상세 페이지
+
+
 import Header from "../components/Header";
 
 const FaqDetailPage = () => {
