@@ -91,6 +91,10 @@ const AdminNavbar = () => {
               </li>
             </ul>
           </li>
+
+          <li className="admin-menu-item admin-user-page-link">
+            <Link to="/">사용자 페이지로</Link>
+          </li>
         </ul>
       </div>
     </nav>
