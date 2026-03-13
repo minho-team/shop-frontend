@@ -1,3 +1,8 @@
+
+// 문의 게시판 홈/////////////////////////////////////////
+// 여기서 자주 묻는 질문과 1:1문의 내역을 클릭에 따라 분기 처리
+// 페이징 구현해야 함
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";

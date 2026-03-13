@@ -1,9 +1,12 @@
+// 1:1 문의의 내 문의 내역 리스트 페이지
+
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import { getMyBoards, deleteBoard } from "../api/boardApi";
+import { getMyBoards, deleteBoard } from "../api/inquiryApi";
 
-const BoardMyPage = () => {
+const InquiryMyPage = () => {
     const navigate = useNavigate();
 
     // 내 문의 목록
@@ -123,4 +126,4 @@ const BoardMyPage = () => {
     );
 };
 
-export default BoardMyPage;
+export default InquiryMyPage;

@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate, useParams } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import Loading from "../pages/Loading";
 import { useUser, UserProvider } from "../context/UserContext";
