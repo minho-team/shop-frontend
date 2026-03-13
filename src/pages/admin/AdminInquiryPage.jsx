@@ -1,14 +1,17 @@
 // =========================================
 // 관리자 1:1 문의 페이지 컴포넌트
-// 기능: 문의 목록 조회, 필터링, 상세 조회, 답변 작성/삭제
+// 기능: 문의 목록 조회, 필터링, 상세 조회, 답변 작성/삭제, 문의 삭제, 페이징
 // =========================================
 import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminHeader from "../../components/admin/AdminHeader";
-import { getAllInquiries, getOneInquiry, createComment, deleteComment } from "../../api/inquiryApi";
+import { getAllInquiries, getOneInquiry, createComment, deleteComment, adminDeleteInquiry } from "../../api/inquiryApi";
 
 const STATUS_LABELS = ["전체", "답변대기", "답변완료"];
 const CATEGORY_LABELS = ["전체", "배송", "주문/결제", "취소/교환/반품", "상품/AS문의", "회원정보", "서비스", "이용안내"];
+
+// 페이지당 문의 표시 개수
+const PAGE_SIZE = 10;
 
 const AdminInquiryPage = () => {
     // 상태 변수들 (useState)
@@ -21,6 +24,7 @@ const AdminInquiryPage = () => {
     const [detail, setDetail] = useState(null);                    // 상세 데이터 { inquiry, files, comments } (객체 또는 null)
     const [commentContent, setCommentContent] = useState("");     // 답변 작성 내용 (문자열)
     const [loading, setLoading] = useState(false);               // 로딩 상태 (불리언)
+    const [currentPage, setCurrentPage] = useState(1);           // 현재 페이지 번호 (1부터 시작)
 
     // =========================================
     // 컴포넌트 마운트 시 문의 목록 조회
@@ -28,7 +32,7 @@ const AdminInquiryPage = () => {
     useEffect(() => { fetchList(); }, []);
 
     // =========================================
-    // 필터링 로직: 상태, 카테고리, 검색어에 따라 목록 필터링
+    // 필터링 로직: 상태, 카테고리, 검색어에 따라 목록 필터링 및 페이지 초기화
     // =========================================
     useEffect(() => {
         let list = [...inquiryList];  // 원본 목록 복사
@@ -38,7 +42,8 @@ const AdminInquiryPage = () => {
             const kw = searchKeyword.toLowerCase();  // 소문자 변환
             list = list.filter(i => i.title.toLowerCase().includes(kw) || i.content.toLowerCase().includes(kw));  // 제목/내용 검색
         }
-        setFiltered(list);  // 필터링된 목록 설정
+        setFiltered(list);   // 필터링된 목록 설정
+        setCurrentPage(1);   // 필터 변경 시 첫 페이지로 이동
     }, [inquiryList, statusFilter, categoryFilter, searchKeyword]);
 
     // =========================================
@@ -103,11 +108,27 @@ const AdminInquiryPage = () => {
     };
 
     // =========================================
+    // 문의 삭제 처리 (관리자 전용)
+    // inquiryNo: 삭제할 문의 번호
+    // =========================================
+    const handleInquiryDelete = async (inquiryNo) => {
+        if (!window.confirm("문의를 삭제하시겠습니까?")) return;  // 확인 대화상자
+        try {
+            await adminDeleteInquiry(inquiryNo);  // 관리자 문의 삭제 API 호출
+            alert("삭제되었습니다.");
+            closeModal();   // 모달 닫기
+            fetchList();    // 목록 갱신
+        } catch (e) {
+            alert("문의 삭제 실패");  // 실패 알림
+        }
+    };
+
+    // =========================================
     // 모달 닫기
     // =========================================
     const closeModal = () => {
         setSelectedInquiry(null);  // 선택 초기화
-        setDetail(null);  // 상세 데이터 초기화
+        setDetail(null);           // 상세 데이터 초기화
     };
 
     // =========================================
@@ -117,6 +138,22 @@ const AdminInquiryPage = () => {
     const formatDate = (ts) => {
         if (!ts) return "-";  // null/undefined 처리
         return new Date(ts).toLocaleDateString("ko-KR");  // 한국어 날짜 형식
+    };
+
+    // =========================================
+    // 페이징 계산
+    // totalPages: 전체 페이지 수
+    // pagedList: 현재 페이지에 해당하는 목록
+    // =========================================
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    const pagedList = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+    // =========================================
+    // 페이지 변경 핸들러
+    // page: 이동할 페이지 번호
+    // =========================================
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
     };
 
     return (
@@ -157,7 +194,7 @@ const AdminInquiryPage = () => {
                     </span>
                 </div>
 
-                {/* 목록 테이블 */}
+                {/* 목록 테이블 (현재 페이지 데이터만 표시) */}
                 {loading ? (
                     <p style={{ textAlign: "center", padding: "40px", color: "#999" }}>로딩 중...</p>
                 ) : (
@@ -171,26 +208,27 @@ const AdminInquiryPage = () => {
                                 <th style={th}>상태</th>
                                 <th style={th}>비밀글</th>
                                 <th style={th}>등록일</th>
+                                <th style={th}>관리</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filtered.length === 0 ? (
-                                <tr><td colSpan={7} style={{ textAlign: "center", padding: "40px", color: "#999" }}>
+                            {pagedList.length === 0 ? (
+                                <tr><td colSpan={8} style={{ textAlign: "center", padding: "40px", color: "#999" }}>
                                     조회된 문의가 없습니다.
                                 </td></tr>
-                            ) : filtered.map(item => (
-                                <tr key={item.inquiryNo} onClick={() => handleRowClick(item.inquiryNo)}
+                            ) : pagedList.map(item => (
+                                <tr key={item.inquiryNo}
                                     style={{ borderBottom: "1px solid #eee", cursor: "pointer" }}
                                     onMouseEnter={e => e.currentTarget.style.background = "#fafafa"}
                                     onMouseLeave={e => e.currentTarget.style.background = ""}>
-                                    <td style={td}>{item.inquiryNo}</td>
-                                    <td style={td}>{item.category}</td>
-                                    <td style={{ ...td, textAlign: "left" }}>
+                                    <td style={td} onClick={() => handleRowClick(item.inquiryNo)}>{item.inquiryNo}</td>
+                                    <td style={td} onClick={() => handleRowClick(item.inquiryNo)}>{item.category}</td>
+                                    <td style={{ ...td, textAlign: "left" }} onClick={() => handleRowClick(item.inquiryNo)}>
                                         {item.secretYn === "Y" && <span style={{ color: "#e00", marginRight: "6px" }}>🔒</span>}
                                         {item.title}
                                     </td>
-                                    <td style={td}>{item.memberNo}</td>
-                                    <td style={td}>
+                                    <td style={td} onClick={() => handleRowClick(item.inquiryNo)}>{item.memberNo}</td>
+                                    <td style={td} onClick={() => handleRowClick(item.inquiryNo)}>
                                         <span style={{
                                             padding: "3px 10px", borderRadius: "12px", fontSize: "12px",
                                             background: item.status === "답변완료" ? "#e8f5e9" : "#fff3e0",
@@ -199,12 +237,71 @@ const AdminInquiryPage = () => {
                                             {item.status}
                                         </span>
                                     </td>
-                                    <td style={td}>{item.secretYn === "Y" ? "Y" : "N"}</td>
-                                    <td style={td}>{formatDate(item.createdAt)}</td>
+                                    <td style={td} onClick={() => handleRowClick(item.inquiryNo)}>{item.secretYn === "Y" ? "Y" : "N"}</td>
+                                    <td style={td} onClick={() => handleRowClick(item.inquiryNo)}>{formatDate(item.createdAt)}</td>
+                                    {/* 삭제 버튼 - 클릭 시 행 클릭 이벤트와 겹치지 않도록 stopPropagation 처리 */}
+                                    <td style={td}>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleInquiryDelete(item.inquiryNo); }}
+                                            style={{
+                                                background: "none", border: "1px solid #e00", color: "#e00",
+                                                borderRadius: "4px", padding: "3px 8px", fontSize: "12px", cursor: "pointer"
+                                            }}
+                                        >
+                                            삭제
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+                )}
+
+                {/* 페이지네이션 */}
+                {totalPages > 1 && (
+                    <div style={{ display: "flex", justifyContent: "center", gap: "6px", marginTop: "24px" }}>
+                        {/* 이전 버튼 */}
+                        <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            style={{
+                                padding: "6px 12px", border: "1px solid #ddd", borderRadius: "4px",
+                                background: "#fff", cursor: currentPage === 1 ? "default" : "pointer",
+                                color: currentPage === 1 ? "#ccc" : "#333", fontSize: "13px"
+                            }}
+                        >
+                            이전
+                        </button>
+
+                        {/* 페이지 번호 목록 */}
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                            <button
+                                key={page}
+                                onClick={() => handlePageChange(page)}
+                                style={{
+                                    padding: "6px 12px", border: "1px solid #ddd", borderRadius: "4px",
+                                    background: currentPage === page ? "#222" : "#fff",
+                                    color: currentPage === page ? "#fff" : "#333",
+                                    cursor: "pointer", fontSize: "13px"
+                                }}
+                            >
+                                {page}
+                            </button>
+                        ))}
+
+                        {/* 다음 버튼 */}
+                        <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            style={{
+                                padding: "6px 12px", border: "1px solid #ddd", borderRadius: "4px",
+                                background: "#fff", cursor: currentPage === totalPages ? "default" : "pointer",
+                                color: currentPage === totalPages ? "#ccc" : "#333", fontSize: "13px"
+                            }}
+                        >
+                            다음
+                        </button>
+                    </div>
                 )}
 
                 {/* 상세 모달 */}
@@ -217,7 +314,6 @@ const AdminInquiryPage = () => {
                             background: "#fff", borderRadius: "8px", width: "680px", maxHeight: "85vh",
                             overflow: "auto", padding: "32px", position: "relative"
                         }}>
-
                             {/* 닫기 버튼 */}
                             <button onClick={closeModal} style={{
                                 position: "absolute", top: "16px", right: "20px",
@@ -237,7 +333,7 @@ const AdminInquiryPage = () => {
                                 <div style={{ fontSize: "15px", fontWeight: "bold", marginBottom: "12px" }}>{detail.inquiry.title}</div>
                                 <div style={{ fontSize: "14px", color: "#444", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>{detail.inquiry.content}</div>
 
-                                {/* 첨부파일 */}
+                                {/* 첨부파일 목록 */}
                                 {detail.files && detail.files.length > 0 && (
                                     <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #eee" }}>
                                         <p style={{ fontSize: "12px", color: "#888", marginBottom: "6px" }}>첨부파일</p>
@@ -272,7 +368,7 @@ const AdminInquiryPage = () => {
                                 </div>
                             )}
 
-                            {/* 답변 작성 */}
+                            {/* 답변 작성 영역 */}
                             <div>
                                 <p style={{ fontSize: "14px", fontWeight: "bold", marginBottom: "8px" }}>답변 작성</p>
                                 <textarea value={commentContent} onChange={e => setCommentContent(e.target.value)}

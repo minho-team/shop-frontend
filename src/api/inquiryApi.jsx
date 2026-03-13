@@ -81,6 +81,16 @@ export const deleteInquiry = async (inquiryNo) => {
 };
 
 // =========================================
+// 문의 삭제 (관리자 전용 - 모든 문의 삭제 가능)
+// inquiryNo: 삭제할 문의 번호
+// =========================================
+export const adminDeleteInquiry = async (inquiryNo) => {
+    // 관리자 전용 문의 삭제 API 호출
+    const res = await api.delete(`/admin/${inquiryNo}`);
+    return res.data;
+};
+
+// =========================================
 // 관리자 답변 작성
 // request: { boardNo, content }
 // =========================================

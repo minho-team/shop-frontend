@@ -1,8 +1,7 @@
-
-// 문의 게시판 홈/////////////////////////////////////////
-// 여기서 자주 묻는 질문과 1:1문의 내역을 클릭에 따라 분기 처리
-// 페이징 구현해야 함
-
+// =========================================
+// 문의 게시판 홈 컴포넌트
+// 기능: 자주 묻는 질문(FAQ) 조회/검색/페이징, 1:1 문의 안내
+// =========================================
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
@@ -11,6 +10,9 @@ import { useUser } from "../context/UserContext";
 
 // 문의 카테고리 목록
 const CATEGORIES = ["전체", "배송", "주문/결제", "취소/교환/반품", "상품/AS문의", "회원정보", "서비스", "이용안내"];
+
+// 페이지당 FAQ 표시 개수
+const PAGE_SIZE = 10;
 
 const InquiryPage = () => {
     const navigate = useNavigate();
@@ -22,7 +24,7 @@ const InquiryPage = () => {
     // 선택된 카테고리
     const [selectedCategory, setSelectedCategory] = useState("전체");
 
-    // FAQ 목록
+    // FAQ 전체 목록 (서버에서 받아온 원본)
     const [faqList, setFaqList] = useState([]);
 
     // 검색 입력값 (실시간)
@@ -37,25 +39,33 @@ const InquiryPage = () => {
     // 로딩 상태
     const [loading, setLoading] = useState(false);
 
-    // 카테고리 또는 키워드 변경 시 FAQ 재조회
+    // 현재 페이지 번호 (1부터 시작)
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // =========================================
+    // 카테고리 또는 키워드 변경 시 FAQ 재조회 및 페이지 초기화
+    // =========================================
     useEffect(() => {
         fetchFaq();
+        setCurrentPage(1);  // 조회 조건 변경 시 첫 페이지로 이동
     }, [selectedCategory, keyword]);
 
+    // =========================================
     // FAQ 조회 함수 (전체 / 카테고리 / 키워드 검색)
+    // =========================================
     const fetchFaq = async () => {
         setLoading(true);
         try {
             let data;
             if (keyword) {
-                data = await searchFaq(keyword);          // 키워드 검색
+                data = await searchFaq(keyword);                    // 키워드 검색
             } else if (selectedCategory === "전체") {
-                data = await getAllFaqs();                 // 전체 조회
+                data = await getAllFaqs();                           // 전체 조회
             } else {
-                data = await getFaqByCategory(selectedCategory); // 카테고리별 조회
+                data = await getFaqByCategory(selectedCategory);    // 카테고리별 조회
             }
             setFaqList(data);
-            setOpenFaqNo(null); // 조회 시 아코디언 초기화
+            setOpenFaqNo(null);  // 조회 시 아코디언 초기화
         } catch (e) {
             console.error("FAQ 조회 실패:", e);
         } finally {
@@ -63,7 +73,9 @@ const InquiryPage = () => {
         }
     };
 
-    // 검색 실행
+    // =========================================
+    // 검색 실행 (버튼 클릭 시)
+    // =========================================
     const handleSearch = () => {
         setKeyword(searchInput);
         setSelectedCategory("전체");
@@ -79,7 +91,9 @@ const InquiryPage = () => {
         setOpenFaqNo(openFaqNo === faqNo ? null : faqNo);
     };
 
+    // =========================================
     // 1:1 문의 작성 (로그인 필요)
+    // =========================================
     const handleInquiryWrite = () => {
         if (!user) {
             alert("로그인 후 이용 가능합니다.");
@@ -89,7 +103,9 @@ const InquiryPage = () => {
         navigate("/inquiry/write");
     };
 
+    // =========================================
     // 내 문의 내역 보기 (로그인 필요)
+    // =========================================
     const handleMyInquiry = () => {
         if (!user) {
             alert("로그인 후 이용 가능합니다.");
@@ -97,6 +113,23 @@ const InquiryPage = () => {
             return;
         }
         navigate("/inquiry/my");
+    };
+
+    // =========================================
+    // 페이징 계산
+    // totalPages: 전체 페이지 수
+    // pagedList: 현재 페이지에 해당하는 FAQ 목록
+    // =========================================
+    const totalPages = Math.ceil(faqList.length / PAGE_SIZE);
+    const pagedList = faqList.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+    // =========================================
+    // 페이지 변경 핸들러
+    // page: 이동할 페이지 번호
+    // =========================================
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        setOpenFaqNo(null);  // 페이지 변경 시 아코디언 초기화
     };
 
     return (
@@ -167,13 +200,18 @@ const InquiryPage = () => {
                             ))}
                         </div>
 
-                        {/* FAQ 아코디언 목록 */}
+                        {/* 전체 건수 표시 */}
+                        <div style={{ fontSize: "13px", color: "#888", marginBottom: "12px" }}>
+                            총 {faqList.length}건
+                        </div>
+
+                        {/* FAQ 아코디언 목록 (현재 페이지 데이터만 표시) */}
                         {loading ? (
                             <p style={{ textAlign: "center", color: "#999" }}>로딩 중...</p>
-                        ) : faqList.length === 0 ? (
+                        ) : pagedList.length === 0 ? (
                             <p style={{ textAlign: "center", color: "#999", padding: "40px 0" }}>검색 결과가 없습니다.</p>
                         ) : (
-                            faqList.map((faq) => (
+                            pagedList.map((faq) => (
                                 <div key={faq.faqNo} style={{ borderBottom: "1px solid #eee" }}>
                                     {/* 질문 헤더 */}
                                     <div
@@ -196,6 +234,53 @@ const InquiryPage = () => {
                                     )}
                                 </div>
                             ))
+                        )}
+
+                        {/* 페이지네이션 */}
+                        {totalPages > 1 && (
+                            <div style={{ display: "flex", justifyContent: "center", gap: "6px", marginTop: "32px" }}>
+                                {/* 이전 버튼 */}
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    style={{
+                                        padding: "6px 12px", border: "1px solid #ddd", borderRadius: "4px",
+                                        background: "#fff", cursor: currentPage === 1 ? "default" : "pointer",
+                                        color: currentPage === 1 ? "#ccc" : "#333", fontSize: "13px"
+                                    }}
+                                >
+                                    이전
+                                </button>
+
+                                {/* 페이지 번호 목록 */}
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                    <button
+                                        key={page}
+                                        onClick={() => handlePageChange(page)}
+                                        style={{
+                                            padding: "6px 12px", border: "1px solid #ddd", borderRadius: "4px",
+                                            background: currentPage === page ? "#222" : "#fff",
+                                            color: currentPage === page ? "#fff" : "#333",
+                                            cursor: "pointer", fontSize: "13px"
+                                        }}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+
+                                {/* 다음 버튼 */}
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    style={{
+                                        padding: "6px 12px", border: "1px solid #ddd", borderRadius: "4px",
+                                        background: "#fff", cursor: currentPage === totalPages ? "default" : "pointer",
+                                        color: currentPage === totalPages ? "#ccc" : "#333", fontSize: "13px"
+                                    }}
+                                >
+                                    다음
+                                </button>
+                            </div>
                         )}
                     </div>
                 )}
