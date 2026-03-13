@@ -119,7 +119,7 @@ const Header = () => {
               {isAdmin && (
                 <Nav.Link
                   as={Link}
-                  to="/admin"
+                  to="/admin/home"
                   className="utility-link admin-page-btn"
                 >
                   관리자 페이지로
