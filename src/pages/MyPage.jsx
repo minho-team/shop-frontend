@@ -4,7 +4,9 @@ import { Link } from 'react-router-dom'; // 푸터 링크를 위해 추가
 import Header from '../components/Header';
 import { useUser } from "../context/UserContext";
 import '../css/MyPage.css';
-import { getMyOrderList } from '../api/orderApi';
+import { getMyOrderList } from '../api/myPageApi';
+
+
 
 /**
  * [컴포넌트] 주문 내역 테이블

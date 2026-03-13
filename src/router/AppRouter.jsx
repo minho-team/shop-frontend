@@ -15,6 +15,7 @@ const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage"));
 const FaqDetailPage = lazy(() => import("../pages/FaqDetailPage"));
 const InquiryMyDetailPage = lazy(() => import("../pages/InquiryMyDetailPage"));
 const OrderWritePage = lazy(() => import("../pages/OrderWritePage"));
+const MyOrderDetailPage = lazy(() => import("../pages/MyOrderDetailPage"));
 
 //admin
 const AdminHome = lazy(() => import("../pages/admin/AdminHome"));
@@ -95,6 +96,7 @@ const AppRouterContent = () => {
         { path: "/inquiry/my", element: <ProtectedRouteWrapper Component={InquiryMyPage} /> },
         { path: "/inquiry/my/detail/:id", element: <ProtectedRouteWrapper Component={InquiryMyDetailPage} /> },
         { path: "/order/write", element: <ProtectedRouteWrapper Component={OrderWritePage} /> },
+        { path: "/my/order/detail", element: <ProtectedRouteWrapper Component={MyOrderDetailPage} /> },
 
 
     ]);

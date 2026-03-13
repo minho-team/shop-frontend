@@ -9,9 +9,5 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export const asd = async (formData) => {
-  const res = await api.post(`${prefix}/asd`, formData)
-  return res.data;
-}
 
 
