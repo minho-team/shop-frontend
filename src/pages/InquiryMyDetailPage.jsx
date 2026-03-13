@@ -1,16 +1,14 @@
-
 // 1:1 문의 리스트에서 한 가지를 클릭하면 들어오는 페이지
-
 
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
-import { getOneBoard } from "../api/inquiryApi";
+import { getOneInquiry } from "../api/inquiryApi";
 import { API_SERVER_HOST } from "../api/authApi";
 
 const InquiryMyDetailPage = () => {
-    const { boardNo } = useParams();
-    const navigate    = useNavigate();
+    const { id } = useParams();
+    const navigate = useNavigate();
 
     // 게시글 데이터
     const [board, setBoard] = useState(null);
@@ -27,15 +25,16 @@ const InquiryMyDetailPage = () => {
     // 컴포넌트 마운트 시 상세 조회
     useEffect(() => {
         fetchDetail();
-    }, [boardNo]);
+    }, [id]);
 
     const fetchDetail = async () => {
         setLoading(true);
         try {
-            // 반환값: { board, files, comments }
-            const data = await getOneBoard(boardNo);
-            setBoard(data.board);
-            setFiles(data.files       || []);
+            // 반환값: { inquiry, files, comments }
+            const data = await getOneInquiry(id);
+            // [수정] data.board → data.inquiry (백엔드 반환 키명)
+            setBoard(data.inquiry);
+            setFiles(data.files || []);
             setComments(data.comments || []);
         } catch (e) {
             console.error("게시글 조회 실패:", e);
@@ -75,11 +74,7 @@ const InquiryMyDetailPage = () => {
                             {board.category}
                         </span>
                         {/* 답변 상태 배지 */}
-                        <span style={{
-                            fontSize: "12px", padding: "3px 10px", borderRadius: "12px",
-                            background: board.status === "답변완료" ? "#e8f5e9" : "#fff3e0",
-                            color: board.status === "답변완료" ? "#2e7d32" : "#e65100",
-                        }}>
+                        <span style={{ fontSize: "12px", padding: "3px 10px", borderRadius: "12px", background: board.status === "답변완료" ? "#e8f5e9" : "#fff3e0", color: board.status === "답변완료" ? "#2e7d32" : "#e65100" }}>
                             {board.status}
                         </span>
                         {/* 비밀글 표시 */}
@@ -101,21 +96,14 @@ const InquiryMyDetailPage = () => {
                     <div style={{ padding: "16px 0", borderBottom: "1px solid #eee" }}>
                         <p style={{ fontSize: "13px", fontWeight: "bold", marginBottom: "10px" }}>첨부파일</p>
                         {files.map((file) => (
-                            <div key={file.fileNo} style={{ marginBottom: "10px" }}>
+                            // [수정] file.fileNo → file.inquiryFileNo (백엔드 필드명)
+                            <div key={file.inquiryFileNo} style={{ marginBottom: "10px" }}>
                                 {file.fileType && file.fileType.startsWith("image/") ? (
                                     // 이미지 파일 - 미리보기
-                                    <img
-                                        src={`${API_SERVER_HOST}${file.fileUrl}`}
-                                        alt={file.fileName}
-                                        style={{ maxWidth: "100%", maxHeight: "400px", borderRadius: "4px", border: "1px solid #eee" }}
-                                    />
+                                    <img src={`${API_SERVER_HOST}${file.fileUrl}`} alt={file.fileName} style={{ maxWidth: "100%", maxHeight: "400px", borderRadius: "4px", border: "1px solid #eee" }} />
                                 ) : (
                                     // 일반 파일 - 다운로드 링크
-                                    <a
-                                        href={`${API_SERVER_HOST}${file.fileUrl}`}
-                                        download={file.fileName}
-                                        style={{ fontSize: "13px", color: "#1a73e8" }}
-                                    >
+                                    <a href={`${API_SERVER_HOST}${file.fileUrl}`} download={file.fileName} style={{ fontSize: "13px", color: "#1a73e8" }}>
                                         📎 {file.fileName}
                                     </a>
                                 )}
@@ -129,10 +117,8 @@ const InquiryMyDetailPage = () => {
                     <p style={{ fontSize: "13px", fontWeight: "bold", marginBottom: "12px" }}>관리자 답변</p>
                     {comments.length > 0 ? (
                         comments.map((comment) => (
-                            <div
-                                key={comment.commentNo}
-                                style={{ background: "#f9f9f9", border: "1px solid #eee", borderRadius: "4px", padding: "16px", marginBottom: "10px" }}
-                            >
+                            // [수정] comment.commentNo → comment.inquiryCommentNo (백엔드 필드명)
+                            <div key={comment.inquiryCommentNo} style={{ background: "#f9f9f9", border: "1px solid #eee", borderRadius: "4px", padding: "16px", marginBottom: "10px" }}>
                                 <div style={{ fontSize: "14px", color: "#555", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>
                                     {comment.content}
                                 </div>
@@ -148,6 +134,7 @@ const InquiryMyDetailPage = () => {
                         </div>
                     )}
                 </div>
+
             </div>
         </>
     );
