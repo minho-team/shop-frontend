@@ -5,7 +5,6 @@ import { useUser, UserProvider } from "../context/UserContext";
 
 const MainHome = lazy(() => import("../pages/MainHome"));
 const LoginPage = lazy(() => import("../pages/LoginPage"));
-const AdminHome = lazy(() => import("../pages/AdminHome"));
 const CartPage = lazy(() => import("../pages/CartPage"));
 const MyPage = lazy(() => import("../pages/MyPage"));
 const InquiryPage = lazy(() => import("../pages/InquiryPage"));
@@ -16,6 +15,21 @@ const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage"));
 const FaqDetailPage = lazy(() => import("../pages/FaqDetailPage"));
 const InquiryMyDetailPage = lazy(() => import("../pages/InquiryMyDetailPage"));
 const OrderWritePage = lazy(() => import("../pages/OrderWritePage"));
+
+//admin
+const AdminHome = lazy(() => import("../pages/admin/AdminHome"));
+const AdminMemberListPage = lazy(() => import("../pages/admin/AdminMemberListPage"));
+const AdminCategoryListPage = lazy(() => import("../pages/admin/AdminCategoryListPage"));
+const AdminCategoryAddPage = lazy(() => import("../pages/admin/AdminCategoryAddPage"));
+const AdminCategoryEditPage = lazy(() => import("../pages/admin/AdminCategoryEditPage"));
+const AdminProductListPage = lazy(() => import("../pages/admin/AdminProductListPage"));
+const AdminProductAddPage = lazy(() => import("../pages/admin/AdminProductAddPage"));
+const AdminProductEditPage = lazy(() => import("../pages/admin/AdminProductEditPage"));
+const AdminProductInventoryPage = lazy(() => import("../pages/admin/AdminProductInventoryPage"));
+const AdminOrderListPage = lazy(() => import("../pages/admin/AdminOrderListPage"));
+const AdminRefundPage = lazy(() => import("../pages/admin/AdminRefundPage"));
+const AdminInquiryPage = lazy(() => import("../pages/admin/AdminInquiryPage"));
+const AdminFaqPage = lazy(() => import("../pages/admin/AdminFaqPage"));
 
 // 로그인이 안 돼 있으면 /login페이지로 리다이렉트
 const ProtectedRouteWrapper = ({ Component }) => {
@@ -58,8 +72,21 @@ const AppRouterContent = () => {
         { path: "/faq/detail/:id", element: <FaqDetailPage /> },
 
         /* 관리자만 들어올 수 있는 페이지 */
-        { path: "/admin", element: <AdminRouteWrapper Component={AdminHome} /> },
+        { path: "/admin/home", element: <AdminRouteWrapper Component={AdminHome} /> },
+        { path: "/admin/members", element: <AdminRouteWrapper Component={AdminMemberListPage} /> },
+        { path: "/admin/categories", element: <AdminRouteWrapper Component={AdminCategoryListPage} /> },
+        { path: "/admin/categories/add", element: <AdminRouteWrapper Component={AdminCategoryAddPage} /> },
+        { path: "/admin/categories/edit", element: <AdminRouteWrapper Component={AdminCategoryEditPage} /> },
+        { path: "/admin/products", element: <AdminRouteWrapper Component={AdminProductListPage} /> },
+        { path: "/admin/products/add", element: <AdminRouteWrapper Component={AdminProductAddPage} /> },
+        { path: "/admin/products/edit", element: <AdminRouteWrapper Component={AdminProductEditPage} /> },
+        { path: "/admin/products/inventory", element: <AdminRouteWrapper Component={AdminProductInventoryPage} /> },
 
+        { path: "/admin/orders", element: <AdminRouteWrapper Component={AdminOrderListPage} /> },
+        { path: "/admin/orders/refunds", element: <AdminRouteWrapper Component={AdminRefundPage} /> },
+
+        { path: "/admin/inquiries", element: <AdminRouteWrapper Component={AdminInquiryPage} /> },
+        { path: "/admin/faqs", element: <AdminRouteWrapper Component={AdminFaqPage} /> },
 
         /*로그인해야만 들어올 수 있는 페이지*/
         { path: "/cart", element: <ProtectedRouteWrapper Component={CartPage} /> },

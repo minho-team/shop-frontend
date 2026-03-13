@@ -6,7 +6,6 @@ import "../../css/admin/AdminLayout.css";
 const AdminLayout = ({ children, pageTitle }) => {
   return (
     <div className="admin-layout-wrapper">
-      <Header />
 
       <AdminNavbar />
 
