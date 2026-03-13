@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import { getMyBoards, deleteBoard } from "../api/inquiryApi";
+import { getMyInquiries, deleteInquiry } from "../api/inquiryApi";
 
 const InquiryMyPage = () => {
     const navigate = useNavigate();
@@ -23,7 +23,7 @@ const InquiryMyPage = () => {
     const fetchMyBoards = async () => {
         setLoading(true);
         try {
-            const data = await getMyBoards();
+            const data = await getMyInquiries();
             setBoards(data);
         } catch (e) {
             console.error("문의 내역 조회 실패:", e);
@@ -33,10 +33,11 @@ const InquiryMyPage = () => {
     };
 
     // 게시글 삭제 (소프트 딜리트)
-    const handleDelete = async (boardNo) => {
+    const handleDelete = async (inquiryNo) => {
         if (!window.confirm("문의를 삭제하시겠습니까?")) return;
         try {
-            await deleteBoard(boardNo);
+            // [수정] boardNo → inquiryNo
+            await deleteInquiry(inquiryNo);
             alert("삭제되었습니다.");
             fetchMyBoards(); // 목록 재조회
         } catch (e) {
@@ -82,12 +83,17 @@ const InquiryMyPage = () => {
                         </thead>
                         <tbody>
                             {boards.map((board) => (
-                                <tr key={board.boardNo} style={{ borderBottom: "1px solid #eee" }}>
-                                    <td style={{ padding: "12px 8px", textAlign: "center", color: "#999" }}>{board.boardNo}</td>
+                                // [수정] board.boardNo → board.inquiryNo
+                                <tr key={board.inquiryNo} style={{ borderBottom: "1px solid #eee" }}>
+                                    <td style={{ padding: "12px 8px", textAlign: "center", color: "#999" }}>
+                                        {/* [수정] board.boardNo → board.inquiryNo */}
+                                        {board.inquiryNo}
+                                    </td>
                                     <td style={{ padding: "12px 8px", textAlign: "center", color: "#666", fontSize: "13px" }}>{board.category}</td>
                                     <td style={{ padding: "12px 8px" }}>
                                         <span
-                                            onClick={() => navigate(`/inquiry/${board.boardNo}`)}
+                                            // [수정] board.boardNo → board.inquiryNo
+                                            onClick={() => navigate(`/inquiry/my/detail/${board.inquiryNo}`)}
                                             style={{ cursor: "pointer" }}
                                         >
                                             {/* 비밀글이면 자물쇠 아이콘 표시 */}
@@ -110,7 +116,8 @@ const InquiryMyPage = () => {
                                     </td>
                                     <td style={{ padding: "12px 8px", textAlign: "center" }}>
                                         <button
-                                            onClick={() => handleDelete(board.boardNo)}
+                                            // [수정] board.boardNo → board.inquiryNo
+                                            onClick={() => handleDelete(board.inquiryNo)}
                                             style={{ background: "none", border: "none", color: "#e00", cursor: "pointer", fontSize: "12px" }}
                                         >
                                             삭제

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import { createBoard } from "../api/inquiryApi";
+import { createInquiry } from "../api/inquiryApi";
 
 // 문의 카테고리 목록
 const CATEGORIES = ["배송", "주문/결제", "취소/교환/반품", "상품/AS문의", "회원정보", "서비스", "이용안내"];
@@ -49,12 +49,12 @@ const BoardWritePage = () => {
 
     // 게시글 제출
     const handleSubmit = async () => {
-        if (!form.title.trim())   { alert("제목을 입력해주세요."); return; }
+        if (!form.title.trim()) { alert("제목을 입력해주세요."); return; }
         if (!form.content.trim()) { alert("내용을 입력해주세요."); return; }
 
         setSubmitting(true);
         try {
-            await createBoard(form, files);
+            await createInquiry(form, files);
             alert("문의가 등록되었습니다.");
             navigate("/inquiry/my");
         } catch (e) {
