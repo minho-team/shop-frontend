@@ -23,15 +23,18 @@
 
 .product-main-image-wrap {
   position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
   border: 1px solid #ececec;
   background: #fafafa;
-  overflow: hidden;
 }
 
 .product-main-image {
   width: 100%;
-  height: 660px;
+  height: 100%;
   object-fit: cover;
+  object-position: top center;
   display: block;
 }
 
@@ -80,7 +83,10 @@
 .thumbnail-button img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  background: #f8f8f8;
 }
 
 .product-info-area {
