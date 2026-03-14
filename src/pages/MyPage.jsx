@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import { useUser } from "../context/UserContext";
 import '../css/MyPage.css';
-import { getMyOrderList } from '../api/myPageApi';
+import { getMyOrderList } from '../api/orderApi';
 import Footer from '../components/Footer';
 
 const getStatusLabel = (status) => {

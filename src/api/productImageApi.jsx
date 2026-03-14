@@ -1,20 +1,14 @@
 import axios from "axios";
 
 export const API_SERVER_HOST = "http://localhost:8080";
-const prefix = `${API_SERVER_HOST}/api/product`;
+const prefix = `${API_SERVER_HOST}/api/product/image`;
 
 const api = axios.create({
   baseURL: prefix,
   withCredentials: true,
 });
-
-export const getProductList = async () => {
-  const res = await api.get("");
-  return res.data;
-};
-
-export const getProductDetail = async (id) => {
-  const res = await api.get(`/${id}`);
+export const getProductMainAndThumbImages = async (productNo) => {
+  const res = await api.get(`/${productNo}`);
   return res.data;
 };
 // export const register = async(formData) =>{

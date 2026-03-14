@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getOrderDetail } from '../api/myPageApi';
+import { getOrderDetail } from '../api/orderApi';
 import Header from '../components/Header';
 import '../css/MyOrderDetailPage.css';
 import Footer from '../components/Footer';

@@ -2,10 +2,10 @@ import { useMemo, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import {
-  getProductDetail,
   getProductMainAndThumbImages,
-} from "../api/productApi";
+} from "../api/productImageApi";
 import "../css/ProductDetailPage.css";
+import { getProductDetail } from "../api/productApi";
 
 const tabMenus = ["상품정보", "사이즈", "관련상품", "구매후기", "상품문의"];
 const API_BASE_URL = "http://localhost:8080";
