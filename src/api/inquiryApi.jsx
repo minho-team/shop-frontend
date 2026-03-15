@@ -1,14 +1,8 @@
-import axios from "axios";
-import { API_SERVER_HOST } from "./authApi";
+import apiClient from "./apiClient";
 
-// 1:1 문의 API 기본 경로
-const prefix = `${API_SERVER_HOST}/api/inquiry`;
 
-// axios 인스턴스 (쿠키 자동 포함 - JWT 인증용)
-const api = axios.create({
-    baseURL: prefix,
-    withCredentials: true,
-});
+const prefix = "/api/inquiry";
+
 
 // =========================================
 // 문의 작성 (첨부파일 포함)
@@ -27,7 +21,7 @@ export const createInquiry = async (request, files) => {
     }
 
     // API 요청 (multipart/form-data)
-    const res = await api.post("", formData, {
+    const res = await apiClient.post(`${prefix}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
@@ -38,7 +32,7 @@ export const createInquiry = async (request, files) => {
 // =========================================
 export const getAllInquiries = async () => {
     // 전체 문의 목록 조회 API 호출
-    const res = await api.get("");
+    const res = await apiClient.get(`${prefix}`);
     return res.data;
 };
 
@@ -47,7 +41,7 @@ export const getAllInquiries = async () => {
 // =========================================
 export const getMyInquiries = async () => {
     // 내 문의 목록 조회 API 호출
-    const res = await api.get("/my");
+    const res = await apiClient.get(`${prefix}/my`);
     return res.data;
 };
 
@@ -57,7 +51,7 @@ export const getMyInquiries = async () => {
 // =========================================
 export const getOneInquiry = async (inquiryNo) => {
     // 특정 문의 상세 조회 API 호출
-    const res = await api.get(`/${inquiryNo}`);
+    const res = await apiClient.get(`${prefix}/${inquiryNo}`);
     return res.data;
 };
 
@@ -67,7 +61,7 @@ export const getOneInquiry = async (inquiryNo) => {
 // =========================================
 export const updateInquiry = async (inquiryNo, dto) => {
     // 문의 수정 API 호출
-    const res = await api.put(`/${inquiryNo}`, dto);
+    const res = await apiClient.put(`${prefix}/${inquiryNo}`, dto);
     return res.data;
 };
 
@@ -76,7 +70,7 @@ export const updateInquiry = async (inquiryNo, dto) => {
 // =========================================
 export const deleteInquiry = async (inquiryNo) => {
     // 문의 삭제 API 호출
-    const res = await api.delete(`/${inquiryNo}`);
+    const res = await apiClient.delete(`${prefix}/${inquiryNo}`);
     return res.data;
 };
 
@@ -86,29 +80,7 @@ export const deleteInquiry = async (inquiryNo) => {
 // =========================================
 export const adminDeleteInquiry = async (inquiryNo) => {
     // 관리자 전용 문의 삭제 API 호출
-    const res = await api.delete(`/admin/${inquiryNo}`);
+    const res = await apiClient.delete(`${prefix}}/${inquiryNo}`);
     return res.data;
 };
 
-// =========================================
-// 관리자 답변 작성
-// request: { boardNo, content }
-// =========================================
-export const createComment = async (request) => {
-    // 답변 작성 API 호출 (별도 엔드포인트)
-    const res = await axios.post(`${API_SERVER_HOST}/api/comment`, request, {
-        withCredentials: true,
-    });
-    return res.data;
-};
-
-// =========================================
-// 관리자 답변 삭제
-// =========================================
-export const deleteComment = async (commentNo) => {
-    // 답변 삭제 API 호출
-    const res = await axios.delete(`${API_SERVER_HOST}/api/comment/${commentNo}`, {
-        withCredentials: true,
-    });
-    return res.data;
-};

@@ -5,7 +5,9 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminHeader from "../../components/admin/AdminHeader";
-import { getAllInquiries, getOneInquiry, createComment, deleteComment, adminDeleteInquiry } from "../../api/inquiryApi";
+import { getAllInquiries, getOneInquiry, adminDeleteInquiry } from "../../api/inquiryApi";
+import { createComment,deleteComment } from "../../api/commentApi";
+
 
 const STATUS_LABELS = ["전체", "답변대기", "답변완료"];
 const CATEGORY_LABELS = ["전체", "배송", "주문/결제", "취소/교환/반품", "상품/AS문의", "회원정보", "서비스", "이용안내"];
