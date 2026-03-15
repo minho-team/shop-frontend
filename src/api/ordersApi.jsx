@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 export const API_SERVER_HOST = 'http://localhost:8080'
-const prefix = `${API_SERVER_HOST}/api/order`;
+const prefix = `${API_SERVER_HOST}/api/orders`;
 
 const api = axios.create({
   baseURL: prefix,
