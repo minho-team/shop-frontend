@@ -1,20 +1,19 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
-export const API_SERVER_HOST = "http://localhost:8080";
-const prefix = `${API_SERVER_HOST}/api/product`;
+const prefix = "/api/product";
 
-const api = axios.create({
-  baseURL: prefix,
-  withCredentials: true,
-});
 
+// 모든 상품을 가져오는 api
 export const getProductList = async () => {
-  const res = await api.get("");
+
+  const res = await apiClient.get(`${prefix}`);
   return res.data;
 };
 
+
+// 상품 상세 페이지를 위한 api
 export const getProductDetail = async (id) => {
-  const res = await api.get(`/${id}`);
+  const res = await apiClient.get(`${prefix}/${id}`);
   return res.data;
 };
 // export const register = async(formData) =>{

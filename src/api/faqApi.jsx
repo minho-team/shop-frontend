@@ -1,21 +1,13 @@
-import axios from "axios";
-import { API_SERVER_HOST } from "./authApi";
+import apiClient from "./apiClient";
 
-// FAQ API 기본 경로
-const prefix = `${API_SERVER_HOST}/api/faq`;
 
-// axios 인스턴스 (쿠키 자동 포함 - 관리자 인증용)
-const api = axios.create({
-    baseURL: prefix,
-    withCredentials: true,
-});
-
+const prefix = "/api/faq";
 // =========================================
 // FAQ 전체 조회
 // GET /api/faq
 // =========================================
 export const getAllFaqs = async () => {
-    const res = await axios.get(prefix);
+    const res = await apiClient.get(`${prefix}`);
     return res.data;
 };
 
@@ -24,7 +16,7 @@ export const getAllFaqs = async () => {
 // GET /api/faq/category?category=배송
 // =========================================
 export const getFaqByCategory = async (category) => {
-    const res = await axios.get(`${prefix}/category`, { params: { category } });
+    const res = await apiClient.get(`${prefix}/category`, { params: { category } });
     return res.data;
 };
 
@@ -33,7 +25,7 @@ export const getFaqByCategory = async (category) => {
 // GET /api/faq/search?keyword=배송
 // =========================================
 export const searchFaq = async (keyword) => {
-    const res = await axios.get(`${prefix}/search`, { params: { keyword } });
+    const res = await apiClient.get(`${prefix}/search`, { params: { keyword } });
     return res.data;
 };
 
@@ -43,7 +35,7 @@ export const searchFaq = async (keyword) => {
 // =========================================
 export const createFaq = async (request) => {
     // 관리자 인증 포함하여 FAQ 등록 API 호출
-    const res = await api.post("", request);
+    const res = await apiClient.post(`${prefix}`, request);
     return res.data;
 };
 
@@ -53,6 +45,6 @@ export const createFaq = async (request) => {
 // =========================================
 export const deleteFaq = async (faqNo) => {
     // 관리자 인증 포함하여 FAQ 삭제 API 호출
-    const res = await api.delete(`/${faqNo}`);
+    const res = await apiClient.delete(`${prefix}/${faqNo}`);
     return res.data;
 };
