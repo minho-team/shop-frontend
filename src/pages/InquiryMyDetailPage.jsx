@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import { getOneInquiry } from "../api/inquiryApi";
-import { API_SERVER_HOST } from "../api/authApi";
+// [수정] API_SERVER_HOST import 경로: authApi → apiClient
+import { API_SERVER_HOST } from "../api/apiClient";
 
 const InquiryMyDetailPage = () => {
     const { id } = useParams();

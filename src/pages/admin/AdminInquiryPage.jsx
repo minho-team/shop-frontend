@@ -6,7 +6,9 @@ import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminHeader from "../../components/admin/AdminHeader";
 import { getAllInquiries, getOneInquiry, adminDeleteInquiry } from "../../api/inquiryApi";
-import { createComment,deleteComment } from "../../api/commentApi";
+import { createComment, deleteComment } from "../../api/commentApi";
+// [수정] 첨부파일 이미지 미리보기를 위해 API_SERVER_HOST import 추가
+import { API_SERVER_HOST } from "../../api/apiClient";
 
 
 const STATUS_LABELS = ["전체", "답변대기", "답변완료"];
@@ -102,8 +104,8 @@ const AdminInquiryPage = () => {
         if (!window.confirm("답변을 삭제하시겠습니까?")) return;  // 확인 대화상자
         try {
             await deleteComment(commentNo);  // 답변 삭제 API 호출
-            await handleRowClick(selectedInquiry);  // 상세 조회 갱신
-            await fetchList();  // 목록 갱신
+            await handleRowClick(selectedInquiry);  // 상세 조회 갱신 (상태 변경 반영)
+            await fetchList();  // 목록 갱신 (상태 변경 반영)
         } catch (e) {
             alert("답변 삭제 실패");  // 실패 알림
         }
@@ -335,71 +337,87 @@ const AdminInquiryPage = () => {
                                 <div style={{ fontSize: "15px", fontWeight: "bold", marginBottom: "12px" }}>{detail.inquiry.title}</div>
                                 <div style={{ fontSize: "14px", color: "#444", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>{detail.inquiry.content}</div>
 
-                                {/* 첨부파일 목록 */}
+                                {/* [수정] 첨부파일 목록 - 이미지면 미리보기, 아니면 다운로드 링크로 표시 */}
                                 {detail.files && detail.files.length > 0 && (
                                     <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid #eee" }}>
                                         <p style={{ fontSize: "12px", color: "#888", marginBottom: "6px" }}>첨부파일</p>
                                         {detail.files.map(f => (
-                                            <div key={f.inquiryFileNo} style={{ fontSize: "13px", color: "#555" }}>
-                                                📎 {f.fileName}
-                                            </div>
-                                        ))}
+                                            <div key={f.inquiryFileNo} style={{ marginBottom: "8px" }}>
+                                                {f.fileType && f.fileType.startsWith("image/") ? (
+                                                    // 이미지 파일 - 미리보기 표시
+                                                    <img
+                                                        src={`${API_SERVER_HOST}${f.fileUrl}`}
+                                                        alt={f.fileName}
+                                                        style={{ maxWidth: "100%", maxHeight: "300px", borderRadius: "4px", border: "1px solid #eee" }}
+                                                    />
+                                                ) : (
+                                                    // 일반 파일 - 다운로드 링크
+                                                    <a
+                                                        href={`${API_SERVER_HOST}${f.fileUrl}`}
+                                                        download={f.fileName}
+                                                        style={{ fontSize: "13px", color: "#1a73e8" }}
+                                                    >
+                                                        📎 {f.fileName}
+                                                    </a>
+                                        )}
                                     </div>
-                                )}
+                                ))}
                             </div>
+                                )}
+                        </div>
 
-                            {/* 기존 답변 목록 */}
-                            {detail.comments && detail.comments.length > 0 && (
-                                <div style={{ marginBottom: "20px" }}>
-                                    <p style={{ fontSize: "14px", fontWeight: "bold", marginBottom: "10px" }}>등록된 답변</p>
-                                    {detail.comments.map(c => (
-                                        <div key={c.inquiryCommentNo} style={{
-                                            background: "#e8f5e9", borderRadius: "6px",
-                                            padding: "14px 16px", marginBottom: "8px", position: "relative"
-                                        }}>
-                                            <div style={{ fontSize: "13px", color: "#444", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>{c.content}</div>
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px" }}>
-                                                <span style={{ fontSize: "11px", color: "#888" }}>{formatDate(c.createdAt)}</span>
-                                                <button onClick={() => handleCommentDelete(c.inquiryCommentNo)}
-                                                    style={{ background: "none", border: "none", color: "#e00", fontSize: "12px", cursor: "pointer" }}>
-                                                    삭제
-                                                </button>
-                                            </div>
+                        {/* 기존 답변 목록 */}
+                        {detail.comments && detail.comments.length > 0 && (
+                            <div style={{ marginBottom: "20px" }}>
+                                <p style={{ fontSize: "14px", fontWeight: "bold", marginBottom: "10px" }}>등록된 답변</p>
+                                {detail.comments.map(c => (
+                                    <div key={c.inquiryCommentNo} style={{
+                                        background: "#e8f5e9", borderRadius: "6px",
+                                        padding: "14px 16px", marginBottom: "8px", position: "relative"
+                                    }}>
+                                        <div style={{ fontSize: "13px", color: "#444", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>{c.content}</div>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px" }}>
+                                            <span style={{ fontSize: "11px", color: "#888" }}>{formatDate(c.createdAt)}</span>
+                                            <button onClick={() => handleCommentDelete(c.inquiryCommentNo)}
+                                                style={{ background: "none", border: "none", color: "#e00", fontSize: "12px", cursor: "pointer" }}>
+                                                삭제
+                                            </button>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
-                            {/* 답변 작성 영역 */}
-                            <div>
-                                <p style={{ fontSize: "14px", fontWeight: "bold", marginBottom: "8px" }}>답변 작성</p>
-                                <textarea value={commentContent} onChange={e => setCommentContent(e.target.value)}
-                                    rows={5} placeholder="답변 내용을 입력하세요"
+                        {/* 답변 작성 영역 */}
+                        <div>
+                            <p style={{ fontSize: "14px", fontWeight: "bold", marginBottom: "8px" }}>답변 작성</p>
+                            <textarea value={commentContent} onChange={e => setCommentContent(e.target.value)}
+                                rows={5} placeholder="답변 내용을 입력하세요"
+                                style={{
+                                    width: "100%", padding: "10px", border: "1px solid #ddd", borderRadius: "4px",
+                                    fontSize: "14px", resize: "vertical", boxSizing: "border-box"
+                                }} />
+                            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "10px" }}>
+                                <button onClick={closeModal}
                                     style={{
-                                        width: "100%", padding: "10px", border: "1px solid #ddd", borderRadius: "4px",
-                                        fontSize: "14px", resize: "vertical", boxSizing: "border-box"
-                                    }} />
-                                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "10px" }}>
-                                    <button onClick={closeModal}
-                                        style={{
-                                            padding: "8px 20px", border: "1px solid #ddd", borderRadius: "4px",
-                                            background: "#fff", cursor: "pointer", fontSize: "14px"
-                                        }}>
-                                        닫기
-                                    </button>
-                                    <button onClick={handleCommentSubmit}
-                                        style={{
-                                            padding: "8px 20px", background: "#222", color: "#fff", border: "none",
-                                            borderRadius: "4px", cursor: "pointer", fontSize: "14px"
-                                        }}>
-                                        답변 등록
-                                    </button>
-                                </div>
+                                        padding: "8px 20px", border: "1px solid #ddd", borderRadius: "4px",
+                                        background: "#fff", cursor: "pointer", fontSize: "14px"
+                                    }}>
+                                    닫기
+                                </button>
+                                <button onClick={handleCommentSubmit}
+                                    style={{
+                                        padding: "8px 20px", background: "#222", color: "#fff", border: "none",
+                                        borderRadius: "4px", cursor: "pointer", fontSize: "14px"
+                                    }}>
+                                    답변 등록
+                                </button>
                             </div>
                         </div>
                     </div>
+                    </div>
                 )}
-            </AdminLayout>
+        </AdminLayout >
         </>
     );
 };
