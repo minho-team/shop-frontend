@@ -1,9 +1,17 @@
 /* MyOrderDetailPage.css */
 
-/* 1. 기본 레이아웃 (MyPage 스타일 계승) */
-.order-detail-container {
+/* 1. 기본 레이아웃 */
+.mypage-container {
   background: #fff;
   color: #222;
+  min-height: 100vh;
+}
+
+.mypage-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 /* 2. 상단 헤더 영역 */
@@ -13,7 +21,7 @@
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #111; /* 마이페이지 테이블 헤더와 통일감 */
+  border-bottom: 2px solid #111;
 }
 
 .btn-back-list {
@@ -31,26 +39,30 @@
   color: #111;
 }
 
-/* 3. 주문 요약 박스 (상단 회색 영역) */
+/* 3. 주문 요약 박스 */
 .order-summary-box {
   display: flex;
-  gap: 40px;
+  gap: 60px;
   background: #fafafa;
   padding: 25px 30px;
   margin-bottom: 40px;
-  border-bottom: 1px solid #e9e9e9;
+  border: 1px solid #eee;
 }
 
 .summary-item {
-  font-size: 13px;
-  color: #888;
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-item span {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 5px;
 }
 
 .summary-item strong {
-  display: block;
-  font-size: 16px;
+  font-size: 17px;
   color: #111;
-  margin-top: 6px;
   font-weight: 600;
 }
 
@@ -59,15 +71,36 @@
   font-size: 18px;
   font-weight: 600;
   color: #111;
-  margin: 40px 0 15px;
+  margin: 40px 0 20px;
 }
 
-/* 5. 상품 정보 테이블 (커스텀 스타일) */
+/* 5. 상품 정보 테이블 */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 40px;
+}
+
+.custom-table th {
+  background: #fcfcfc;
+  border-top: 1px solid #111;
+  border-bottom: 1px solid #eee;
+  padding: 15px;
+  font-size: 14px;
+}
+
+.custom-table td {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+  font-size: 14px;
+}
+
 .product-info-td {
   display: flex;
   align-items: center;
   gap: 15px;
-  padding: 15px 10px !important; /* 이미지 있는 칸만 패딩 허용 */
+  text-align: left !important;
 }
 
 .product-img {
@@ -78,24 +111,20 @@
   border: 1px solid #eee;
 }
 
-.product-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: #222;
-  margin-bottom: 4px;
-}
-
-/* 6. 정보 그리드 컨테이너 (결제/배송지 2단 구성) */
+/* 6. 정보 그리드 컨테이너 (주문자/결제/배송지) */
 .info-grid-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
   margin-top: 20px;
+  align-items: start;
 }
 
 .info-card {
   border: 1px solid #f1f1f1;
-  padding: 30px;
+  padding: 25px;
+  background: #fff;
+  height: 100%;
 }
 
 .info-row {
@@ -103,48 +132,99 @@
   justify-content: space-between;
   margin-bottom: 12px;
   font-size: 14px;
-  color: #666;
 }
 
-.info-row span:last-child {
-  color: #111;
-  font-weight: 500;
-}
-
-/* 결제 정보 합계 라인 */
 .info-row.total {
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid #f1f1f1;
+  border-top: 1px solid #eee;
 }
 
 .info-row.total span {
   font-size: 18px;
   font-weight: 700;
-  color: #111;
 }
 
-.info-row.total .price-red {
-  color: #d11 !important; /* 최종 결제 금액 강조 */
+.price-red {
+  color: #d11 !important;
 }
 
-/* 배송지 텍스트 스타일 */
+/* 7. 텍스트 정렬 */
 .delivery-text p {
+  display: flex;
+  align-items: flex-start;
   font-size: 14px;
-  line-height: 2;
+  line-height: 1.6;
   color: #444;
-  margin: 0;
+  margin-bottom: 12px;
 }
 
 .delivery-text strong {
+  width: 95px;
+  flex-shrink: 0;
   color: #111;
   font-weight: 600;
-  margin-right: 8px;
-  display: inline-block;
-  width: 80px; /* 라벨 가로폭 고정으로 정렬 유지 */
 }
 
-/* 로딩 및 빈 화면 공통 (마이페이지에서 계승) */
+.delivery-text span {
+  flex: 1;
+  word-break: keep-all;
+}
+
+/* 8. 하단 상품 상세 내역 섹션 */
+.order-items-detail-section {
+  margin-top: 60px;
+  padding-top: 30px;
+  border-top: 2px solid #333;
+  width: 100%;
+  clear: both;
+}
+
+.item-detail-card {
+  display: flex;
+  padding: 20px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.item-detail-card img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 25px;
+}
+
+.item-info-text {
+  flex: 1;
+}
+
+.item-info-text h5 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  color: #111;
+}
+
+.item-price-text {
+  text-align: right;
+}
+
+.item-price-text .unit-price {
+  font-size: 13px;
+  color: #888;
+  text-decoration: line-through;
+}
+
+.item-price-text .total-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #d9534f;
+  margin-top: 5px;
+}
+
+/* 9. 상태 메시지 */
 .loading-container,
 .empty-content {
   padding: 100px 0;
