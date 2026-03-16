@@ -1,9 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
-import {
-  getProductMainAndThumbImages,
-} from "../api/productImageApi";
+import { getProductMainAndThumbImages } from "../api/productImageApi";
 import "../css/ProductDetailPage.css";
 import { getProductDetail } from "../api/productApi";
 
@@ -15,11 +13,13 @@ const ProductDetailPage = () => {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
+  const [options, setOptions] = useState([]);
   const [imageData, setImageData] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isWished, setIsWished] = useState(false);
   const [activeTab, setActiveTab] = useState("상품정보");
+  const [selectedOptionNo, setSelectedOptionNo] = useState("");
 
   useEffect(() => {
     const fetchDetailData = async () => {
@@ -32,9 +32,12 @@ const ProductDetailPage = () => {
         console.log("상품 상세 응답:", productRes);
         console.log("이미지 리스트 응답:", imageRes);
 
-        setProduct(productRes);
+        setProduct(productRes.product);
+        setOptions(productRes.options || []);
         setImageData(imageRes);
         setCurrentImageIndex(0);
+        setSelectedOptionNo("");
+        setQuantity(1);
       } catch (error) {
         console.error("상품 상세 조회 실패:", error);
       }
@@ -93,10 +96,18 @@ const ProductDetailPage = () => {
   };
 
   const handleCart = () => {
+    if (options.length > 0 && !selectedOptionNo) {
+      alert("옵션을 선택해주세요.");
+      return;
+    }
     navigate("/cart");
   };
 
   const handleOrder = () => {
+    if (options.length > 0 && !selectedOptionNo) {
+      alert("옵션을 선택해주세요.");
+      return;
+    }
     navigate("/order/write");
   };
 
@@ -220,6 +231,29 @@ const ProductDetailPage = () => {
               </div>
 
               <div className="option-section">
+                <div className="option-group">
+                  <label>옵션</label>
+                  {options.length > 0 ? (
+                    <select
+                      value={selectedOptionNo}
+                      onChange={(e) => setSelectedOptionNo(e.target.value)}
+                    >
+                      <option value="">옵션 선택</option>
+                      {options.map((option) => (
+                        <option
+                          key={option.productOptionNo}
+                          value={option.productOptionNo}
+                        >
+                          {option.optionSize} / {option.color} / 재고{" "}
+                          {option.stock}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p>옵션이 없습니다.</p>
+                  )}
+                </div>
+
                 <div className="option-group">
                   <label>수량</label>
                   <div className="quantity-box">
