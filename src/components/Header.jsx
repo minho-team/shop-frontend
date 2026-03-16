@@ -1,28 +1,83 @@
 import { useState } from "react";
 import { Container, Nav } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { logout } from "../api/authApi";
 import "../css/Header.css";
 
 const menCategories = {
-  아우터: ["코트", "파카", "자켓", "가디건"],
-  상의: ["니트", "셔츠", "스웨트 셔츠", "긴팔", "반팔"],
-  하의: ["긴바지", "반바지", "데님"],
-  악세서리: ["가방", "슈즈", "주얼리", "잡화"],
+  아우터: [
+    { id: 111, name: "코트" },
+    { id: 112, name: "파카" },
+    { id: 113, name: "자켓" },
+    { id: 114, name: "가디건" },
+  ],
+  상의: [
+    { id: 121, name: "니트" },
+    { id: 122, name: "셔츠" },
+    { id: 123, name: "스웨트 셔츠" },
+    { id: 124, name: "긴팔" },
+    { id: 125, name: "반팔" },
+  ],
+  하의: [
+    { id: 131, name: "긴바지" },
+    { id: 132, name: "반바지" },
+    { id: 133, name: "데님" },
+  ],
+  악세서리: [
+    { id: 141, name: "가방" },
+    { id: 142, name: "슈즈" },
+    { id: 143, name: "주얼리" },
+    { id: 144, name: "잡화" },
+  ],
 };
 
 const womenCategories = {
-  아우터: ["코트", "파카", "자켓", "가디건"],
-  상의: ["니트", "셔츠", "스웨트 셔츠", "긴팔", "반팔"],
-  하의: ["긴바지", "반바지", "데님"],
-  악세서리: ["가방", "슈즈", "주얼리", "잡화"],
+  아우터: [
+    { id: 211, name: "코트" },
+    { id: 212, name: "파카" },
+    { id: 213, name: "자켓" },
+    { id: 214, name: "가디건" },
+  ],
+  상의: [
+    { id: 221, name: "니트" },
+    { id: 222, name: "셔츠" },
+    { id: 223, name: "스웨트 셔츠" },
+    { id: 224, name: "긴팔" },
+    { id: 225, name: "반팔" },
+  ],
+  하의: [
+    { id: 231, name: "긴바지" },
+    { id: 232, name: "반바지" },
+    { id: 233, name: "데님" },
+  ],
+  악세서리: [
+    { id: 241, name: "가방" },
+    { id: 242, name: "슈즈" },
+    { id: 243, name: "주얼리" },
+    { id: 244, name: "잡화" },
+  ],
+};
+
+const menSectionIds = {
+  아우터: 11,
+  상의: 12,
+  하의: 13,
+  악세서리: 14,
+};
+
+const womenSectionIds = {
+  아우터: 21,
+  상의: 22,
+  하의: 23,
+  악세서리: 24,
 };
 
 const Header = () => {
   const [openMenu, setOpenMenu] = useState(null);
   const { user, setUser } = useUser();
   const nav = useNavigate();
+  const location = useLocation();
 
   const isAdmin = user?.roles?.includes("ROLE_ADMIN");
 
@@ -36,20 +91,48 @@ const Header = () => {
     }
   };
 
-  const renderMegaMenu = (categories, basePath) => {
+  const moveCategory = (categoryId) => {
+    const params = new URLSearchParams(location.search);
+
+    if (categoryId) {
+      params.set("categoryId", categoryId);
+    } else {
+      params.delete("categoryId");
+    }
+
+    nav(`/?${params.toString()}`);
+    setOpenMenu(null);
+  };
+
+  const renderMegaMenu = (
+    categories,
+    sectionIds,
+    mainCategoryId,
+    previewImages
+  ) => {
     return (
       <div className="mega-menu">
         <Container fluid className="mega-menu-inner">
           <div className="mega-menu-side">
-            <Nav.Link as={Link} to={basePath} className="mega-side-link">
+            <Nav.Link
+              as="button"
+              className="mega-side-link"
+              onClick={() => moveCategory(mainCategoryId)}
+            >
               ALL
             </Nav.Link>
-            <Nav.Link as={Link} to={`${basePath}/new`} className="mega-side-link">
-              NEW
-            </Nav.Link>
+
             <Nav.Link
               as={Link}
-              to={`${basePath}/outlet`}
+              to="/products?filter=new"
+              className="mega-side-link"
+            >
+              NEW
+            </Nav.Link>
+
+            <Nav.Link
+              as={Link}
+              to="/products?filter=outlet"
               className="mega-side-link outlet"
             >
               OUTLET
@@ -59,15 +142,21 @@ const Header = () => {
           <div className="mega-menu-columns">
             {Object.entries(categories).map(([title, items]) => (
               <div key={title} className="mega-column">
-                <h6>{title}</h6>
+                <h6
+                  style={{ cursor: "pointer" }}
+                  onClick={() => moveCategory(sectionIds[title])}
+                >
+                  {title}
+                </h6>
+
                 {items.map((item) => (
                   <Nav.Link
-                    as={Link}
-                    key={item}
-                    to={`${basePath}/category/${encodeURIComponent(item)}`}
+                    as="button"
+                    key={item.id}
                     className="mega-item"
+                    onClick={() => moveCategory(item.id)}
                   >
-                    {item}
+                    {item.name}
                   </Nav.Link>
                 ))}
               </div>
@@ -75,8 +164,21 @@ const Header = () => {
           </div>
 
           <div className="mega-menu-right">
-            <div className="mega-preview-box">이미지영역1</div>
-            <div className="mega-preview-box">이미지영역2</div>
+            <div className="mega-preview-box">
+              <img
+                src={previewImages[0]}
+                alt="카테고리 미리보기 1"
+                className="mega-preview-image"
+              />
+            </div>
+
+            <div className="mega-preview-box">
+              <img
+                src={previewImages[1]}
+                alt="카테고리 미리보기 2"
+                className="mega-preview-image"
+              />
+            </div>
           </div>
         </Container>
       </div>
@@ -165,7 +267,11 @@ const Header = () => {
               className="nav-hover-item"
               onMouseEnter={() => setOpenMenu("/men")}
             >
-              <Nav.Link as={Link} to="/men" className="nav-link-custom">
+              <Nav.Link
+                as="button"
+                className="nav-link-custom"
+                onClick={() => moveCategory(1)}
+              >
                 남성
               </Nav.Link>
             </div>
@@ -174,15 +280,32 @@ const Header = () => {
               className="nav-hover-item"
               onMouseEnter={() => setOpenMenu("/women")}
             >
-              <Nav.Link as={Link} to="/women" className="nav-link-custom">
+              <Nav.Link
+                as="button"
+                className="nav-link-custom"
+                onClick={() => moveCategory(2)}
+              >
                 여성
               </Nav.Link>
             </div>
           </Nav>
         </Container>
 
-        {openMenu === "/men" && renderMegaMenu(menCategories, "/men")}
-        {openMenu === "/women" && renderMegaMenu(womenCategories, "/women")}
+        {openMenu === "/men" &&
+          renderMegaMenu(
+            menCategories,
+            menSectionIds,
+            1,
+            ["/images/menu-men-1.jpg", "/images/menu-men-2.jpg"]
+          )}
+
+        {openMenu === "/women" &&
+          renderMegaMenu(
+            womenCategories,
+            womenSectionIds,
+            2,
+            ["/images/menu-women-1.jpg", "/images/menu-women-2.jpg"]
+          )}
       </div>
     </header>
   );
