@@ -80,7 +80,7 @@ export const deleteInquiry = async (inquiryNo) => {
 // =========================================
 export const adminDeleteInquiry = async (inquiryNo) => {
     // 관리자 전용 문의 삭제 API 호출
-    const res = await apiClient.delete(`${prefix}}/${inquiryNo}`);
+    // [수정] ${prefix}} → ${prefix} (중괄호 오타 수정)
+    const res = await apiClient.delete(`${prefix}/${inquiryNo}`);
     return res.data;
 };
-
