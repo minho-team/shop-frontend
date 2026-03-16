@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import "../css/MainProductList.css";
 import { useEffect, useState } from "react";
-import { getProductList } from "../api/productApi";
+import { getProductList } from "../api/categoryApi";
 
 const tagOptions = ["NEW", "HOT", "BEST", "SALE"];
 
@@ -12,21 +12,37 @@ const getRandomTag = (productNo = 0) => {
 const API_BASE_URL = "http://localhost:8080";
 
 const MainProductList = () => {
-  const [product, setProduct] = useState([]);
+  const [searchParams] = useSearchParams();
+  const [productList, setProductList] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const categoryId = searchParams.get("categoryId");
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const data = await getProductList();
-        setProduct(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error("상품 목록 불러오기 실패:", error);
-        setProduct([]);
-      }
-    };
+  console.log("MainProductList useEffect 실행");
+  console.log("현재 categoryId =", categoryId);
 
-    fetchProducts();
-  }, []);
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      console.log("getProductList 호출 직전");
+      const data = await getProductList(categoryId);
+      console.log("getProductList 응답 =", data);
+      setProductList(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("상품 목록 불러오기 실패:", error);
+      setProductList([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProducts();
+}, [categoryId]);
+
+  if (loading) {
+    return <div className="main-product-loading">로딩중...</div>;
+  }
 
   return (
     <section className="main-product-section">
@@ -34,7 +50,7 @@ const MainProductList = () => {
         <div className="main-product-header">
           <div>
             <span className="main-product-label">OUR PICKS</span>
-            <h2>BEST PRODUCT</h2>
+            <h2>{categoryId ? "CATEGORY PRODUCT" : "BEST PRODUCT"}</h2>
           </div>
 
           <Link to="/products" className="main-product-more">
@@ -43,10 +59,7 @@ const MainProductList = () => {
         </div>
 
         <div className="product-grid">
-          {product.map((item, index) => {
-            console.log("상품명:", item.name);
-            console.log("imageUrl 원본:", JSON.stringify(item.imageUrl));
-            console.log("최종 src:", `${API_BASE_URL}${item.imageUrl}`);
+          {productList.map((item, index) => {
             const imageSrc = item.imageUrl
               ? `${API_BASE_URL}${item.imageUrl}`
               : "";
