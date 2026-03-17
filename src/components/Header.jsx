@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Container, Nav } from "react-bootstrap";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
@@ -75,11 +75,21 @@ const womenSectionIds = {
 
 const Header = () => {
   const [openMenu, setOpenMenu] = useState(null);
+  const [searchKeyword, setSearchKeyword] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("keyword") || "";
+  });
+
   const { user, setUser } = useUser();
   const nav = useNavigate();
   const location = useLocation();
 
   const isAdmin = user?.roles?.includes("ROLE_ADMIN");
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setSearchKeyword(params.get("keyword") || "");
+  }, [location.search]);
 
   const handleLogout = async () => {
     try {
@@ -104,11 +114,31 @@ const Header = () => {
     setOpenMenu(null);
   };
 
+  const handleSearch = () => {
+    const keyword = searchKeyword.trim();
+    const params = new URLSearchParams(location.search);
+
+    if (keyword) {
+      params.set("keyword", keyword);
+    } else {
+      params.delete("keyword");
+    }
+
+    nav(`/?${params.toString()}`);
+    setOpenMenu(null);
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   const renderMegaMenu = (
     categories,
     sectionIds,
     mainCategoryId,
-    previewImages
+    previewImages,
   ) => {
     return (
       <div className="mega-menu">
@@ -246,66 +276,84 @@ const Header = () => {
 
       <Container fluid className="brand-row">
         <Link to="/" className="brand-center">
-          <div className="brand-logo-image">LOGO</div>
+          <div className="brand-logo-image">
+            <img src="/images/logo.png" alt="ERDIN 로고" />
+          </div>
           <div className="brand-copy">
-            <strong>민호팀</strong>
-            <span>쇼핑몰</span>
+            <strong>ERDIN</strong>
+            <span>SELECT SHOP</span>
           </div>
         </Link>
       </Container>
 
       <div className="nav-area" onMouseLeave={() => setOpenMenu(null)}>
         <Container fluid className="nav-row">
-          <button type="button" className="menu-button" aria-label="menu">
-            <span />
-            <span />
-            <span />
-          </button>
+          <div className="nav-left-group">
+            <button type="button" className="menu-button" aria-label="menu">
+              <span />
+              <span />
+              <span />
+            </button>
 
-          <Nav className="category-nav">
-            <div
-              className="nav-hover-item"
-              onMouseEnter={() => setOpenMenu("/men")}
-            >
-              <Nav.Link
-                as="button"
-                className="nav-link-custom"
-                onClick={() => moveCategory(1)}
+            <Nav className="category-nav">
+              <div
+                className="nav-hover-item"
+                onMouseEnter={() => setOpenMenu("/men")}
               >
-                남성
-              </Nav.Link>
-            </div>
+                <Nav.Link
+                  as="button"
+                  className="nav-link-custom"
+                  onClick={() => moveCategory(1)}
+                >
+                  남성
+                </Nav.Link>
+              </div>
 
-            <div
-              className="nav-hover-item"
-              onMouseEnter={() => setOpenMenu("/women")}
-            >
-              <Nav.Link
-                as="button"
-                className="nav-link-custom"
-                onClick={() => moveCategory(2)}
+              <div
+                className="nav-hover-item"
+                onMouseEnter={() => setOpenMenu("/women")}
               >
-                여성
-              </Nav.Link>
-            </div>
-          </Nav>
+                <Nav.Link
+                  as="button"
+                  className="nav-link-custom"
+                  onClick={() => moveCategory(2)}
+                >
+                  여성
+                </Nav.Link>
+              </div>
+            </Nav>
+          </div>
+
+          <div className="header-search-box">
+            <input
+              type="text"
+              className="header-search-input"
+              placeholder="상품명을 검색하세요"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+            />
+            <button
+              type="button"
+              className="header-search-btn"
+              onClick={handleSearch}
+            >
+              검색
+            </button>
+          </div>
         </Container>
 
         {openMenu === "/men" &&
-          renderMegaMenu(
-            menCategories,
-            menSectionIds,
-            1,
-            ["/images/menu-men-1.jpg", "/images/menu-men-2.jpg"]
-          )}
+          renderMegaMenu(menCategories, menSectionIds, 1, [
+            "/images/menu-men-1.jpg",
+            "/images/menu-men-2.jpg",
+          ])}
 
         {openMenu === "/women" &&
-          renderMegaMenu(
-            womenCategories,
-            womenSectionIds,
-            2,
-            ["/images/menu-women-1.jpg", "/images/menu-women-2.jpg"]
-          )}
+          renderMegaMenu(womenCategories, womenSectionIds, 2, [
+            "/images/menu-women-1.jpg",
+            "/images/menu-women-2.jpg",
+          ])}
       </div>
     </header>
   );

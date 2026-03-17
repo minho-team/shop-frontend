@@ -17,18 +17,27 @@ const MainProductList = () => {
   const [loading, setLoading] = useState(false);
 
   const categoryId = searchParams.get("categoryId");
+  const keyword = searchParams.get("keyword")?.trim() || "";
 
   useEffect(() => {
     console.log("MainProductList useEffect 실행");
     console.log("현재 categoryId =", categoryId);
+    console.log("현재 keyword =", keyword);
 
     const fetchProducts = async () => {
       setLoading(true);
       try {
         console.log("getProductList 호출 직전");
-        const data = await getProductList(categoryId);
+
+        const data = await getProductList({
+          categoryId,
+          keyword,
+        });
+
         console.log("getProductList 응답 =", data);
-        setProductList(Array.isArray(data) ? data : []);
+
+        const safeList = Array.isArray(data) ? data : [];
+        setProductList(safeList);
       } catch (error) {
         console.error("상품 목록 불러오기 실패:", error);
         setProductList([]);
@@ -38,7 +47,7 @@ const MainProductList = () => {
     };
 
     fetchProducts();
-  }, [categoryId]);
+  }, [categoryId, keyword]);
 
   if (loading) {
     return <div className="main-product-loading">로딩중...</div>;
@@ -50,7 +59,13 @@ const MainProductList = () => {
         <div className="main-product-header">
           <div>
             <span className="main-product-label">OUR PICKS</span>
-            <h2>{categoryId ? "CATEGORY PRODUCT" : "BEST PRODUCT"}</h2>
+            <h2>
+              {keyword
+                ? `"${keyword}" 검색 결과`
+                : categoryId
+                ? "CATEGORY PRODUCT"
+                : "BEST PRODUCT"}
+            </h2>
           </div>
 
           <Link to="/products" className="main-product-more">
@@ -60,6 +75,8 @@ const MainProductList = () => {
 
         <div className="product-grid">
           {productList.map((item, index) => {
+            const productName = item.name || item.productName || "상품명 없음";
+
             const imageSrc = item.imageUrl
               ? `${API_BASE_URL}${item.imageUrl}`
               : "";
@@ -75,7 +92,7 @@ const MainProductList = () => {
               >
                 <div className="product-thumb">
                   {item.imageUrl ? (
-                    <img src={imageSrc} alt={item.name} />
+                    <img src={imageSrc} alt={productName} />
                   ) : (
                     <div className="product-no-image">NO IMAGE</div>
                   )}
@@ -84,21 +101,23 @@ const MainProductList = () => {
                 </div>
 
                 <div className="product-info">
-                  <p className="product-brand">MINHO TEAM</p>
-                  <h3 className="product-name">{item.name}</h3>
+                  <p className="product-brand">ERDIN SELECT SHOP</p>
+                  <h3 className="product-name">{productName}</h3>
 
                   <div className="product-price-box">
-
                     <span className="product-price">
                       {Number(item.price).toLocaleString()}원
                     </span>
-
                   </div>
                 </div>
               </Link>
             );
           })}
         </div>
+
+        {!loading && productList.length === 0 && (
+          <div className="main-product-loading">검색 결과가 없습니다.</div>
+        )}
       </div>
     </section>
   );
