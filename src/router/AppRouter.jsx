@@ -17,6 +17,7 @@ const InquiryMyDetailPage = lazy(() => import("../pages/InquiryMyDetailPage"));
 const OrderWritePage = lazy(() => import("../pages/OrderWritePage"));
 const MyOrderDetailPage = lazy(() => import("../pages/MyOrderDetailPage"));
 
+
 //admin
 const AdminHome = lazy(() => import("../pages/admin/AdminHome"));
 const AdminMemberListPage = lazy(() => import("../pages/admin/AdminMemberListPage"));
@@ -31,6 +32,7 @@ const AdminOrderListPage = lazy(() => import("../pages/admin/AdminOrderListPage"
 const AdminRefundPage = lazy(() => import("../pages/admin/AdminRefundPage"));
 const AdminInquiryPage = lazy(() => import("../pages/admin/AdminInquiryPage"));
 const AdminFaqPage = lazy(() => import("../pages/admin/AdminFaqPage"));
+const AdminOrderDetailPage = lazy(() => import("../pages/admin/AdminOrderDetailPage"));
 
 // 로그인이 안 돼 있으면 /login페이지로 리다이렉트
 const ProtectedRouteWrapper = ({ Component }) => {
@@ -88,6 +90,7 @@ const AppRouterContent = () => {
 
         { path: "/admin/inquiries", element: <AdminRouteWrapper Component={AdminInquiryPage} /> },
         { path: "/admin/faqs", element: <AdminRouteWrapper Component={AdminFaqPage} /> },
+        { path: "/admin/order/detail/:orderNo", element: <AdminRouteWrapper Component={AdminOrderDetailPage} /> },
 
         /*로그인해야만 들어올 수 있는 페이지*/
         { path: "/cart", element: <ProtectedRouteWrapper Component={CartPage} /> },
