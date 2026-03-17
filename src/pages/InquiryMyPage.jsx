@@ -1,42 +1,58 @@
 // =========================================
 // 1:1 문의 내 문의 내역 리스트 페이지 컴포넌트
-// 기능: 내 문의 목록 조회, 삭제, 페이징
+// 기능: 내 문의 목록 조회, 삭제, 페이징 (서버사이드)
 // =========================================
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import { getMyInquiries, deleteInquiry } from "../api/inquiryApi";
+import { getMyInquiryPage, deleteInquiry } from "../api/inquiryApi";
 
 // 페이지당 문의 표시 개수
 const PAGE_SIZE = 10;
 
+// 한 번에 표시할 페이지 번호 개수
+const PAGE_GROUP_SIZE = 5;
+
 const InquiryMyPage = () => {
     const navigate = useNavigate();
 
-    // 내 문의 목록
+    // 현재 페이지에 표시할 문의 목록
     const [boards, setBoards] = useState([]);
 
-    // 로딩 상태
-    const [loading, setLoading] = useState(true);
+    // 전체 건수 (서버에서 받아온 값)
+    const [totalCount, setTotalCount] = useState(0);
+
+    // 전체 페이지 수 (서버에서 받아온 값)
+    const [totalPages, setTotalPages] = useState(1);
 
     // 현재 페이지 번호 (1부터 시작)
     const [currentPage, setCurrentPage] = useState(1);
 
+    // 로딩 상태
+    const [loading, setLoading] = useState(true);
+
     // =========================================
-    // 컴포넌트 마운트 시 내 문의 내역 조회
+    // 페이지 변경 시 내 문의 내역 재조회
     // =========================================
     useEffect(() => {
         fetchMyBoards();
-    }, []);
+    }, [currentPage]);
 
     // =========================================
-    // 내 문의 목록 조회 함수
+    // 내 문의 목록 페이징 조회 함수 (서버사이드)
+    // 서버에서 현재 페이지 데이터만 받아옴
     // =========================================
     const fetchMyBoards = async () => {
         setLoading(true);
         try {
-            const data = await getMyInquiries();
-            setBoards(data);
+            // 서버에 page, size 전달 (memberNo는 서버에서 JWT로 추출)
+            const data = await getMyInquiryPage({
+                page: currentPage,
+                size: PAGE_SIZE,
+            });
+            setBoards(data.list);           // 현재 페이지 문의 목록
+            setTotalCount(data.totalCount); // 전체 건수
+            setTotalPages(data.totalPages); // 전체 페이지 수
         } catch (e) {
             console.error("문의 내역 조회 실패:", e);
         } finally {
@@ -53,7 +69,7 @@ const InquiryMyPage = () => {
         try {
             await deleteInquiry(inquiryNo);
             alert("삭제되었습니다.");
-            fetchMyBoards();  // 목록 재조회
+            fetchMyBoards(); // 목록 재조회
         } catch (e) {
             alert("삭제에 실패했습니다.");
         }
@@ -69,12 +85,14 @@ const InquiryMyPage = () => {
     };
 
     // =========================================
-    // 페이징 계산
-    // totalPages: 전체 페이지 수
-    // pagedBoards: 현재 페이지에 해당하는 목록
+    // 페이지 그룹 계산 (5개씩 표시)
+    // currentGroup: 현재 페이지가 속한 그룹 번호
+    // startPage: 현재 그룹의 시작 페이지
+    // endPage: 현재 그룹의 끝 페이지
     // =========================================
-    const totalPages = Math.ceil(boards.length / PAGE_SIZE);
-    const pagedBoards = boards.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const currentGroup = Math.ceil(currentPage / PAGE_GROUP_SIZE);
+    const startPage = (currentGroup - 1) * PAGE_GROUP_SIZE + 1;
+    const endPage = Math.min(startPage + PAGE_GROUP_SIZE - 1, totalPages);
 
     // =========================================
     // 페이지 변경 핸들러
@@ -98,9 +116,9 @@ const InquiryMyPage = () => {
                     </button>
                 </div>
 
-                {/* 전체 건수 표시 */}
+                {/* 전체 건수 표시 (서버에서 받아온 실제 총 건수) */}
                 <div style={{ fontSize: "13px", color: "#888", marginBottom: "12px" }}>
-                    총 {boards.length}건
+                    총 {totalCount}건
                 </div>
 
                 {loading ? (
@@ -122,7 +140,7 @@ const InquiryMyPage = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {pagedBoards.map((board) => (
+                                {boards.map((board) => (
                                     <tr key={board.inquiryNo} style={{ borderBottom: "1px solid #eee" }}>
                                         <td style={{ padding: "12px 8px", textAlign: "center", color: "#999" }}>
                                             {board.inquiryNo}
@@ -164,24 +182,24 @@ const InquiryMyPage = () => {
                             </tbody>
                         </table>
 
-                        {/* 페이지네이션 */}
+                        {/* 페이지네이션 (5개씩 그룹으로 표시) */}
                         {totalPages > 1 && (
                             <div style={{ display: "flex", justifyContent: "center", gap: "6px", marginTop: "32px" }}>
-                                {/* 이전 버튼 */}
+                                {/* 이전 그룹 버튼: 현재 그룹의 이전 페이지로 이동 */}
                                 <button
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
+                                    onClick={() => handlePageChange(startPage - 1)}
+                                    disabled={startPage === 1}
                                     style={{
                                         padding: "6px 12px", border: "1px solid #ddd", borderRadius: "4px",
-                                        background: "#fff", cursor: currentPage === 1 ? "default" : "pointer",
-                                        color: currentPage === 1 ? "#ccc" : "#333", fontSize: "13px"
+                                        background: "#fff", cursor: startPage === 1 ? "default" : "pointer",
+                                        color: startPage === 1 ? "#ccc" : "#333", fontSize: "13px"
                                     }}
                                 >
-                                    이전
+                                    &lt;
                                 </button>
 
-                                {/* 페이지 번호 목록 */}
-                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                {/* 페이지 번호 목록 (현재 그룹의 5개만 표시) */}
+                                {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(page => (
                                     <button
                                         key={page}
                                         onClick={() => handlePageChange(page)}
@@ -196,17 +214,17 @@ const InquiryMyPage = () => {
                                     </button>
                                 ))}
 
-                                {/* 다음 버튼 */}
+                                {/* 다음 그룹 버튼: 현재 그룹의 다음 페이지로 이동 */}
                                 <button
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
+                                    onClick={() => handlePageChange(endPage + 1)}
+                                    disabled={endPage === totalPages}
                                     style={{
                                         padding: "6px 12px", border: "1px solid #ddd", borderRadius: "4px",
-                                        background: "#fff", cursor: currentPage === totalPages ? "default" : "pointer",
-                                        color: currentPage === totalPages ? "#ccc" : "#333", fontSize: "13px"
+                                        background: "#fff", cursor: endPage === totalPages ? "default" : "pointer",
+                                        color: endPage === totalPages ? "#ccc" : "#333", fontSize: "13px"
                                     }}
                                 >
-                                    다음
+                                    &gt;
                                 </button>
                             </div>
                         )}
