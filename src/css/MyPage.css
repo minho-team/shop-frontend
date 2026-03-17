@@ -1,11 +1,15 @@
-/* 1. 글로벌 레이아웃 통일 */
+/* ==========================================================================
+   1. 글로벌 레이아웃 통일 (Global Layout)
+   ========================================================================== */
 .mypage-container {
   background: #fff;
   color: #222;
   font-family: inherit;
 }
 
-/* 2. 상단 대시보드 */
+/* ==========================================================================
+   2. 상단 대시보드 (User Summary Dashboard)
+   ========================================================================== */
 .user-summary-bg {
   background: #fafafa;
   border-bottom: 1px solid #e9e9e9;
@@ -48,7 +52,7 @@
   display: block;
   font-size: 13px;
   color: #888;
-  margin-bottom: 8px; /* 등급과 SILVER 사이 간격 확보 */
+  margin-bottom: 8px;
   letter-spacing: 0.5px;
 }
 
@@ -60,13 +64,15 @@
   line-height: 1.2;
 }
 
-/* 3. 컨텐츠 영역 레이아웃 */
+/* ==========================================================================
+   3. 컨텐츠 영역 레이아웃 (Content Layout)
+   ========================================================================== */
 .mypage-wrapper {
   max-width: 1280px;
   margin: 0 auto;
   padding-left: 28px;
   padding-right: 28px;
-  padding-bottom: 100px; /* 푸터와의 간격 */
+  padding-bottom: 100px;
 }
 
 .mypage-body {
@@ -75,7 +81,9 @@
   gap: 60px;
 }
 
-/* 4. 좌측 사이드바 */
+/* ==========================================================================
+   4. 좌측 사이드바 (Sidebar Menu)
+   ========================================================================== */
 .sidebar {
   width: 180px;
   flex-shrink: 0;
@@ -113,7 +121,9 @@
   font-weight: 500;
 }
 
-/* 5. 우측 본문 영역 */
+/* ==========================================================================
+   5. 우측 본문 영역 (Main Content)
+   ========================================================================== */
 .content-area {
   flex: 1;
 }
@@ -125,10 +135,12 @@
   margin-bottom: 30px;
 }
 
-/* 6. 탭 메뉴 (양쪽 끝 정렬 반영) */
+/* ==========================================================================
+   6. 탭 메뉴 (Tab Navigation)
+   ========================================================================== */
 .order-tab-container {
   display: flex;
-  justify-content: space-between; /* 양쪽 끝으로 밀어내기 */
+  justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #ececec;
   margin-bottom: 25px;
@@ -137,16 +149,11 @@
 .modern-tab-btn {
   background: none;
   border: none;
-  padding: 12px 0; /* 좌우 패딩을 제거해 선 끝에 맞춤 */
+  padding: 12px 0;
   font-size: 14px;
   color: #999;
   cursor: pointer;
   position: relative;
-}
-
-.modern-tab-btn span {
-  font-size: 12px;
-  font-weight: 400;
 }
 
 .modern-tab-btn.active {
@@ -164,63 +171,131 @@
   background: #111;
 }
 
-/* 7. 테이블 디자인 */
+/* ==========================================================================
+   7. 테이블 디자인 (Data Table)
+   ========================================================================== */
 .custom-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+  table-layout: fixed;
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 15px 10px;
+  border-bottom: 1px solid #f4f4f4;
+  vertical-align: middle;
+  text-align: center;
 }
 
 .custom-table th {
-  text-align: left;
-  padding: 15px 10px;
   border-bottom: 1px solid #111;
   font-weight: 600;
   color: #111;
+  background-color: #fff;
 }
 
-/* td 자체의 패딩을 제거하여 Link가 꽉 차게 만듭니다. */
+/* 각 열의 너비 배분 (합계 100%) */
+/* 주문일자 */
+.custom-table th:nth-child(1),
+.custom-table td:nth-child(1) {
+  width: 20%;
+}
+/* 주문번호 */
+.custom-table th:nth-child(2),
+.custom-table td:nth-child(2) {
+  width: 35%;
+}
+/* 금액 */
+.custom-table th:nth-child(3),
+.custom-table td:nth-child(3) {
+  width: 25%;
+}
+/* 상태 */
+.custom-table th:nth-child(4),
+.custom-table td:nth-child(4) {
+  width: 20%;
+}
+
+.custom-table td:nth-child(3) {
+  text-align: center;
+  padding-right: 0;
+}
+
 .custom-table td {
-  padding: 0 !important; /* 내부 Link(a태그)가 꽉 채우도록 패딩 제거 */
-  border-bottom: 1px solid #f4f4f4;
-  color: #444;
+  padding: 0 !important;
 }
 
-/* 행 전체 호버 효과 */
 .order-row-hover:hover {
   background-color: #f9f9f9;
   transition: background-color 0.2s ease;
 }
 
-/* 셀 전체를 클릭 영역으로 만드는 Link 스타일 */
 .table-cell-link {
-  display: block; /* 블록 요소로 변경하여 셀 전체 차지 */
-  width: 100%; /* 가로 꽉 채우기 */
-  height: 100%; /* 세로 꽉 채우기 */
-  padding: 18px 10px; /* 기존 td에 있던 패딩을 여기로 옮김 */
-  color: inherit; /* 텍스트 색상 유지 */
-  text-decoration: none; /* 밑줄 제거 */
-  box-sizing: border-box; /* 패딩을 포함한 크기 계산 */
-}
-
-/* 상태값에 따른 텍스트 색상 (Link 내부에서도 적용되도록 수정) */
-.status-cancel {
-  color: #999;
-}
-.status-delivery,
-.status-payment_completed {
-  /* PAYMENT_COMPLETED 상태 추가 */
-  color: #222;
-  font-weight: 500;
-}
-
-/* 호버 시 밑줄 방지 및 색상 유지 */
-.table-cell-link:hover {
-  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 18px 10px;
   color: inherit;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
-/* 공통 로딩/에러 */
+.custom-table td:nth-child(3) .table-cell-link {
+  justify-content: center;
+}
+/* ==========================================================================
+   8. 페이징 버튼 (Pagination) - [추가됨]
+   ========================================================================== */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+  gap: 8px;
+}
+
+.paging-btn {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #666;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.paging-btn.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+  font-weight: 600;
+}
+
+.paging-btn:hover:not(:disabled):not(.active) {
+  background: #f5f5f5;
+  border-color: #ccc;
+  color: #111;
+}
+
+.paging-btn:disabled {
+  background: #fafafa;
+  color: #ccc;
+  border-color: #eee;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   9. 기타 유틸리티 (Loading, Empty Status)
+   ========================================================================== */
 .loading-container,
 .empty-row,
 .empty-content {

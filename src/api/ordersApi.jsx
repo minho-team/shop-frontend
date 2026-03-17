@@ -5,8 +5,8 @@ const adminPrefix = "/api/admin/orders";
 
 
 // 내 모든 주문내역 불러오기
-export const getMyOrderList = async () => {
-  const res = await apiClient.get(`${prefix}`);
+export const getMyOrderList = async (page = 1) => {
+  const res = await apiClient.get(`${prefix}?page=${page}`);
   return res.data;
 };
 

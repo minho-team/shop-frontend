@@ -20,20 +20,21 @@ const getStatusLabel = (status) => {
 };
 
 /**
- * [컴포넌트] 주문 내역 테이블
+ * [컴포넌트] 주문 내역 테이블 (서버 사이드 페이징 적용)
  */
-const OrderHistory = ({ currentUser, type }) => {
-    const [orders, setOrders] = useState([]);
+const OrderHistory = ({ user: propsUser, type }) => {
+    const [pageData, setPageData] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const { user } = useUser();
 
     useEffect(() => {
         const fetchOrders = async () => {
             if (!user) return;
+            setLoading(true);
             try {
-
-                const data = await getMyOrderList();
-                setOrders(data.orderList || []);
+                const data = await getMyOrderList(currentPage);
+                setPageData(data);
             } catch (err) {
                 console.error("데이터 로드 실패:", err);
             } finally {
@@ -41,7 +42,12 @@ const OrderHistory = ({ currentUser, type }) => {
             }
         };
         fetchOrders();
-    }, [currentUser, type, user]);
+    }, [user, currentPage]);
+
+    if (loading) return <div className="loading-container">데이터 로드 중...</div>;
+
+    // pageData가 없거나 내부 데이터가 없을 경우를 대비한 안전한 변수 추출
+    const { orderList = [], startPage = 0, endPage = 0, prev = false, next = false } = pageData || {};
 
     return (
         <div className="table-responsive">
@@ -55,8 +61,9 @@ const OrderHistory = ({ currentUser, type }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {orders.length > 0 ? (
-                        orders.map(o => (
+                    {/* 데이터가 있을 때만 map 실행, 없으면 메시지 출력 */}
+                    {orderList && orderList.length > 0 ? (
+                        orderList.map(o => (
                             <tr key={o.orderNo} className="order-row-hover">
                                 <td>
                                     <Link to={`/my/order/detail/${o.orderNo}`} className="table-cell-link">
@@ -68,27 +75,49 @@ const OrderHistory = ({ currentUser, type }) => {
                                         {o.orderNo}
                                     </Link>
                                 </td>
-                                <td>
-                                    <Link to={`/my/order/detail/${o.orderNo}`} className="table-cell-link">
-                                        ₩{o.totalPrice?.toLocaleString()}
-                                    </Link>
-                                </td>
+                                <td>₩{o.totalPrice?.toLocaleString()}</td>
                                 <td className={`status-${o.orderStatus?.toLowerCase()}`}>
-                                    <Link to={`/my/order/detail/${o.orderNo}`} className="table-cell-link">
-                                        {getStatusLabel(o.orderStatus)}
-                                    </Link>
+                                    {getStatusLabel(o.orderStatus)}
                                 </td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="4" className="empty-row">
-                                최근 주문 내역이 없습니다.
-                            </td>
+                            <td colSpan="4" className="empty-row">최근 주문 내역이 없습니다.</td>
                         </tr>
                     )}
                 </tbody>
             </table>
+
+            {pageData && startPage > 0 && (
+                <div className="pagination-wrapper">
+                    <button
+                        className="paging-btn"
+                        disabled={!prev}
+                        onClick={() => setCurrentPage(startPage - 1)}
+                    >
+                        &lt;
+                    </button>
+
+                    {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(num => (
+                        <button
+                            key={num}
+                            className={`paging-btn ${currentPage === num ? 'active' : ''}`}
+                            onClick={() => setCurrentPage(num)}
+                        >
+                            {num}
+                        </button>
+                    ))}
+
+                    <button
+                        className="paging-btn"
+                        disabled={!next}
+                        onClick={() => setCurrentPage(endPage + 1)}
+                    >
+                        &gt;
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
@@ -224,7 +253,8 @@ const MyPage = () => {
                                     <button className="modern-tab-btn active">주문배송조회</button>
                                 </div>
                                 <div className="order-list-section">
-                                    <OrderHistory currentUser={user} type="DELIVERY" />
+                                    {/* props 이름을 'user'로 통일해서 넘겨줍니다 */}
+                                    <OrderHistory user={user} type="DELIVERY" />
                                 </div>
                             </div>
                         )}
