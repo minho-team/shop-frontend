@@ -5,7 +5,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import { getAllFaqs, getFaqByCategory, searchFaq } from "../api/faqApi";
+import { getFaqPage } from "../api/faqApi";
 import { useUser } from "../context/UserContext";
 
 // 문의 카테고리 목록
@@ -13,6 +13,9 @@ const CATEGORIES = ["전체", "배송", "주문/결제", "취소/교환/반품",
 
 // 페이지당 FAQ 표시 개수
 const PAGE_SIZE = 10;
+
+// 한 번에 표시할 페이지 번호 개수
+const PAGE_GROUP_SIZE = 5;
 
 const InquiryPage = () => {
     const navigate = useNavigate();
@@ -24,14 +27,23 @@ const InquiryPage = () => {
     // 선택된 카테고리
     const [selectedCategory, setSelectedCategory] = useState("전체");
 
-    // FAQ 전체 목록 (서버에서 받아온 원본)
-    const [faqList, setFaqList] = useState([]);
-
     // 검색 입력값 (실시간)
     const [searchInput, setSearchInput] = useState("");
 
     // 실제 검색에 사용되는 키워드 (검색 버튼 클릭 시 적용)
     const [keyword, setKeyword] = useState("");
+
+    // 현재 페이지에 표시할 FAQ 목록
+    const [faqList, setFaqList] = useState([]);
+
+    // 전체 건수 (서버에서 받아온 값)
+    const [totalCount, setTotalCount] = useState(0);
+
+    // 전체 페이지 수 (서버에서 받아온 값)
+    const [totalPages, setTotalPages] = useState(1);
+
+    // 현재 페이지 번호 (1부터 시작)
+    const [currentPage, setCurrentPage] = useState(1);
 
     // 아코디언 열린 FAQ 번호
     const [openFaqNo, setOpenFaqNo] = useState(null);
@@ -39,33 +51,31 @@ const InquiryPage = () => {
     // 로딩 상태
     const [loading, setLoading] = useState(false);
 
-    // 현재 페이지 번호 (1부터 시작)
-    const [currentPage, setCurrentPage] = useState(1);
-
     // =========================================
-    // 카테고리 또는 키워드 변경 시 FAQ 재조회 및 페이지 초기화
+    // 카테고리, 키워드, 페이지 변경 시 FAQ 재조회
     // =========================================
     useEffect(() => {
         fetchFaq();
-        setCurrentPage(1);  // 조회 조건 변경 시 첫 페이지로 이동
-    }, [selectedCategory, keyword]);
+    }, [selectedCategory, keyword, currentPage]);
 
     // =========================================
-    // FAQ 조회 함수 (전체 / 카테고리 / 키워드 검색)
+    // FAQ 페이징 조회 함수 (서버사이드)
+    // 서버에서 현재 페이지 데이터만 받아옴
     // =========================================
     const fetchFaq = async () => {
         setLoading(true);
         try {
-            let data;
-            if (keyword) {
-                data = await searchFaq(keyword);                    // 키워드 검색
-            } else if (selectedCategory === "전체") {
-                data = await getAllFaqs();                           // 전체 조회
-            } else {
-                data = await getFaqByCategory(selectedCategory);    // 카테고리별 조회
-            }
-            setFaqList(data);
-            setOpenFaqNo(null);  // 조회 시 아코디언 초기화
+            // 서버에 page, size, category, keyword 전달
+            const data = await getFaqPage({
+                page: currentPage,
+                size: PAGE_SIZE,
+                category: selectedCategory,
+                keyword: keyword,
+            });
+            setFaqList(data.list);          // 현재 페이지 FAQ 목록
+            setTotalCount(data.totalCount); // 전체 건수
+            setTotalPages(data.totalPages); // 전체 페이지 수
+            setOpenFaqNo(null);             // 조회 시 아코디언 초기화
         } catch (e) {
             console.error("FAQ 조회 실패:", e);
         } finally {
@@ -75,10 +85,12 @@ const InquiryPage = () => {
 
     // =========================================
     // 검색 실행 (버튼 클릭 시)
+    // 검색어 변경 시 첫 페이지부터 다시 조회
     // =========================================
     const handleSearch = () => {
         setKeyword(searchInput);
         setSelectedCategory("전체");
+        setCurrentPage(1); // 검색 시 첫 페이지로 이동
     };
 
     // 엔터키로 검색
@@ -89,6 +101,17 @@ const InquiryPage = () => {
     // FAQ 아코디언 토글
     const toggleFaq = (faqNo) => {
         setOpenFaqNo(openFaqNo === faqNo ? null : faqNo);
+    };
+
+    // =========================================
+    // 카테고리 클릭 핸들러
+    // 카테고리 변경 시 첫 페이지부터 다시 조회
+    // =========================================
+    const handleCategoryClick = (cat) => {
+        setSelectedCategory(cat);
+        setKeyword("");
+        setSearchInput("");
+        setCurrentPage(1); // 카테고리 변경 시 첫 페이지로 이동
     };
 
     // =========================================
@@ -116,12 +139,14 @@ const InquiryPage = () => {
     };
 
     // =========================================
-    // 페이징 계산
-    // totalPages: 전체 페이지 수
-    // pagedList: 현재 페이지에 해당하는 FAQ 목록
+    // 페이지 그룹 계산 (5개씩 표시)
+    // currentGroup: 현재 페이지가 속한 그룹 번호
+    // startPage: 현재 그룹의 시작 페이지
+    // endPage: 현재 그룹의 끝 페이지
     // =========================================
-    const totalPages = Math.ceil(faqList.length / PAGE_SIZE);
-    const pagedList = faqList.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const currentGroup = Math.ceil(currentPage / PAGE_GROUP_SIZE);
+    const startPage = (currentGroup - 1) * PAGE_GROUP_SIZE + 1;
+    const endPage = Math.min(startPage + PAGE_GROUP_SIZE - 1, totalPages);
 
     // =========================================
     // 페이지 변경 핸들러
@@ -129,7 +154,7 @@ const InquiryPage = () => {
     // =========================================
     const handlePageChange = (page) => {
         setCurrentPage(page);
-        setOpenFaqNo(null);  // 페이지 변경 시 아코디언 초기화
+        setOpenFaqNo(null); // 페이지 변경 시 아코디언 초기화
     };
 
     return (
@@ -187,7 +212,7 @@ const InquiryPage = () => {
                             {CATEGORIES.map((cat) => (
                                 <button
                                     key={cat}
-                                    onClick={() => { setSelectedCategory(cat); setKeyword(""); setSearchInput(""); }}
+                                    onClick={() => handleCategoryClick(cat)}
                                     style={{
                                         padding: "6px 16px", borderRadius: "20px", cursor: "pointer", fontSize: "13px",
                                         border: "1px solid #ddd",
@@ -200,18 +225,18 @@ const InquiryPage = () => {
                             ))}
                         </div>
 
-                        {/* 전체 건수 표시 */}
+                        {/* 전체 건수 표시 (서버에서 받아온 실제 총 건수) */}
                         <div style={{ fontSize: "13px", color: "#888", marginBottom: "12px" }}>
-                            총 {faqList.length}건
+                            총 {totalCount}건
                         </div>
 
                         {/* FAQ 아코디언 목록 (현재 페이지 데이터만 표시) */}
                         {loading ? (
                             <p style={{ textAlign: "center", color: "#999" }}>로딩 중...</p>
-                        ) : pagedList.length === 0 ? (
+                        ) : faqList.length === 0 ? (
                             <p style={{ textAlign: "center", color: "#999", padding: "40px 0" }}>검색 결과가 없습니다.</p>
                         ) : (
-                            pagedList.map((faq) => (
+                            faqList.map((faq) => (
                                 <div key={faq.faqNo} style={{ borderBottom: "1px solid #eee" }}>
                                     {/* 질문 헤더 */}
                                     <div
@@ -236,24 +261,24 @@ const InquiryPage = () => {
                             ))
                         )}
 
-                        {/* 페이지네이션 */}
+                        {/* 페이지네이션 (5개씩 그룹으로 표시) */}
                         {totalPages > 1 && (
                             <div style={{ display: "flex", justifyContent: "center", gap: "6px", marginTop: "32px" }}>
-                                {/* 이전 버튼 */}
+                                {/* 이전 그룹 버튼: 현재 그룹의 이전 페이지로 이동 */}
                                 <button
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
+                                    onClick={() => handlePageChange(startPage - 1)}
+                                    disabled={startPage === 1}
                                     style={{
                                         padding: "6px 12px", border: "1px solid #ddd", borderRadius: "4px",
-                                        background: "#fff", cursor: currentPage === 1 ? "default" : "pointer",
-                                        color: currentPage === 1 ? "#ccc" : "#333", fontSize: "13px"
+                                        background: "#fff", cursor: startPage === 1 ? "default" : "pointer",
+                                        color: startPage === 1 ? "#ccc" : "#333", fontSize: "13px"
                                     }}
                                 >
-                                    이전
+                                    &lt;
                                 </button>
 
-                                {/* 페이지 번호 목록 */}
-                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                {/* 페이지 번호 목록 (현재 그룹의 5개만 표시) */}
+                                {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(page => (
                                     <button
                                         key={page}
                                         onClick={() => handlePageChange(page)}
@@ -268,17 +293,17 @@ const InquiryPage = () => {
                                     </button>
                                 ))}
 
-                                {/* 다음 버튼 */}
+                                {/* 다음 그룹 버튼: 현재 그룹의 다음 페이지로 이동 */}
                                 <button
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
+                                    onClick={() => handlePageChange(endPage + 1)}
+                                    disabled={endPage === totalPages}
                                     style={{
                                         padding: "6px 12px", border: "1px solid #ddd", borderRadius: "4px",
-                                        background: "#fff", cursor: currentPage === totalPages ? "default" : "pointer",
-                                        color: currentPage === totalPages ? "#ccc" : "#333", fontSize: "13px"
+                                        background: "#fff", cursor: endPage === totalPages ? "default" : "pointer",
+                                        color: endPage === totalPages ? "#ccc" : "#333", fontSize: "13px"
                                     }}
                                 >
-                                    다음
+                                    &gt;
                                 </button>
                             </div>
                         )}

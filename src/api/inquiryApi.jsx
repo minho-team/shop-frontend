@@ -37,11 +37,38 @@ export const getAllInquiries = async () => {
 };
 
 // =========================================
+// 전체 문의 페이징 조회 (관리자용, 서버사이드 페이징)
+// GET /api/inquiry/page?page=1&size=10&status=답변대기&category=배송&keyword=검색어
+// 반환값: { list, totalCount, totalPages, currentPage, pageSize }
+// =========================================
+export const getInquiryPage = async ({ page = 1, size = 10, status, category, keyword } = {}) => {
+    const params = { page, size };
+    // 상태 필터: "전체"면 파라미터 생략
+    if (status && status !== "전체") params.status = status;
+    // 카테고리 필터: "전체"면 파라미터 생략
+    if (category && category !== "전체") params.category = category;
+    // 키워드 필터: 빈 문자열이면 파라미터 생략
+    if (keyword && keyword.trim()) params.keyword = keyword.trim();
+    const res = await apiClient.get(`${prefix}/page`, { params });
+    return res.data;
+};
+
+// =========================================
 // 내 문의 내역 조회 (로그인한 회원)
 // =========================================
 export const getMyInquiries = async () => {
     // 내 문의 목록 조회 API 호출
     const res = await apiClient.get(`${prefix}/my`);
+    return res.data;
+};
+
+// =========================================
+// 내 문의 페이징 조회 (로그인한 회원, 서버사이드 페이징)
+// GET /api/inquiry/my/page?page=1&size=10
+// 반환값: { list, totalCount, totalPages, currentPage, pageSize }
+// =========================================
+export const getMyInquiryPage = async ({ page = 1, size = 10 } = {}) => {
+    const res = await apiClient.get(`${prefix}/my/page`, { params: { page, size } });
     return res.data;
 };
 
@@ -80,7 +107,6 @@ export const deleteInquiry = async (inquiryNo) => {
 // =========================================
 export const adminDeleteInquiry = async (inquiryNo) => {
     // 관리자 전용 문의 삭제 API 호출
-    // [수정] ${prefix}} → ${prefix} (중괄호 오타 수정)
-    const res = await apiClient.delete(`${prefix}/${inquiryNo}`);
+    const res = await apiClient.delete(`${prefix}/admin/${inquiryNo}`);
     return res.data;
 };
