@@ -19,26 +19,26 @@ const MainProductList = () => {
   const categoryId = searchParams.get("categoryId");
 
   useEffect(() => {
-  console.log("MainProductList useEffect 실행");
-  console.log("현재 categoryId =", categoryId);
+    console.log("MainProductList useEffect 실행");
+    console.log("현재 categoryId =", categoryId);
 
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      console.log("getProductList 호출 직전");
-      const data = await getProductList(categoryId);
-      console.log("getProductList 응답 =", data);
-      setProductList(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("상품 목록 불러오기 실패:", error);
-      setProductList([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        console.log("getProductList 호출 직전");
+        const data = await getProductList(categoryId);
+        console.log("getProductList 응답 =", data);
+        setProductList(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("상품 목록 불러오기 실패:", error);
+        setProductList([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchProducts();
-}, [categoryId]);
+    fetchProducts();
+  }, [categoryId]);
 
   if (loading) {
     return <div className="main-product-loading">로딩중...</div>;
@@ -88,20 +88,11 @@ const MainProductList = () => {
                   <h3 className="product-name">{item.name}</h3>
 
                   <div className="product-price-box">
-                    {item.salePrice ? (
-                      <>
-                        <span className="product-price-sale">
-                          {Number(item.salePrice).toLocaleString()}원
-                        </span>
-                        <span className="product-price-original">
-                          {Number(item.price).toLocaleString()}원
-                        </span>
-                      </>
-                    ) : (
-                      <span className="product-price">
-                        {Number(item.price).toLocaleString()}원
-                      </span>
-                    )}
+
+                    <span className="product-price">
+                      {Number(item.price).toLocaleString()}원
+                    </span>
+
                   </div>
                 </div>
               </Link>
