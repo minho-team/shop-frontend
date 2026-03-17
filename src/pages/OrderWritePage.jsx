@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import "../css/OrderWritePage.css";
 
 // 구매하기를 누를 때 나오는 주문서 작성 페이지
 
 const OrderWritePage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [ordererName, setOrdererName] = useState("");
   const [ordererPhone, setOrdererPhone] = useState("");
   const [ordererEmail, setOrdererEmail] = useState("");
@@ -15,17 +19,112 @@ const OrderWritePage = () => {
   const [detailAddress, setDetailAddress] = useState("");
   const [message, setMessage] = useState("");
 
-  // 임시 상품 데이터
-  const product = {
-    itemName: "라이더 자켓",
-    itemColor: "블랙",
-    itemSize: "M",
-    quantity: 1,
-    unitPrice: 59000,
+  const orderData = location.state;
+
+  useEffect(() => {
+    if (!orderData) {
+      alert("잘못된 접근입니다.");
+      navigate(-1);
+    }
+  }, [orderData, navigate]);
+
+  useEffect(() => {
+    if (window.kakao?.Postcode) return;
+
+    const existingScript = document.getElementById("kakao-postcode-script");
+    if (existingScript) return;
+
+    const script = document.createElement("script");
+    script.id = "kakao-postcode-script";
+    script.src =
+      "//t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.async = true;
+
+    script.onerror = () => {
+      alert("주소 검색 스크립트를 불러오지 못했습니다.");
+    };
+
+    document.body.appendChild(script);
+  }, []);
+
+  const handleAddressSearch = () => {
+    if (!window.kakao?.Postcode) {
+      alert("주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
+    new window.kakao.Postcode({
+      oncomplete: function (data) {
+        let addr = "";
+        let extraAddr = "";
+
+        if (data.userSelectedType === "R") {
+          addr = data.roadAddress;
+        } else {
+          addr = data.jibunAddress;
+        }
+
+        if (data.userSelectedType === "R") {
+          if (data.bname && /[동로가]$/.test(data.bname)) {
+            extraAddr += data.bname;
+          }
+
+          if (data.buildingName && data.apartment === "Y") {
+            extraAddr += extraAddr
+              ? `, ${data.buildingName}`
+              : data.buildingName;
+          }
+
+          if (extraAddr) {
+            extraAddr = ` (${extraAddr})`;
+          }
+        }
+
+        setZipCode(data.zonecode);
+        setBaseAddress(addr + extraAddr);
+
+        setTimeout(() => {
+          const detailInput = document.getElementById("detailAddress");
+          if (detailInput) {
+            detailInput.focus();
+          }
+        }, 0);
+      },
+    }).open();
   };
 
-  // 총 결제 금액
-  const totalPrice = product.unitPrice * product.quantity;
+  const product = useMemo(() => {
+    if (!orderData) {
+      return {
+        productNo: 0,
+        itemName: "",
+        itemColor: "",
+        itemSize: "",
+        quantity: 0,
+        unitPrice: 0,
+        imageUrl: "",
+      };
+    }
+
+    return {
+      productNo: orderData.productNo,
+      itemName: orderData.productName,
+      itemColor: orderData.optionColor,
+      itemSize: orderData.optionSize,
+      quantity: orderData.quantity,
+      unitPrice: orderData.productPrice,
+      imageUrl: orderData.imageUrl,
+      productOptionNo: orderData.productOptionNo,
+    };
+  }, [orderData]);
+
+  const totalPrice = useMemo(() => {
+    return Number(product.unitPrice ?? 0) * Number(product.quantity ?? 0);
+  }, [product]);
+
+  if (!orderData) {
+    return null;
+  }
 
   return (
     <div className="order-page">
@@ -62,18 +161,30 @@ const OrderWritePage = () => {
               <div className="order-item-list">
                 <div className="order-item-card">
                   <div className="order-item-image-wrap">
-                    <img
-                      src={product.imageUrl}
-                      alt={product.itemName}
-                      className="order-item-image"
-                    />
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.itemName}
+                        className="order-item-image"
+                      />
+                    ) : (
+                      <div className="order-item-image no-image">
+                        이미지 없음
+                      </div>
+                    )}
                   </div>
 
                   <div className="order-item-info">
                     <p className="order-item-name">{product.itemName}</p>
-                    <p className="order-item-option">
-                      옵션: {product.itemColor} / {product.itemSize}
-                    </p>
+
+                    {product.itemColor || product.itemSize ? (
+                      <p className="order-item-option">
+                        옵션: {product.itemColor} / {product.itemSize}
+                      </p>
+                    ) : (
+                      <p className="order-item-option">옵션 없음</p>
+                    )}
+
                     <p className="order-item-quantity">
                       수량: {product.quantity}개
                     </p>
@@ -81,7 +192,7 @@ const OrderWritePage = () => {
 
                   <div className="order-item-price-box">
                     <p className="unit-price">
-                      {product.unitPrice.toLocaleString()}원
+                      {Number(product.unitPrice).toLocaleString()}원
                     </p>
                     <p className="total-price">
                       {totalPrice.toLocaleString()}원
@@ -172,9 +283,13 @@ const OrderWritePage = () => {
                       type="text"
                       placeholder="우편번호"
                       value={zipCode}
-                      onChange={(e) => setZipCode(e.target.value)}
+                      readOnly
                     />
-                    <button type="button" className="address-button">
+                    <button
+                      type="button"
+                      className="address-button"
+                      onClick={handleAddressSearch}
+                    >
                       주소 찾기
                     </button>
                   </div>
@@ -186,13 +301,14 @@ const OrderWritePage = () => {
                     type="text"
                     placeholder="기본주소를 입력해주세요"
                     value={baseAddress}
-                    onChange={(e) => setBaseAddress(e.target.value)}
+                    readOnly
                   />
                 </div>
 
                 <div className="form-row full">
                   <label>상세주소</label>
                   <input
+                    id="detailAddress"
                     type="text"
                     placeholder="상세주소를 입력해주세요"
                     value={detailAddress}
@@ -215,15 +331,34 @@ const OrderWritePage = () => {
 
           <aside className="order-sidebar">
             <div className="summary-box">
-              <h2>결제예정금액</h2>
+              <h2>결제정보</h2>
 
-              <div className="summary-row total">
-                <span>총 결제예정금액</span>
+              <div className="summary-detail">
+                <div className="summary-row">
+                  <span>구매상품</span>
+                  <strong>{totalPrice.toLocaleString()}원</strong>
+                </div>
+
+                <div className="summary-row">
+                  <span>배송비</span>
+                  <strong>0원</strong>
+                </div>
+
+                <div className="summary-row">
+                  <span>할인/부가결제</span>
+                  <strong>-0원</strong>
+                </div>
+              </div>
+
+              <div className="summary-divider"></div>
+
+              <div className="summary-row grand-total">
+                <span>총 결제 금액</span>
                 <strong>{totalPrice.toLocaleString()}원</strong>
               </div>
 
               <button type="button" className="submit-order-button">
-                주문하기
+                {totalPrice.toLocaleString()}원 결제하기
               </button>
             </div>
           </aside>

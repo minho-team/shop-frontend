@@ -34,6 +34,7 @@ const ProductDetailPage = () => {
 
         setProduct(productRes.product);
         setOptions(productRes.options || []);
+
         setImageData(imageRes);
         setCurrentImageIndex(0);
         setSelectedOptionNo("");
@@ -60,6 +61,14 @@ const ProductDetailPage = () => {
     if (!displayImages.length) return null;
     return displayImages[currentImageIndex] || displayImages[0];
   }, [displayImages, currentImageIndex]);
+
+  const selectedOption = useMemo(() => {
+    return (
+      options.find(
+        (option) => String(option.productOptionNo) === String(selectedOptionNo),
+      ) || null
+    );
+  }, [options, selectedOptionNo]);
 
   const finalPrice = useMemo(() => {
     return Number(product?.price ?? 0);
@@ -100,6 +109,7 @@ const ProductDetailPage = () => {
       alert("옵션을 선택해주세요.");
       return;
     }
+
     navigate("/cart");
   };
 
@@ -108,7 +118,23 @@ const ProductDetailPage = () => {
       alert("옵션을 선택해주세요.");
       return;
     }
-    navigate("/order/write");
+
+    navigate("/order/write", {
+      state: {
+        productNo: product.productNo,
+        productName: product.name,
+        productPrice: Number(product.price ?? 0),
+        quantity: quantity,
+        totalPrice: totalPrice,
+        productOptionNo: selectedOption ? selectedOption.productOptionNo : null,
+        optionSize: selectedOption ? selectedOption.optionSize : "",
+        optionColor: selectedOption ? selectedOption.color : "",
+        stock: selectedOption ? selectedOption.stock : 0,
+        imageUrl: currentDisplayImage
+          ? `${API_BASE_URL}${currentDisplayImage.imageUrl}`
+          : "",
+      },
+    });
   };
 
   if (!product) {
@@ -279,6 +305,14 @@ const ProductDetailPage = () => {
                   <span>{product.name}</span>
                   <span>{quantity}개</span>
                 </div>
+
+                {selectedOption && (
+                  <div className="selected-summary-line">
+                    <span>
+                      옵션: {selectedOption.color} / {selectedOption.optionSize}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="total-price-row">

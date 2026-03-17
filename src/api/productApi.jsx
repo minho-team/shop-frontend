@@ -2,18 +2,16 @@ import apiClient from "./apiClient";
 
 const prefix = "/api/product";
 
-
 // 모든 상품을 가져오는 api
 export const getProductList = async () => {
-
   const res = await apiClient.get(`${prefix}`);
   return res.data;
 };
 
-
 // 상품 상세 페이지를 위한 api
 export const getProductDetail = async (id) => {
   const res = await apiClient.get(`${prefix}/${id}`);
+  console.log("productDetail:" + res.data);
   return res.data;
 };
 // export const register = async(formData) =>{
