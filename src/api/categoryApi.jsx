@@ -1,12 +1,21 @@
-
 import apiClient from "./apiClient";
 
 const prefix = "/api/product";
 
-// 카테고리를 눌렀을 때 그에 맞는 상품 가져오는 함수
-export const getProductList = async (categoryId) => {
+// 카테고리 + 검색어로 상품 목록 조회
+export const getProductList = async ({ categoryId, keyword }) => {
+  const params = {};
+
+  if (categoryId) {
+    params.categoryId = categoryId;
+  }
+
+  if (keyword && keyword.trim()) {
+    params.keyword = keyword.trim();
+  }
+
   const response = await apiClient.get(`${prefix}/withcategory`, {
-    params: categoryId ? { categoryId } : {},
+    params,
     withCredentials: true,
   });
 

@@ -24,13 +24,13 @@ const Footer = () => {
 
       <div className="footer-main">
         <div className="footer-col footer-company">
-          <h2 className="footer-logo">민호팀</h2>
+          <h2 className="footer-logo">ERDIN SELECT SHOP</h2>
 
-          <p>COMPANY : 민호팀(주) / CEO : 민호</p>
+          <p>COMPANY : 에르딘(주) / CEO : 강민호</p>
           <p>CALL CENTER : 1111-2222</p>
           <p>ADDRESS : 서울특별시 강남구 테헤란로14길 6 남도빌딩 2F, 3F, 4F, 5F, 6F</p>
           <p>
-            개인정보관리책임자 : 민호
+            개인정보관리책임자 : 강민호
           </p>
           <p>
             사업자등록번호 : 333-33-33333{" "}
@@ -54,14 +54,14 @@ const Footer = () => {
 
           <div className="footer-block">
             <h3>RETURN / EXCHANGE</h3>
-            <p>서울특별시 강남구 테헤란로14길 6 남도빌딩 2F, 3F, 4F, 5F, 6F (민호팀)</p>
+            <p>서울특별시 강남구 테헤란로14길 6 남도빌딩 2F, 3F, 4F, 5F, 6F (에르딘)</p>
           </div>
         </div>
 
         <div className="footer-col footer-bank">
           <h3>BANK ACCOUNT</h3>
           <p>신한 111-222-333333</p>
-          <p>예금주: 민호팀</p>
+          <p>예금주: 에르딘</p>
           <div className="footer-bank-line" />
         </div>
       </div>
