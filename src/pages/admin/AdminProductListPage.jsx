@@ -179,7 +179,7 @@ const AdminProductListPage = () => {
                       <tr
                         key={product.productNo}
                         onClick={() =>
-                          navigate(`/admin/product/${product.productNo}`)
+                          navigate(`/admin/products/detail/${product.productNo}`)
                         }
                         style={{ cursor: "pointer" }}
                       >

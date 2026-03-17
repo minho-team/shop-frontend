@@ -33,6 +33,7 @@ const AdminRefundPage = lazy(() => import("../pages/admin/AdminRefundPage"));
 const AdminInquiryPage = lazy(() => import("../pages/admin/AdminInquiryPage"));
 const AdminFaqPage = lazy(() => import("../pages/admin/AdminFaqPage"));
 const AdminOrderDetailPage = lazy(() => import("../pages/admin/AdminOrderDetailPage"));
+const AdminProductDetailPage = lazy(() => import("../pages/admin/AdminProductDetailPage"));
 
 // 로그인이 안 돼 있으면 /login페이지로 리다이렉트
 const ProtectedRouteWrapper = ({ Component }) => {
@@ -84,6 +85,7 @@ const AppRouterContent = () => {
         { path: "/admin/products/add", element: <AdminRouteWrapper Component={AdminProductAddPage} /> },
         { path: "/admin/products/edit", element: <AdminRouteWrapper Component={AdminProductEditPage} /> },
         { path: "/admin/products/inventory", element: <AdminRouteWrapper Component={AdminProductInventoryPage} /> },
+        { path: "/admin/products/detail/:productNo", element: <AdminRouteWrapper Component={AdminProductDetailPage} /> },
 
         { path: "/admin/orders", element: <AdminRouteWrapper Component={AdminOrderListPage} /> },
         { path: "/admin/orders/refunds", element: <AdminRouteWrapper Component={AdminRefundPage} /> },

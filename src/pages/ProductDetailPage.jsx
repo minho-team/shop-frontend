@@ -28,9 +28,12 @@ const ProductDetailPage = () => {
           getProductDetail(id),
           getProductMainAndThumbImages(id),
         ]);
+        
+        //화면이 랜더링될때 가장 위쪽 스크롤로 이동
+        window.scrollTo(0, 0);
 
-        console.log("상품 상세 응답:", productRes);
-        console.log("이미지 리스트 응답:", imageRes);
+        console.log("상품 상세 페이지에서:", productRes);
+        console.log("상품 상세페이지에서 이미지 리스트 응답:", imageRes);
 
         setProduct(productRes.product);
         setOptions(productRes.options || []);
@@ -189,9 +192,8 @@ const ProductDetailPage = () => {
                   <button
                     key={img.productImgNo}
                     type="button"
-                    className={`thumbnail-button ${
-                      currentImageIndex === index ? "active" : ""
-                    }`}
+                    className={`thumbnail-button ${currentImageIndex === index ? "active" : ""
+                      }`}
                     onClick={() => setCurrentImageIndex(index)}
                   >
                     <img
@@ -354,9 +356,8 @@ const ProductDetailPage = () => {
                 <button
                   key={tab}
                   type="button"
-                  className={`detail-tab-button ${
-                    activeTab === tab ? "active" : ""
-                  }`}
+                  className={`detail-tab-button ${activeTab === tab ? "active" : ""
+                    }`}
                   onClick={() => setActiveTab(tab)}
                 >
                   {tab}
