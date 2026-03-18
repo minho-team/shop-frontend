@@ -6,12 +6,86 @@ import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = "http://localhost:8080";
 
+// 카테고리 데이터
+const genderCategories = [
+  { categoryId: 1, name: "남성" },
+  { categoryId: 2, name: "여성" },
+];
+
+const mainCategories = {
+  1: [
+    { categoryId: 11, name: "아우터" },
+    { categoryId: 12, name: "상의" },
+    { categoryId: 13, name: "하의" },
+    { categoryId: 14, name: "악세사리" },
+  ],
+  2: [
+    { categoryId: 21, name: "아우터" },
+    { categoryId: 22, name: "상의" },
+    { categoryId: 23, name: "하의" },
+    { categoryId: 24, name: "악세사리" },
+  ],
+};
+
+const subCategories = {
+  11: [
+    { categoryId: 111, name: "코트" },
+    { categoryId: 112, name: "파카" },
+    { categoryId: 113, name: "자켓" },
+    { categoryId: 114, name: "가디건" },
+  ],
+  12: [
+    { categoryId: 121, name: "니트" },
+    { categoryId: 122, name: "셔츠" },
+    { categoryId: 123, name: "스웨트 셔츠" },
+    { categoryId: 124, name: "긴팔" },
+    { categoryId: 125, name: "반팔" },
+  ],
+  13: [
+    { categoryId: 131, name: "긴바지" },
+    { categoryId: 132, name: "반바지" },
+    { categoryId: 133, name: "데님" },
+  ],
+  14: [
+    { categoryId: 141, name: "가방" },
+    { categoryId: 142, name: "슈즈" },
+    { categoryId: 143, name: "주얼리" },
+    { categoryId: 144, name: "잡화" },
+  ],
+  21: [
+    { categoryId: 211, name: "코트" },
+    { categoryId: 212, name: "파카" },
+    { categoryId: 213, name: "자켓" },
+    { categoryId: 214, name: "가디건" },
+  ],
+  22: [
+    { categoryId: 221, name: "니트" },
+    { categoryId: 222, name: "셔츠" },
+    { categoryId: 223, name: "스웨트 셔츠" },
+    { categoryId: 224, name: "긴팔" },
+    { categoryId: 225, name: "반팔" },
+  ],
+  23: [
+    { categoryId: 231, name: "긴바지" },
+    { categoryId: 232, name: "반바지" },
+    { categoryId: 233, name: "데님" },
+  ],
+  24: [
+    { categoryId: 241, name: "가방" },
+    { categoryId: 242, name: "슈즈" },
+    { categoryId: 243, name: "주얼리" },
+    { categoryId: 244, name: "잡화" },
+  ],
+};
+
 const AdminProductListPage = () => {
   // 검색 조건 상태
   const [search, setSearch] = useState({
     page: 1,
     size: 10,
     keyword: "",
+    genderCategoryId: "",
+    mainCategoryId: "",
     categoryId: "",
     useYn: "",
     sameDayDeliveryYn: "",
@@ -47,11 +121,24 @@ const AdminProductListPage = () => {
   const handleChangeSearch = (e) => {
     const { name, value } = e.target;
 
-    setSearch((prev) => ({
-      ...prev,
-      [name]: value,
-      page: 1, // 검색조건 바뀌면 첫 페이지로 이동
-    }));
+    setSearch((prev) => {
+      let newSearch = {
+        ...prev,
+        [name]: value,
+        page: 1,
+      };
+
+      if (name === "genderCategoryId") {
+        newSearch.mainCategoryId = "";
+        newSearch.categoryId = "";
+      }
+
+      if (name === "mainCategoryId") {
+        newSearch.categoryId = "";
+      }
+
+      return newSearch;
+    });
   };
   // 검색 버튼 클릭 핸들러
   const handleSearch = () => {
@@ -66,6 +153,8 @@ const AdminProductListPage = () => {
       page: 1,
       size: 10,
       keyword: "",
+      genderCategoryId: "",
+      mainCategoryId: "",
       categoryId: "",
       useYn: "",
       sameDayDeliveryYn: "",
@@ -105,14 +194,46 @@ const AdminProductListPage = () => {
             />
 
             <select
+              name="genderCategoryId"
+              value={search.genderCategoryId}
+              onChange={handleChangeSearch}
+            >
+              <option value="">전체 성별</option>
+              {genderCategories.map((category) => (
+                <option key={category.categoryId} value={category.categoryId}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              name="mainCategoryId"
+              value={search.mainCategoryId}
+              onChange={handleChangeSearch}
+              disabled={!search.genderCategoryId}
+            >
+              <option value="">전체 대분류</option>
+              {(mainCategories[search.genderCategoryId] || []).map(
+                (category) => (
+                  <option key={category.categoryId} value={category.categoryId}>
+                    {category.name}
+                  </option>
+                ),
+              )}
+            </select>
+
+            <select
               name="categoryId"
               value={search.categoryId}
               onChange={handleChangeSearch}
+              disabled={!search.mainCategoryId}
             >
-              <option value="">전체 카테고리</option>
-              <option value="1">상의</option>
-              <option value="2">하의</option>
-              <option value="3">아우터</option>
+              <option value="">전체 소분류</option>
+              {(subCategories[search.mainCategoryId] || []).map((category) => (
+                <option key={category.categoryId} value={category.categoryId}>
+                  {category.name}
+                </option>
+              ))}
             </select>
 
             <select
@@ -134,10 +255,6 @@ const AdminProductListPage = () => {
               <option value="Y">당일배송</option>
               <option value="N">일반배송</option>
             </select>
-
-            <button type="button" onClick={handleSearch}>
-              검색
-            </button>
 
             <button type="button" onClick={handleReset}>
               초기화
