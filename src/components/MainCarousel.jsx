@@ -9,7 +9,7 @@ const carouselItems = [
       "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1600&q=80",
     title: "2026 SPRING COLLECTION",
     desc: "가볍고 세련된 봄 신상 컬렉션을 만나보세요",
-    link: "/new",
+    link: "/?sort=new",
     buttonText: "신상품 보기",
   },
   {
@@ -18,7 +18,7 @@ const carouselItems = [
       "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1600&q=80",
     title: "BEST SELLER",
     desc: "지금 가장 인기 있는 베스트 아이템",
-    link: "/best",
+    link: "/?sort=best",
     buttonText: "베스트 보기",
   },
   {
@@ -27,8 +27,8 @@ const carouselItems = [
       "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=80",
     title: "SPECIAL EVENT",
     desc: "회원 한정 할인 혜택을 지금 바로 확인하세요",
-    link: "/event",
-    buttonText: "이벤트 보기",
+    link: "/?discountOnly=true&sort=sale",
+    buttonText: "할인 상품 보기",
   },
 ];
 

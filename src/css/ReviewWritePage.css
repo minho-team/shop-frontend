@@ -1,0 +1,23 @@
+/* src/css/ReviewWritePage.css */
+.label-title {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.custom-input,
+.custom-textarea,
+.custom-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.btn-submit {
+  background-color: #111;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+}
