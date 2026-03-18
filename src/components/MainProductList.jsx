@@ -3,13 +3,12 @@ import "../css/MainProductList.css";
 import { useEffect, useState } from "react";
 import { getProductList } from "../api/categoryApi";
 
-const tagOptions = ["NEW", "HOT", "BEST", "SALE"];
-
-const getRandomTag = (productNo = 0) => {
-  return tagOptions[productNo % tagOptions.length] || "NEW";
-};
-
 const API_BASE_URL = "http://localhost:8080";
+
+const getSalePrice = (price, discountRate) => {
+  if (!discountRate || discountRate <= 0) return price;
+  return Math.floor((price * (100 - discountRate)) / 100 / 100) * 100;
+};
 
 const MainProductList = () => {
   const [searchParams] = useSearchParams();
@@ -18,26 +17,21 @@ const MainProductList = () => {
 
   const categoryId = searchParams.get("categoryId");
   const keyword = searchParams.get("keyword")?.trim() || "";
+  const sort = searchParams.get("sort") || "";
+  const discountOnly = searchParams.get("discountOnly") === "true";
 
   useEffect(() => {
-    console.log("MainProductList useEffect 실행");
-    console.log("현재 categoryId =", categoryId);
-    console.log("현재 keyword =", keyword);
-
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        console.log("getProductList 호출 직전");
-
         const data = await getProductList({
           categoryId,
           keyword,
+          sort,
+          discountOnly,
         });
 
-        console.log("getProductList 응답 =", data);
-
-        const safeList = Array.isArray(data) ? data : [];
-        setProductList(safeList);
+        setProductList(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("상품 목록 불러오기 실패:", error);
         setProductList([]);
@@ -47,7 +41,16 @@ const MainProductList = () => {
     };
 
     fetchProducts();
-  }, [categoryId, keyword]);
+  }, [categoryId, keyword, sort, discountOnly]);
+
+  const getTitle = () => {
+    if (keyword) return `"${keyword}" 검색 결과`;
+    if (discountOnly || sort === "sale") return "할인 상품";
+    if (sort === "best") return "베스트 상품";
+    if (sort === "new") return "신상품";
+    if (categoryId) return "카테고리 상품";
+    return "BEST PRODUCT";
+  };
 
   if (loading) {
     return <div className="main-product-loading">로딩중...</div>;
@@ -59,30 +62,23 @@ const MainProductList = () => {
         <div className="main-product-header">
           <div>
             <span className="main-product-label">OUR PICKS</span>
-            <h2>
-              {keyword
-                ? `"${keyword}" 검색 결과`
-                : categoryId
-                ? "CATEGORY PRODUCT"
-                : "BEST PRODUCT"}
-            </h2>
+            <h2>{getTitle()}</h2>
           </div>
 
-          <Link to="/products" className="main-product-more">
-            전체보기
+          <Link to="/" className="main-product-more">
+            메인으로
           </Link>
         </div>
 
         <div className="product-grid">
           {productList.map((item, index) => {
-            const productName = item.name || item.productName || "상품명 없음";
-
+            const productName = item.name || "상품명 없음";
             const imageSrc = item.imageUrl
               ? `${API_BASE_URL}${item.imageUrl}`
               : "";
 
-            const tag = getRandomTag(item.productNo ?? index);
-            const badgeClass = `product-badge badge-${String(tag).toLowerCase()}`;
+            const isSale = item.discountRate && item.discountRate > 0;
+            const salePrice = getSalePrice(item.price, item.discountRate);
 
             return (
               <Link
@@ -97,7 +93,15 @@ const MainProductList = () => {
                     <div className="product-no-image">NO IMAGE</div>
                   )}
 
-                  <span className={badgeClass}>{tag}</span>
+                  {isSale && (
+                    <span className="product-badge badge-sale">
+                      {item.discountRate}% OFF
+                    </span>
+                  )}
+
+                  {item.sameDayDeliveryYn === "Y" && (
+                    <span className="product-delivery-badge">당일배송</span>
+                  )}
                 </div>
 
                 <div className="product-info">
@@ -105,9 +109,20 @@ const MainProductList = () => {
                   <h3 className="product-name">{productName}</h3>
 
                   <div className="product-price-box">
-                    <span className="product-price">
-                      {Number(item.price).toLocaleString()}원
-                    </span>
+                    {isSale ? (
+                      <>
+                        <span className="product-price-sale">
+                          {Number(salePrice).toLocaleString()}원
+                        </span>
+                        <span className="product-price-original">
+                          {Number(item.price).toLocaleString()}원
+                        </span>
+                      </>
+                    ) : (
+                      <span className="product-price">
+                        {Number(item.price).toLocaleString()}원
+                      </span>
+                    )}
                   </div>
                 </div>
               </Link>
