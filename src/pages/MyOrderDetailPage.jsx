@@ -123,13 +123,31 @@ const MyOrderDetailPage = () => {
                                     <p style={{ margin: '5px 0', color: '#666' }}>옵션: {item.itemColor} / {item.itemSize}</p>
                                     <p style={{ margin: '5px 0' }}>수량: <strong>{item.quantity}</strong>개</p>
                                 </div>
-                                <div className="item-price-text" style={{ textAlign: 'right' }}>
-                                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#888', textDecoration: 'line-through' }}>
-                                        단가: ₩{item.unitPrice?.toLocaleString()}
+
+                                {/* 가격 정보와 리뷰 버튼 영역 */}
+                                <div className="item-action-area" style={{ textAlign: 'right' }}>
+                                    <p style={{ margin: '0 0 10px 0', fontSize: '1.2rem', fontWeight: 'bold', color: '#d9534f' }}>
+                                        ₩{(item.unitPrice * item.quantity).toLocaleString()}
                                     </p>
-                                    <p style={{ margin: 0, fontSize: '1.2rem', fontWeight: 'bold', color: '#d9534f' }}>
-                                        합계: ₩{(item.unitPrice * item.quantity).toLocaleString()}
-                                    </p>
+
+                                    {/* 1. 배송완료 상태일 때만 리뷰 버튼 노출 */}
+                                    {orderInfo.orderStatus === 'DELIVERED' && (
+                                        <button
+                                            className="btn-write-review"
+                                            onClick={() => navigate(`/my/review/write`, {
+                                                state: {
+                                                    productNo: item.productNo,
+                                                    orderItemNo: item.orderItemNo,
+                                                    itemName: item.itemName,
+                                                    itemColor: item.itemColor,
+                                                    itemSize: item.itemSize,
+                                                    imageUrl: item.imageUrl
+                                                }
+                                            })}
+                                        >
+                                            리뷰 작성하기
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
