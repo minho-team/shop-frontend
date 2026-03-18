@@ -102,26 +102,32 @@ const Header = () => {
   };
 
   const moveCategory = (categoryId) => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams();
 
     if (categoryId) {
       params.set("categoryId", categoryId);
-    } else {
-      params.delete("categoryId");
     }
 
     nav(`/?${params.toString()}`);
     setOpenMenu(null);
   };
 
+  const moveNewProducts = () => {
+    nav("/?sort=new");
+    setOpenMenu(null);
+  };
+
+  const moveSaleProducts = () => {
+    nav("/?discountOnly=true&sort=sale");
+    setOpenMenu(null);
+  };
+
   const handleSearch = () => {
     const keyword = searchKeyword.trim();
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams();
 
     if (keyword) {
       params.set("keyword", keyword);
-    } else {
-      params.delete("keyword");
     }
 
     nav(`/?${params.toString()}`);
@@ -147,25 +153,17 @@ const Header = () => {
             <Nav.Link
               as="button"
               className="mega-side-link"
-              onClick={() => moveCategory(mainCategoryId)}
-            >
-              ALL
-            </Nav.Link>
-
-            <Nav.Link
-              as={Link}
-              to="/products?filter=new"
-              className="mega-side-link"
+              onClick={moveNewProducts}
             >
               NEW
             </Nav.Link>
 
             <Nav.Link
-              as={Link}
-              to="/products?filter=outlet"
-              className="mega-side-link outlet"
+              as="button"
+              className="mega-side-link sale"
+              onClick={moveSaleProducts}
             >
-              OUTLET
+              SALE
             </Nav.Link>
           </div>
 

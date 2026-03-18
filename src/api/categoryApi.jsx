@@ -2,8 +2,12 @@ import apiClient from "./apiClient";
 
 const prefix = "/api/product";
 
-// 카테고리 + 검색어로 상품 목록 조회
-export const getProductList = async ({ categoryId, keyword }) => {
+export const getProductList = async ({
+  categoryId,
+  keyword,
+  sort,
+  discountOnly,
+}) => {
   const params = {};
 
   if (categoryId) {
@@ -12,6 +16,14 @@ export const getProductList = async ({ categoryId, keyword }) => {
 
   if (keyword && keyword.trim()) {
     params.keyword = keyword.trim();
+  }
+
+  if (sort) {
+    params.sort = sort;
+  }
+
+  if (discountOnly) {
+    params.discountOnly = discountOnly;
   }
 
   const response = await apiClient.get(`${prefix}/withcategory`, {
