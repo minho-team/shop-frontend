@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { createOrder } from "../api/ordersApi";
 import "../css/OrderWritePage.css";
 
 // 구매하기를 누를 때 나오는 주문서 작성 페이지
@@ -18,6 +19,8 @@ const OrderWritePage = () => {
   const [baseAddress, setBaseAddress] = useState("");
   const [detailAddress, setDetailAddress] = useState("");
   const [message, setMessage] = useState("");
+
+  const [submitting, setSubmitting] = useState(false);
 
   const orderData = location.state;
 
@@ -121,6 +124,94 @@ const OrderWritePage = () => {
   const totalPrice = useMemo(() => {
     return Number(product.unitPrice ?? 0) * Number(product.quantity ?? 0);
   }, [product]);
+
+  const handleSubmitOrder = async () => {
+    if (submitting) return;
+
+    if (!ordererName.trim()) {
+      alert("주문자명을 입력해주세요.");
+      return;
+    }
+
+    if (!ordererPhone.trim()) {
+      alert("연락처를 입력해주세요.");
+      return;
+    }
+
+    if (!ordererEmail.trim()) {
+      alert("이메일을 입력해주세요.");
+      return;
+    }
+
+    if (!receiverName.trim()) {
+      alert("수령인명을 입력해주세요.");
+      return;
+    }
+
+    if (!receiverPhone.trim()) {
+      alert("수령인 연락처를 입력해주세요.");
+      return;
+    }
+
+    if (!zipCode.trim() || !baseAddress.trim()) {
+      alert("주소를 입력해주세요.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const orderRequest = {
+        ordererName,
+        ordererPhoneNumber: ordererPhone,
+        ordererEmail,
+        receiverName,
+        receiverPhoneNumber: receiverPhone,
+        receiverZipCode: zipCode,
+        receiverBaseAddress: baseAddress,
+        receiverDetailAddress: detailAddress,
+        message,
+        totalPrice,
+        items: [
+          {
+            productOptionNo: product.productOptionNo,
+            quantity: product.quantity,
+            unitPrice: product.unitPrice,
+            itemName: product.itemName,
+            itemSize: product.itemSize,
+            itemColor: product.itemColor,
+            imageUrl: product.imageUrl,
+          },
+        ],
+      };
+
+      const response = await createOrder(orderRequest);
+
+      navigate("/order/result", {
+        state: {
+          orderNo: response.orderNo,
+          totalPrice,
+          createdAt: response.createdAt || new Date().toISOString(),
+          ordererName,
+          items: [
+            {
+              itemName: product.itemName,
+              itemColor: product.itemColor,
+              itemSize: product.itemSize,
+              quantity: product.quantity,
+              unitPrice: product.unitPrice,
+              imageUrl: product.imageUrl,
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      console.error("주문 실패:", error);
+      alert("주문 처리 중 오류가 발생했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (!orderData) {
     return null;
@@ -357,8 +448,13 @@ const OrderWritePage = () => {
                 <strong>{totalPrice.toLocaleString()}원</strong>
               </div>
 
-              <button type="button" className="submit-order-button">
-                {totalPrice.toLocaleString()}원 결제하기
+              <button
+                type="button"
+                className="submit-order-button"
+                onClick={handleSubmitOrder}
+                disabled={submitting}
+              >
+                {submitting ? "처리 중..." : "결제하기"}
               </button>
             </div>
           </aside>
