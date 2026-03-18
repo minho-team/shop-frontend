@@ -15,6 +15,7 @@ const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage"));
 const FaqDetailPage = lazy(() => import("../pages/FaqDetailPage"));
 const InquiryMyDetailPage = lazy(() => import("../pages/InquiryMyDetailPage"));
 const OrderWritePage = lazy(() => import("../pages/OrderWritePage"));
+const OrderResultPage = lazy(() => import("../pages/OrderResultPage"));
 const MyOrderDetailPage = lazy(() => import("../pages/MyOrderDetailPage"));
 
 
@@ -34,6 +35,8 @@ const AdminInquiryPage = lazy(() => import("../pages/admin/AdminInquiryPage"));
 const AdminFaqPage = lazy(() => import("../pages/admin/AdminFaqPage"));
 const AdminOrderDetailPage = lazy(() => import("../pages/admin/AdminOrderDetailPage"));
 const AdminProductDetailPage = lazy(() => import("../pages/admin/AdminProductDetailPage"));
+const AdminMemberDetailPage = lazy(() => import("../pages/admin/AdminMemberDetailPage"));
+const AdminMemberEditPage = lazy(() => import("../pages/admin/AdminMemberEditPage"));
 
 // 로그인이 안 돼 있으면 /login페이지로 리다이렉트
 const ProtectedRouteWrapper = ({ Component }) => {
@@ -93,6 +96,8 @@ const AppRouterContent = () => {
         { path: "/admin/inquiries", element: <AdminRouteWrapper Component={AdminInquiryPage} /> },
         { path: "/admin/faqs", element: <AdminRouteWrapper Component={AdminFaqPage} /> },
         { path: "/admin/order/detail/:orderNo", element: <AdminRouteWrapper Component={AdminOrderDetailPage} /> },
+        { path: "/admin/member/detail/:memberNo", element: <AdminRouteWrapper Component={AdminMemberDetailPage} /> },
+        { path: "/admin/member/edit/:memberNo", element: <AdminRouteWrapper Component={AdminMemberEditPage} /> },
 
         /*로그인해야만 들어올 수 있는 페이지*/
         { path: "/cart", element: <ProtectedRouteWrapper Component={CartPage} /> },
@@ -101,9 +106,9 @@ const AppRouterContent = () => {
         { path: "/inquiry/my", element: <ProtectedRouteWrapper Component={InquiryMyPage} /> },
         { path: "/inquiry/my/detail/:id", element: <ProtectedRouteWrapper Component={InquiryMyDetailPage} /> },
         { path: "/order/write", element: <ProtectedRouteWrapper Component={OrderWritePage} /> },
+        { path: "/order/result", element: <ProtectedRouteWrapper Component={OrderResultPage} /> },
         { path: "/my/order/detail/:orderNo", element: <ProtectedRouteWrapper Component={MyOrderDetailPage} /> },
-
-
+        
     ]);
 
     return <RouterProvider router={router} />;
