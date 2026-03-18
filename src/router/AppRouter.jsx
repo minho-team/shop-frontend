@@ -17,6 +17,7 @@ const InquiryMyDetailPage = lazy(() => import("../pages/InquiryMyDetailPage"));
 const OrderWritePage = lazy(() => import("../pages/OrderWritePage"));
 const OrderResultPage = lazy(() => import("../pages/OrderResultPage"));
 const MyOrderDetailPage = lazy(() => import("../pages/MyOrderDetailPage"));
+const ReviewWritePage = lazy(() => import("../pages/ReviewWritePage"));
 
 
 //admin
@@ -99,6 +100,7 @@ const AppRouterContent = () => {
         { path: "/admin/member/detail/:memberNo", element: <AdminRouteWrapper Component={AdminMemberDetailPage} /> },
         { path: "/admin/member/edit/:memberNo", element: <AdminRouteWrapper Component={AdminMemberEditPage} /> },
 
+
         /*로그인해야만 들어올 수 있는 페이지*/
         { path: "/cart", element: <ProtectedRouteWrapper Component={CartPage} /> },
         { path: "/mypage", element: <ProtectedRouteWrapper Component={MyPage} /> },
@@ -108,7 +110,8 @@ const AppRouterContent = () => {
         { path: "/order/write", element: <ProtectedRouteWrapper Component={OrderWritePage} /> },
         { path: "/order/result", element: <ProtectedRouteWrapper Component={OrderResultPage} /> },
         { path: "/my/order/detail/:orderNo", element: <ProtectedRouteWrapper Component={MyOrderDetailPage} /> },
-        
+        { path: "/my/review/write", element: <ProtectedRouteWrapper Component={ReviewWritePage} /> },
+
     ]);
 
     return <RouterProvider router={router} />;

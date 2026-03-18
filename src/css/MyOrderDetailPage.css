@@ -175,60 +175,110 @@
 .order-items-detail-section {
   margin-top: 60px;
   padding-top: 30px;
-  border-top: 2px solid #333;
+  border-top: 2px solid #111;
   width: 100%;
-  clear: both;
 }
 
 .item-detail-card {
   display: flex;
-  padding: 20px;
+  padding: 25px;
   border: 1px solid #eee;
-  border-radius: 8px;
-  margin-bottom: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
   align-items: center;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.item-detail-card:hover {
+  border-color: #ddd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .item-detail-card img {
   width: 100px;
   height: 100px;
   object-fit: cover;
-  border-radius: 4px;
+  border: 1px solid #f1f1f1;
+  border-radius: 0;
   margin-right: 25px;
 }
 
+/* 9. 아이템 정보 및 버튼 영역 */
 .item-info-text {
   flex: 1;
 }
 
 .item-info-text h5 {
-  margin: 0 0 8px 0;
-  font-size: 1.1rem;
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: 600;
   color: #111;
 }
 
-.item-price-text {
-  text-align: right;
-}
-
-.item-price-text .unit-price {
+.item-info-text p {
+  margin: 4px 0;
   font-size: 13px;
-  color: #888;
-  text-decoration: line-through;
+  color: #777;
 }
 
-.item-price-text .total-price {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #d9534f;
-  margin-top: 5px;
+.item-action-area {
+  text-align: right;
+  min-width: 150px;
 }
 
-/* 9. 상태 메시지 */
-.loading-container,
-.empty-content {
-  padding: 100px 0;
-  text-align: center;
+.item-total-price {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 15px;
+}
+
+/* 10. 리뷰 버튼 스타일  */
+.btn-write-review {
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+  max-width: 140px;
+}
+
+.btn-write-review:hover {
+  background: #444;
+}
+
+/* 클릭 시 살짝 눌리는 느낌 추가 */
+.btn-write-review:active {
+  transform: translateY(1px);
+}
+
+/* 이미지 로딩 전 배경 처리 */
+.item-detail-card img {
+  background-color: #f9f9f9;
+}
+
+/* 이미 리뷰를 작성했을 때의 상태 버튼 */
+.btn-review-completed {
+  background: #f4f4f4;
+  color: #aaa;
+  border: 1px solid #eee;
+  padding: 10px 20px;
+  font-size: 13px;
+  cursor: default;
+  width: 100%;
+  max-width: 140px;
+}
+
+/* 배송완료 전 안내 텍스트 */
+.review-notice {
+  font-size: 12px;
   color: #999;
-  font-size: 14px;
+  margin-top: 8px;
 }
