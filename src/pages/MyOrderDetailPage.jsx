@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getOrderDetail } from '../api/ordersApi';
+import apiClient from '../api/apiClient';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import '../css/MyOrderDetailPage.css';
@@ -23,12 +24,32 @@ const MyOrderDetailPage = () => {
     const navigate = useNavigate();
     const [orderData, setOrderData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [reviewedItems, setReviewedItems] = useState({});
+
+    const getImageUrl = (url) => {
+        if (!url) return '/default-product.png';
+        if (url.startsWith('http')) return url;
+        return `/upload/${url}`;
+    };
 
     useEffect(() => {
         const fetchDetail = async () => {
             try {
                 const data = await getOrderDetail(orderNo);
                 setOrderData(data);
+
+                if (data.order && data.order.orderStatus === 'DELIVERED' && data.items) {
+                    const reviewStatus = {};
+                    await Promise.all(data.items.map(async (item) => {
+                        try {
+                            const res = await apiClient.get(`/api/reviews/check/${item.orderItemNo}`);
+                            reviewStatus[item.orderItemNo] = res.data;
+                        } catch (e) {
+                            console.error(`리뷰 상태 확인 실패 (No: ${item.orderItemNo}):`, e);
+                        }
+                    }));
+                    setReviewedItems(reviewStatus);
+                }
             } catch (err) {
                 console.error("상세 내역 로드 실패:", err);
             } finally {
@@ -46,117 +67,80 @@ const MyOrderDetailPage = () => {
     return (
         <div className="mypage-container">
             <Header />
-
             <div className="mypage-wrapper">
                 <main className="content-area" style={{ paddingTop: '50px' }}>
-                    {/* 상단 헤더 */}
                     <header className="detail-header">
                         <h3 className="content-title" style={{ margin: 0 }}>주문 상세 정보</h3>
                         <button className="btn-back-list" onClick={() => navigate(-1)}>목록으로</button>
                     </header>
 
-                    {/* 주문 요약 정보 */}
                     <div className="order-summary-box">
                         <div className="summary-item"><span>주문번호</span> <strong>{orderInfo.orderNo}</strong></div>
                         <div className="summary-item"><span>주문일자</span> <strong>{new Date(orderInfo.createdAt).toLocaleDateString()}</strong></div>
                         <div className="summary-item"><span>주문상태</span> <strong>{getStatusLabel(orderInfo.orderStatus)}</strong></div>
                     </div>
 
-                    {/* 하단 상세 정보 그리드 */}
-                    <div className="info-grid-container">
-
-                        {/* 1. 주문자 정보 (회원 가입 주소 포함) */}
-                        <div className="info-card">
-                            <h4 className="section-title" style={{ marginTop: 0 }}>주문자 정보</h4>
-                            <div className="delivery-text">
-                                <p><strong>이름 :</strong> <span>{orderInfo.ordererName}</span></p>
-                                <p><strong>연락처 :</strong> <span>{orderInfo.ordererPhoneNumber}</span></p>
-                                <p><strong>이메일 :</strong> <span>{orderInfo.ordererEmail}</span></p>
-                                <p>
-                                    <strong>가입 주소 :</strong>
-                                    <span>
-                                        {orderData.ordererBasicAddress ?
-                                            `[${orderData.ordererZipCode}] ${orderData.ordererBasicAddress} ${orderData.ordererDetailAddress}`
-                                            : '등록된 주소 정보가 없습니다.'}
-                                    </span>
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* 2. 결제 정보 */}
-                        <div className="info-card">
-                            <h4 className="section-title" style={{ marginTop: 0 }}>결제 정보</h4>
-                            <div className="info-row"><span>주문금액</span><span>₩{orderInfo.totalPrice?.toLocaleString()}</span></div>
-                            <div className="info-row"><span>배송비</span><span>₩0</span></div>
-                            <div className="info-row total">
-                                <span>최종 결제금액</span>
-                                <span className="price-red">₩{orderInfo.totalPrice?.toLocaleString()}</span>
-                            </div>
-                        </div>
-
-                        {/* 3. 배송지 정보 */}
-                        <div className="info-card">
-                            <h4 className="section-title" style={{ marginTop: 0 }}>배송지 정보</h4>
-                            <div className="delivery-text">
-                                <p><strong>받는분 :</strong> <span>{orderInfo.receiverName}</span></p>
-                                <p><strong>연락처 :</strong> <span>{orderInfo.receiverPhoneNumber}</span></p>
-                                <p>
-                                    <strong>주소 :</strong>
-                                    <span>[{orderInfo.receiverZipCode}] {orderInfo.receiverBaseAddress} {orderInfo.receiverDetailAddress}</span>
-                                </p>
-                                <p><strong>배송메시지 :</strong> <span>{orderInfo.message || '없음'}</span></p>
-                            </div>
-                        </div>
-                    </div>
-
                     <div className="order-items-detail-section" style={{ marginTop: '50px', borderTop: '2px solid #333', paddingTop: '30px' }}>
                         <h4 className="section-title" style={{ fontSize: '1.2rem', marginBottom: '20px' }}>주문 상품 상세 내역</h4>
+
                         {orderData.items && orderData.items.map((item) => (
                             <div key={item.orderItemNo} className="item-detail-card" style={{ display: 'flex', padding: '20px', border: '1px solid #eee', borderRadius: '8px', marginBottom: '15px', alignItems: 'center' }}>
                                 <img
-                                    src={item.imageUrl || '/default-product.png'}
+                                    src={getImageUrl(item.imageUrl)}
                                     alt={item.itemName}
                                     style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px', marginRight: '25px' }}
                                 />
+
                                 <div className="item-info-text" style={{ flex: 1 }}>
                                     <h5 style={{ margin: '0 0 10px 0', fontSize: '1.1rem' }}>{item.itemName}</h5>
                                     <p style={{ margin: '5px 0', color: '#666' }}>옵션: {item.itemColor} / {item.itemSize}</p>
                                     <p style={{ margin: '5px 0' }}>수량: <strong>{item.quantity}</strong>개</p>
                                 </div>
 
-                                {/* 가격 정보와 리뷰 버튼 영역 */}
                                 <div className="item-action-area" style={{ textAlign: 'right' }}>
                                     <p style={{ margin: '0 0 10px 0', fontSize: '1.2rem', fontWeight: 'bold', color: '#d9534f' }}>
                                         ₩{(item.unitPrice * item.quantity).toLocaleString()}
                                     </p>
 
-                                    {/* 1. 배송완료 상태일 때만 리뷰 버튼 노출 */}
                                     {orderInfo.orderStatus === 'DELIVERED' && (
-                                        <button
-                                            className="btn-write-review"
-                                            onClick={() => navigate(`/my/review/write`, {
-                                                state: {
-                                                    productNo: item.productNo,
-                                                    orderItemNo: item.orderItemNo,
-                                                    itemName: item.itemName,
-                                                    itemColor: item.itemColor,
-                                                    itemSize: item.itemSize,
-                                                    imageUrl: item.imageUrl
-                                                }
-                                            })}
-                                        >
-                                            리뷰 작성하기
-                                        </button>
+                                        reviewedItems[item.orderItemNo] ? (
+                                            <button
+                                                className="btn-write-review disabled"
+                                                disabled
+                                                style={{ background: '#eee', color: '#999', cursor: 'default', border: '1px solid #ddd' }}
+                                            >
+                                                작성 완료
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="btn-write-review"
+                                                onClick={() => {
+                                                    if (!item.orderItemNo || !item.productNo) {
+                                                        alert("상품 정보가 누락되어 리뷰를 작성할 수 없습니다.");
+                                                        return;
+                                                    }
+                                                    navigate(`/my/review/write/${item.orderItemNo}`, {
+                                                        state: {
+                                                            productNo: item.productNo,
+                                                            orderItemNo: item.orderItemNo,
+                                                            itemName: item.itemName,
+                                                            itemColor: item.itemColor,
+                                                            itemSize: item.itemSize,
+                                                            imageUrl: item.imageUrl
+                                                        }
+                                                    });
+                                                }}
+                                            >
+                                                리뷰 작성하기
+                                            </button>
+                                        )
                                     )}
                                 </div>
                             </div>
                         ))}
                     </div>
-
                 </main>
             </div>
-
-
             <Footer />
         </div>
     );
