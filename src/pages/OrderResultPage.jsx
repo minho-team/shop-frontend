@@ -85,7 +85,7 @@ const OrderResultPage = () => {
             <button
               type="button"
               className="result-line-button"
-              onClick={() => navigate(`/order/detail/${orderNo}`)}
+              onClick={() => navigate(`/my/order/detail/${orderNo}`)}
             >
               주문상세보기
             </button>
