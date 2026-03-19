@@ -8,6 +8,11 @@ import { getProductDetail } from "../api/productApi";
 const tabMenus = ["상품정보", "사이즈", "관련상품", "구매후기", "상품문의"];
 const API_BASE_URL = "http://localhost:8080";
 
+const getSalePrice = (price, discountRate) => {
+  if (!discountRate || discountRate <= 0) return Number(price ?? 0);
+  return Math.floor((Number(price ?? 0) * (100 - discountRate)) / 100 / 100) * 100;
+};
+
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -28,8 +33,7 @@ const ProductDetailPage = () => {
           getProductDetail(id),
           getProductMainAndThumbImages(id),
         ]);
-        
-        //화면이 랜더링될때 가장 위쪽 스크롤로 이동
+
         window.scrollTo(0, 0);
 
         console.log("상품 상세 페이지에서:", productRes);
@@ -74,8 +78,8 @@ const ProductDetailPage = () => {
   }, [options, selectedOptionNo]);
 
   const finalPrice = useMemo(() => {
-    return Number(product?.price ?? 0);
-  }, [product?.price]);
+    return getSalePrice(product?.price, product?.discountRate);
+  }, [product?.price, product?.discountRate]);
 
   const totalPrice = useMemo(() => {
     return finalPrice * quantity;
@@ -126,7 +130,7 @@ const ProductDetailPage = () => {
       state: {
         productNo: product.productNo,
         productName: product.name,
-        productPrice: Number(product.price ?? 0),
+        productPrice: Number(finalPrice ?? 0),
         quantity: quantity,
         totalPrice: totalPrice,
         productOptionNo: selectedOption ? selectedOption.productOptionNo : null,
@@ -192,8 +196,7 @@ const ProductDetailPage = () => {
                   <button
                     key={img.productImgNo}
                     type="button"
-                    className={`thumbnail-button ${currentImageIndex === index ? "active" : ""
-                      }`}
+                    className={`thumbnail-button ${currentImageIndex === index ? "active" : ""}`}
                     onClick={() => setCurrentImageIndex(index)}
                   >
                     <img
@@ -227,166 +230,150 @@ const ProductDetailPage = () => {
 
               <div className="product-price-block">
                 <div className="product-price-line">
+                  {product.discountRate > 0 && (
+                    <span className="product-origin-price">
+                      {Number(product.price ?? 0).toLocaleString()}원
+                    </span>
+                  )}
                   <strong className="product-sale-price">
-                    {Number(product.price ?? 0).toLocaleString()}원
+                    {Number(finalPrice).toLocaleString()}원
                   </strong>
+                  {product.discountRate > 0 && (
+                    <span className="product-discount-rate">
+                      {product.discountRate}%
+                    </span>
+                  )}
                 </div>
 
                 <p className="product-discount-text">
-                  {product.sameDayDeliveryYn === "Y"
-                    ? "오늘 출발 가능 상품입니다."
-                    : "일반 배송 상품입니다."}
+                  {product.discountRate > 0
+                    ? "봄 시즌 할인 적용 상품입니다."
+                    : product.sameDayDeliveryYn === "Y"
+                      ? "오늘 출발 가능 상품입니다."
+                      : "일반 배송 상품입니다."}
                 </p>
               </div>
 
               <div className="benefit-info-list">
                 <div className="benefit-row">
                   <span className="label">상품설명</span>
-                  <span className="value">{product.description}</span>
+                  <span className="value">{product.description || "상품 설명이 없습니다."}</span>
                 </div>
+
                 <div className="benefit-row">
-                  <span className="label">상품상태</span>
+                  <span className="label">적립금</span>
+                  <span className="value">구매 금액의 1% 적립</span>
+                </div>
+
+                <div className="benefit-row">
+                  <span className="label">배송정보</span>
                   <span className="value">
-                    {product.useYn === "Y" ? "판매중" : "비활성"}
+                    {product.sameDayDeliveryYn === "Y"
+                      ? "당일출고 가능 상품"
+                      : "일반 배송 상품"}
                   </span>
                 </div>
-                <div className="benefit-row">
-                  <span className="label">당일출고</span>
-                  <span className="value">
-                    {product.sameDayDeliveryYn === "Y" ? "가능" : "불가"}
-                  </span>
+              </div>
+
+              {options.length > 0 && (
+                <div className="option-select-wrap">
+                  <label htmlFor="product-option-select" className="option-label">
+                    옵션 선택
+                  </label>
+                  <select
+                    id="product-option-select"
+                    value={selectedOptionNo}
+                    onChange={(e) => setSelectedOptionNo(e.target.value)}
+                    className="option-select"
+                  >
+                    <option value="">옵션을 선택해주세요</option>
+                    {options.map((option) => (
+                      <option key={option.productOptionNo} value={option.productOptionNo}>
+                        {option.optionSize} / {option.color} / 재고 {option.stock}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className="quantity-box">
+                <span className="quantity-label">수량</span>
+                <div className="quantity-control">
+                  <button type="button" onClick={() => changeQuantity("minus")}>-</button>
+                  <span>{quantity}</span>
+                  <button type="button" onClick={() => changeQuantity("plus")}>+</button>
                 </div>
               </div>
 
-              <div className="option-section">
-                <div className="option-group">
-                  <label>옵션</label>
-                  {options.length > 0 ? (
-                    <select
-                      value={selectedOptionNo}
-                      onChange={(e) => setSelectedOptionNo(e.target.value)}
-                    >
-                      <option value="">옵션 선택</option>
-                      {options.map((option) => (
-                        <option
-                          key={option.productOptionNo}
-                          value={option.productOptionNo}
-                        >
-                          {option.optionSize} / {option.color} / 재고{" "}
-                          {option.stock}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <p>옵션이 없습니다.</p>
-                  )}
-                </div>
-
-                <div className="option-group">
-                  <label>수량</label>
-                  <div className="quantity-box">
-                    <button
-                      type="button"
-                      onClick={() => changeQuantity("minus")}
-                    >
-                      -
-                    </button>
-                    <span>{quantity}</span>
-                    <button
-                      type="button"
-                      onClick={() => changeQuantity("plus")}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
+              <div className="total-price-box">
+                <span>총 상품금액</span>
+                <strong>{Number(totalPrice).toLocaleString()}원</strong>
               </div>
 
-              <div className="selected-summary-box">
-                <div className="selected-summary-line">
-                  <span>{product.name}</span>
-                  <span>{quantity}개</span>
-                </div>
-
-                {selectedOption && (
-                  <div className="selected-summary-line">
-                    <span>
-                      옵션: {selectedOption.color} / {selectedOption.optionSize}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="total-price-row">
-                <span>총금액</span>
-                <strong>{totalPrice.toLocaleString()}원</strong>
-              </div>
-
-              <div className="action-button-row">
+              <div className="product-action-row">
                 <button
                   type="button"
                   className={`wish-button ${isWished ? "active" : ""}`}
                   onClick={() => setIsWished((prev) => !prev)}
                 >
-                  {isWished ? "♥ 찜완료" : "♡ 찜"}
+                  {isWished ? "♥" : "♡"}
                 </button>
 
-                <button
-                  type="button"
-                  className="cart-button"
-                  onClick={handleCart}
-                >
+                <button type="button" className="cart-button" onClick={handleCart}>
                   장바구니
                 </button>
 
-                <button
-                  type="button"
-                  className="buy-button"
-                  onClick={handleOrder}
-                >
-                  구매하기
+                <button type="button" className="buy-button" onClick={handleOrder}>
+                  바로구매
                 </button>
               </div>
             </div>
           </section>
 
-          <section className="product-bottom-section">
-            <div className="detail-tab-row">
-              {tabMenus.map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  className={`detail-tab-button ${activeTab === tab ? "active" : ""
-                    }`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+          <div className="product-tab-menu">
+            {tabMenus.map((menu) => (
+              <button
+                key={menu}
+                type="button"
+                className={activeTab === menu ? "active" : ""}
+                onClick={() => setActiveTab(menu)}
+              >
+                {menu}
+              </button>
+            ))}
+          </div>
 
-            <div className="detail-tab-content">
-              {activeTab === "상품정보" && (
-                <div className="detail-placeholder">
-                  {product.description || "상품 설명이 없습니다."}
-                </div>
-              )}
-              {activeTab === "사이즈" && (
-                <div className="detail-placeholder">
-                  사이즈 정보는 추후 추가 예정입니다.
-                </div>
-              )}
-              {activeTab === "관련상품" && (
-                <div className="detail-placeholder">관련상품 영역입니다.</div>
-              )}
-              {activeTab === "구매후기" && (
-                <div className="detail-placeholder">구매후기 영역입니다.</div>
-              )}
-              {activeTab === "상품문의" && (
-                <div className="detail-placeholder">상품문의 영역입니다.</div>
-              )}
-            </div>
-          </section>
+          <div className="product-tab-content">
+            {activeTab === "상품정보" && (
+              <div className="product-description-box">
+                <p>{product.description || "등록된 상품 정보가 없습니다."}</p>
+              </div>
+            )}
+
+            {activeTab === "사이즈" && (
+              <div className="product-description-box">
+                <p>사이즈 정보는 옵션을 확인해주세요.</p>
+              </div>
+            )}
+
+            {activeTab === "관련상품" && (
+              <div className="product-description-box">
+                <p>관련상품 영역입니다.</p>
+              </div>
+            )}
+
+            {activeTab === "구매후기" && (
+              <div className="product-description-box">
+                <p>구매후기 영역입니다.</p>
+              </div>
+            )}
+
+            {activeTab === "상품문의" && (
+              <div className="product-description-box">
+                <p>상품문의 영역입니다.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>
