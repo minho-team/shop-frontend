@@ -17,5 +17,6 @@ export const getMyOrderList = async (page = 1) => {
 // 특정 주문 상세내역 불러오기
 export const getOrderDetail = async (orderNo) => {
   const res = await apiClient.get(`${prefix}/${orderNo}`);
+  console.log(res.data);
   return res.data;
 };
