@@ -23,6 +23,12 @@ const ReviewWritePage = () => {
   const [imageFile, setImageFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
+  const getImageUrl = (url) => {
+    if (!url) return '/default-product.png';
+    if (url.startsWith('http')) return url;
+    return `/upload/${url}`;
+  };
+
   useEffect(() => {
     if (!orderItemNo || !productNo) {
       alert("잘못된 접근입니다.");
@@ -43,11 +49,9 @@ const ReviewWritePage = () => {
     }
   };
 
-  // 리뷰 등록 제출 핸들러
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 사진이 포함되므로 FormData 객체 생성
     const formData = new FormData();
     formData.append("productNo", productNo);
     formData.append("orderItemNo", orderItemNo);
@@ -69,7 +73,7 @@ const ReviewWritePage = () => {
 
       if (response.status === 200) {
         alert("리뷰가 소중하게 등록되었습니다!");
-        navigate(`/product/${productNo}`);
+        navigate(`/product/detail/${productNo}`);
       }
     } catch (err) {
       console.error("리뷰 등록 중 오류 발생:", err);
@@ -85,7 +89,11 @@ const ReviewWritePage = () => {
 
         {/* 상품 요약 정보 */}
         <div className="product-review-summary" style={{ display: 'flex', gap: '20px', padding: '20px', background: '#f9f9f9', marginBottom: '30px' }}>
-          <img src={imageUrl || '/default-product.png'} alt={itemName} style={{ width: '80px', height: '80px', objectFit: 'cover' }} />
+          <img
+            src={getImageUrl(imageUrl)}
+            alt={itemName}
+            style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+          />
           <div>
             <h4 style={{ margin: '0 0 5px 0' }}>{itemName}</h4>
             <p style={{ fontSize: '14px', color: '#666' }}>선택 옵션: {itemColor} / {itemSize}</p>
@@ -93,7 +101,6 @@ const ReviewWritePage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="review-write-form">
-          {/* 1. 별점 및 신체정보 */}
           <div className="form-section">
             <label className="label-title">상품은 만족하셨나요? (별점)</label>
             <select name="rating" value={reviewData.rating} onChange={handleChange} className="custom-select">
@@ -124,7 +131,6 @@ const ReviewWritePage = () => {
             </div>
           </div>
 
-          {/* 2. 제목 및 내용 */}
           <div className="form-section" style={{ marginTop: '30px' }}>
             <label className="label-title">리뷰 제목</label>
             <input type="text" name="title" value={reviewData.title} onChange={handleChange} placeholder="제목을 입력해주세요" className="custom-input" required />
@@ -135,14 +141,12 @@ const ReviewWritePage = () => {
             <textarea name="content" value={reviewData.content} onChange={handleChange} rows="8" placeholder="다른 구매자들에게 도움이 될 수 있도록 솔직한 후기를 남겨주세요." className="custom-textarea" required />
           </div>
 
-          {/* 3. 사진 업로드 */}
           <div className="form-section" style={{ marginTop: '20px' }}>
             <label className="label-title">사진 첨부 (선택)</label>
             <input type="file" accept="image/*" onChange={handleImageChange} className="file-input" />
             {previewUrl && <img src={previewUrl} alt="미리보기" style={{ width: '150px', marginTop: '10px', display: 'block' }} />}
           </div>
 
-          {/* 버튼 영역 */}
           <div className="form-actions" style={{ marginTop: '50px', display: 'flex', gap: '15px' }}>
             <button type="button" onClick={() => navigate(-1)} className="btn-cancel" style={{ flex: 1, padding: '15px', background: '#fff', border: '1px solid #ddd', cursor: 'pointer' }}>취소</button>
             <button type="submit" className="btn-submit" style={{ flex: 2, padding: '15px', background: '#111', color: '#fff', border: 'none', cursor: 'pointer' }}>리뷰 등록하기</button>

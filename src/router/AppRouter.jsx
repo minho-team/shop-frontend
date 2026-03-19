@@ -191,7 +191,7 @@ const AppRouterContent = () => {
         { path: "/order/write", element: <ProtectedRouteWrapper Component={OrderWritePage} /> },
         { path: "/order/result", element: <ProtectedRouteWrapper Component={OrderResultPage} /> },
         { path: "/my/order/detail/:orderNo", element: <ProtectedRouteWrapper Component={MyOrderDetailPage} /> },
-        { path: "/my/review/write", element: <ProtectedRouteWrapper Component={ReviewWritePage} /> },
+        { path: "/my/review/write/:orderItemNo", element: <ProtectedRouteWrapper Component={ReviewWritePage} /> },
 
     ]);
 
