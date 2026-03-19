@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import { getProductMainAndThumbImages } from "../api/productImageApi";
 import "../css/ProductDetailPage.css";
 import { getProductDetail } from "../api/productApi";
+import { addCartItem } from "../api/cartItemApi";
 
 const tabMenus = ["상품정보", "사이즈", "관련상품", "구매후기", "상품문의"];
 const API_BASE_URL = "http://localhost:8080";
@@ -28,7 +29,7 @@ const ProductDetailPage = () => {
           getProductDetail(id),
           getProductMainAndThumbImages(id),
         ]);
-        
+
         //화면이 랜더링될때 가장 위쪽 스크롤로 이동
         window.scrollTo(0, 0);
 
@@ -107,13 +108,30 @@ const ProductDetailPage = () => {
     }
   };
 
-  const handleCart = () => {
+  const handleCart = async () => {
     if (options.length > 0 && !selectedOptionNo) {
       alert("옵션을 선택해주세요.");
       return;
     }
 
-    navigate("/cart");
+    try {
+      await addCartItem({
+        productNo: product.productNo,
+        productOptionNo: selectedOptionNo,
+        quantity: quantity,
+      });
+
+      const moveCart = confirm(
+        "장바구니에 담았습니다.\n장바구니 페이지로 이동할까요?",
+      );
+
+      if (moveCart) {
+        navigate("/cart");
+      }
+    } catch (error) {
+      console.error("장바구니 담기 실패:", error);
+      alert("장바구니에 담지 못했습니다.");
+    }
   };
 
   const handleOrder = () => {
@@ -192,8 +210,9 @@ const ProductDetailPage = () => {
                   <button
                     key={img.productImgNo}
                     type="button"
-                    className={`thumbnail-button ${currentImageIndex === index ? "active" : ""
-                      }`}
+                    className={`thumbnail-button ${
+                      currentImageIndex === index ? "active" : ""
+                    }`}
                     onClick={() => setCurrentImageIndex(index)}
                   >
                     <img
@@ -356,8 +375,9 @@ const ProductDetailPage = () => {
                 <button
                   key={tab}
                   type="button"
-                  className={`detail-tab-button ${activeTab === tab ? "active" : ""
-                    }`}
+                  className={`detail-tab-button ${
+                    activeTab === tab ? "active" : ""
+                  }`}
                   onClick={() => setActiveTab(tab)}
                 >
                   {tab}
