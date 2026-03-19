@@ -1,4 +1,4 @@
-import apiClient from "./apiClient";
+import apiClient from "../apiClient";
 
 const prefix = "/api/orders";
 const adminPrefix = "/api/admin/orders";

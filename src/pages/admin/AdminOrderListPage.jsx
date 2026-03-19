@@ -1,7 +1,7 @@
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminHeader from "../../components/admin/AdminHeader";
 import { useEffect, useState } from "react";
-import { getOrderList } from "../../api/admin/ordersApi";
+import { getOrderList } from "../../api/admin/adminOrdersApi";
 import { useNavigate } from "react-router-dom";
 
 const ORDER_STATUS_LABEL = {
