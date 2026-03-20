@@ -23,7 +23,7 @@ const OrderWritePage = lazy(() => import("../pages/OrderWritePage"));
 const OrderResultPage = lazy(() => import("../pages/OrderResultPage"));
 const MyOrderDetailPage = lazy(() => import("../pages/MyOrderDetailPage"));
 const ReviewWritePage = lazy(() => import("../pages/ReviewWritePage"));
-
+const KakaoRedirectPage = lazy(() => import("../pages/KakaoRedirectPage"));
 //admin
 const AdminHome = lazy(() => import("../pages/admin/AdminHome"));
 const AdminMemberListPage = lazy(
@@ -108,6 +108,7 @@ const AppRouterContent = () => {
         { path: "/register", element: <RegisterPage /> },
         { path: "/product/detail/:id", element: <ProductDetailPage /> },
         { path: "/faq/detail/:id", element: <FaqDetailPage /> },
+        { path: "/member/kakao", element: <KakaoRedirectPage /> },
 
         /* 관리자만 들어올 수 있는 페이지 */
         {
