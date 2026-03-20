@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import { getProductMainAndThumbImages } from "../api/productImageApi";
 import "../css/ProductDetailPage.css";
@@ -12,6 +12,7 @@ const API_BASE_URL = "http://localhost:8080";
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [product, setProduct] = useState(null);
   const [options, setOptions] = useState([]);
@@ -50,6 +51,13 @@ const ProductDetailPage = () => {
 
     fetchDetailData();
   }, [id]);
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    if (queryParams.get("tab") === "review") {
+      setActiveTab("구매후기");
+    }
+  }, [location]);
 
   const imageList = useMemo(() => {
     if (!imageData?.images) return [];
@@ -109,19 +117,27 @@ const ProductDetailPage = () => {
   };
 
   const handleCart = async () => {
+    if (!product) return;
+
     if (options.length > 0 && !selectedOptionNo) {
       alert("옵션을 선택해주세요.");
       return;
     }
 
     try {
-      await addCartItem({
-        productNo: product.productNo,
-        productOptionNo: selectedOptionNo,
-        quantity: quantity,
-      });
+      const payload = {
+        productNo: Number(product.productNo),
+        quantity: Number(quantity),
+        ...(selectedOptionNo
+          ? { productOptionNo: Number(selectedOptionNo) }
+          : {}),
+      };
 
-      const moveCart = confirm(
+      console.log("장바구니 요청 payload:", payload);
+
+      await addCartItem(payload);
+
+      const moveCart = window.confirm(
         "장바구니에 담았습니다.\n장바구니 페이지로 이동할까요?",
       );
 
@@ -130,6 +146,14 @@ const ProductDetailPage = () => {
       }
     } catch (error) {
       console.error("장바구니 담기 실패:", error);
+      console.error("응답 데이터:", error.response?.data);
+
+      if (error.response?.status === 401) {
+        alert("로그인이 필요합니다.");
+        navigate("/login");
+        return;
+      }
+
       alert("장바구니에 담지 못했습니다.");
     }
   };

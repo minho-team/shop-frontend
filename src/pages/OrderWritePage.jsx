@@ -3,8 +3,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { createOrder } from "../api/ordersApi";
 import "../css/OrderWritePage.css";
 
-// 구매하기를 누를 때 나오는 주문서 작성 페이지
+const API_BASE_URL = "http://localhost:8080";
 
+const getImageSrc = (imageUrl) => {
+  if (!imageUrl) return "";
+  if (imageUrl.startsWith("http")) return imageUrl;
+  return `${API_BASE_URL}${imageUrl}`;
+};
+
+// 구매하기를 누를 때 나오는 주문서 작성 페이지
 const OrderWritePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -23,6 +30,24 @@ const OrderWritePage = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const orderData = location.state;
+
+  const toOrderItem = (item, isCartItem = false) => ({
+    productOptionNo: item.productOptionNo,
+    itemName: item.productName,
+    itemColor: isCartItem ? item.color : item.optionColor,
+    itemSize: isCartItem ? item.sizeName : item.optionSize,
+    quantity: item.quantity,
+    unitPrice: isCartItem ? item.price : item.productPrice,
+    imageUrl: item.imageUrl,
+  });
+
+  const orderItems = useMemo(() => {
+    if (!orderData) return [];
+
+    return Array.isArray(orderData.cartItems)
+      ? orderData.cartItems.map((item) => toOrderItem(item, true))
+      : [toOrderItem(orderData)];
+  }, [orderData]);
 
   useEffect(() => {
     if (!orderData) {
@@ -96,34 +121,23 @@ const OrderWritePage = () => {
     }).open();
   };
 
-  const product = useMemo(() => {
-    if (!orderData) {
-      return {
-        productNo: 0,
-        itemName: "",
-        itemColor: "",
-        itemSize: "",
-        quantity: 0,
-        unitPrice: 0,
-        imageUrl: "",
-      };
-    }
-
-    return {
-      productNo: orderData.productNo,
-      itemName: orderData.productName,
-      itemColor: orderData.optionColor,
-      itemSize: orderData.optionSize,
-      quantity: orderData.quantity,
-      unitPrice: orderData.productPrice,
-      imageUrl: orderData.imageUrl,
-      productOptionNo: orderData.productOptionNo,
-    };
-  }, [orderData]);
-
   const totalPrice = useMemo(() => {
-    return Number(product.unitPrice ?? 0) * Number(product.quantity ?? 0);
-  }, [product]);
+    return orderItems.reduce((sum, item) => {
+      return sum + Number(item.unitPrice ?? 0) * Number(item.quantity ?? 0);
+    }, 0);
+  }, [orderItems]);
+
+  const resultItems = useMemo(() => {
+    return orderItems.map((item) => ({
+      productOptionNo: item.productOptionNo,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      itemName: item.itemName,
+      itemSize: item.itemSize,
+      itemColor: item.itemColor,
+      imageUrl: getImageSrc(item.imageUrl),
+    }));
+  }, [orderItems]);
 
   const handleSubmitOrder = async () => {
     if (submitting) return;
@@ -172,17 +186,7 @@ const OrderWritePage = () => {
         receiverDetailAddress: detailAddress,
         message,
         totalPrice,
-        items: [
-          {
-            productOptionNo: product.productOptionNo,
-            quantity: product.quantity,
-            unitPrice: product.unitPrice,
-            itemName: product.itemName,
-            itemSize: product.itemSize,
-            itemColor: product.itemColor,
-            imageUrl: product.imageUrl,
-          },
-        ],
+        items: resultItems,
       };
 
       const response = await createOrder(orderRequest);
@@ -193,16 +197,7 @@ const OrderWritePage = () => {
           totalPrice,
           createdAt: response.createdAt || new Date().toISOString(),
           ordererName,
-          items: [
-            {
-              itemName: product.itemName,
-              itemColor: product.itemColor,
-              itemSize: product.itemSize,
-              quantity: product.quantity,
-              unitPrice: product.unitPrice,
-              imageUrl: product.imageUrl,
-            },
-          ],
+          items: resultItems,
         },
       });
     } catch (error) {
@@ -246,50 +241,60 @@ const OrderWritePage = () => {
             <section className="order-section">
               <div className="section-header">
                 <h2>주문상품</h2>
-                <span>1개 상품</span>
+                <span>{orderItems.length}개 상품</span>
               </div>
 
               <div className="order-item-list">
-                <div className="order-item-card">
-                  <div className="order-item-image-wrap">
-                    {product.imageUrl ? (
-                      <img
-                        src={product.imageUrl}
-                        alt={product.itemName}
-                        className="order-item-image"
-                      />
-                    ) : (
-                      <div className="order-item-image no-image">
-                        이미지 없음
+                {orderItems.map((item, index) => {
+                  const itemTotalPrice =
+                    Number(item.unitPrice ?? 0) * Number(item.quantity ?? 0);
+
+                  return (
+                    <div
+                      className="order-item-card"
+                      key={item.productOptionNo ?? index}
+                    >
+                      <div className="order-item-image-wrap">
+                        {item.imageUrl ? (
+                          <img
+                            src={getImageSrc(item.imageUrl)}
+                            alt={item.itemName}
+                            className="order-item-image"
+                          />
+                        ) : (
+                          <div className="order-item-image no-image">
+                            이미지 없음
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  <div className="order-item-info">
-                    <p className="order-item-name">{product.itemName}</p>
+                      <div className="order-item-info">
+                        <p className="order-item-name">{item.itemName}</p>
 
-                    {product.itemColor || product.itemSize ? (
-                      <p className="order-item-option">
-                        옵션: {product.itemColor} / {product.itemSize}
-                      </p>
-                    ) : (
-                      <p className="order-item-option">옵션 없음</p>
-                    )}
+                        {item.itemColor || item.itemSize ? (
+                          <p className="order-item-option">
+                            옵션: {item.itemColor} / {item.itemSize}
+                          </p>
+                        ) : (
+                          <p className="order-item-option">옵션 없음</p>
+                        )}
 
-                    <p className="order-item-quantity">
-                      수량: {product.quantity}개
-                    </p>
-                  </div>
+                        <p className="order-item-quantity">
+                          수량: {item.quantity}개
+                        </p>
+                      </div>
 
-                  <div className="order-item-price-box">
-                    <p className="unit-price">
-                      {Number(product.unitPrice).toLocaleString()}원
-                    </p>
-                    <p className="total-price">
-                      {totalPrice.toLocaleString()}원
-                    </p>
-                  </div>
-                </div>
+                      <div className="order-item-price-box">
+                        <p className="unit-price">
+                          {Number(item.unitPrice).toLocaleString()}원
+                        </p>
+                        <p className="total-price">
+                          {itemTotalPrice.toLocaleString()}원
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </section>
 
