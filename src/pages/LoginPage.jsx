@@ -27,7 +27,7 @@ const LoginPage = () => {
     };
 
     const clickRegisterBtn = () => {
-        nav("/registerPage");
+        nav("/register");
     };
 
     const clickLoginBtn = async () => {
