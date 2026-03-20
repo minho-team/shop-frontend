@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import { useUser } from "../context/UserContext";
 import '../css/MyPage.css';
 import { getMyOrderList } from '../api/ordersApi';
+import apiClient from '../api/apiClient';
 import Footer from '../components/Footer';
 
 const getStatusLabel = (status) => {
@@ -133,10 +134,11 @@ const ReviewHistory = ({ user }) => {
         const fetchReviews = async () => {
             if (!user) return;
             try {
-                setReviews([
-                    { id: 1, itemName: '프리미엄 티셔츠', content: '재질이 너무 좋아요!', rating: 5, createdAt: '2026-03-10' },
-                    { id: 2, itemName: '슬림핏 청바지', content: '사이즈가 딱 맞네요.', rating: 4, createdAt: '2026-03-05' }
-                ]);
+                // 1. 하드코딩된 데이터 대신 실제 API를 호출합니다.
+                const response = await apiClient.get('/api/reviews/my');
+
+                // 2. 응답받은 데이터를 상태에 저장합니다.
+                setReviews(response.data);
             } catch (err) {
                 console.error("리뷰 로드 실패:", err);
             } finally {
@@ -160,11 +162,20 @@ const ReviewHistory = ({ user }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {reviews.length > 0 ? (
+                    {reviews && reviews.length > 0 ? (
                         reviews.map(r => (
-                            <tr key={r.id}>
-                                <td>{r.createdAt}</td>
-                                <td>{r.itemName}</td>
+                            <tr key={r.reviewNo || r.id}>
+                                {/* 날짜 포맷팅 적용 */}
+                                <td>{new Date(r.createdAt).toLocaleDateString()}</td>
+                                <td>
+                                    <Link
+                                        to={`/product/detail/${r.productNo}?tab=review`}
+                                        style={{ textDecoration: 'none', color: '#333', fontWeight: 'bold' }}
+                                    >
+                                        {/* 조인으로 가져온 상품명이 없다면 '상품 보러가기' 등으로 대체 */}
+                                        {r.itemName || '등록된 상품'}
+                                    </Link>
+                                </td>
                                 <td style={{ textAlign: 'left' }}>{r.content}</td>
                                 <td>{'⭐'.repeat(r.rating)}</td>
                             </tr>
@@ -219,7 +230,7 @@ const MyPage = () => {
                     <aside className="sidebar">
                         <MenuSection
                             title="나의 쇼핑 정보"
-                            items={['주문내역조회', '상품리뷰', '관심목록 조회']}
+                            items={['주문내역조회', '상품리뷰', '찜목록 조회']}
                             activeMenu={activeMenu}
                             setActiveMenu={setActiveMenu}
                         />

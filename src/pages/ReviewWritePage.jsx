@@ -3,11 +3,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import apiClient from '../api/apiClient';
+import { useUser } from '../context/UserContext';
 import '../css/ReviewWritePage.css';
 
 const ReviewWritePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useUser();
 
   const { productNo, orderItemNo, itemName, itemColor, itemSize, imageUrl } = location.state || {};
 
@@ -51,10 +53,14 @@ const ReviewWritePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    if (!user || !user.memberNo) {
+      alert("로그인 정보가 없습니다.");
+      return;
+    }
     const formData = new FormData();
     formData.append("productNo", productNo);
     formData.append("orderItemNo", orderItemNo);
+    formData.append("memberNo", user.memberNo);
     formData.append("title", reviewData.title);
     formData.append("content", reviewData.content);
     formData.append("rating", reviewData.rating);
@@ -89,11 +95,7 @@ const ReviewWritePage = () => {
 
         {/* 상품 요약 정보 */}
         <div className="product-review-summary" style={{ display: 'flex', gap: '20px', padding: '20px', background: '#f9f9f9', marginBottom: '30px' }}>
-          <img
-            src={getImageUrl(imageUrl)}
-            alt={itemName}
-            style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-          />
+
           <div>
             <h4 style={{ margin: '0 0 5px 0' }}>{itemName}</h4>
             <p style={{ fontSize: '14px', color: '#666' }}>선택 옵션: {itemColor} / {itemSize}</p>

@@ -6,6 +6,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import '../css/MyOrderDetailPage.css';
 
+const API_BASE_URL = "http://localhost:8080";
+
 const getStatusLabel = (status) => {
     switch (status) {
         case 'PAYMENT_COMPLETED': return '결제완료';
@@ -29,13 +31,16 @@ const MyOrderDetailPage = () => {
     const getImageUrl = (url) => {
         if (!url) return '/default-product.png';
         if (url.startsWith('http')) return url;
-        return `/upload/${url}`;
+        return `${API_BASE_URL}${url}`;
     };
 
     useEffect(() => {
         const fetchDetail = async () => {
             try {
                 const data = await getOrderDetail(orderNo);
+                // 데이터 구조 확인을 위해 콘솔 출력 추가
+                console.log("주문 상세 데이터 응답:", data);
+                console.log("주문 상품 목록:", data.items);
                 setOrderData(data);
 
                 if (data.order && data.order.orderStatus === 'DELIVERED' && data.items) {
