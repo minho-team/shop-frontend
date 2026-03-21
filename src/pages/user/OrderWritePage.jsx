@@ -2,13 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createOrder } from "../../api/user/ordersApi";
 import "../../css/user/OrderWritePage.css";
-
-const API_BASE_URL = "http://localhost:8080";
+import { API_SERVER_HOST } from "../../api/common/apiClient";
 
 const getImageSrc = (imageUrl) => {
   if (!imageUrl) return "";
   if (imageUrl.startsWith("http")) return imageUrl;
-  return `${API_BASE_URL}${imageUrl}`;
+  return `${API_SERVER_HOST}${imageUrl}`;
 };
 
 // 구매하기를 누를 때 나오는 주문서 작성 페이지

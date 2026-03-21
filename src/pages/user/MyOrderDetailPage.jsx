@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getOrderDetail } from '../../api/user/ordersApi';
-import apiClient from '../../api/common/apiClient';
+import apiClient, { API_SERVER_HOST } from '../../api/common/apiClient';
 import Header from '../../components/user/Header';
 import Footer from '../../components/user/Footer';
 import '../../css/user/MyOrderDetailPage.css';
 
-const API_BASE_URL = "http://localhost:8080";
 
 const getStatusLabel = (status) => {
     switch (status) {
@@ -31,7 +30,7 @@ const MyOrderDetailPage = () => {
     const getImageUrl = (url) => {
         if (!url) return '/default-product.png';
         if (url.startsWith('http')) return url;
-        return `${API_BASE_URL}${url}`;
+        return `${API_SERVER_HOST}${url}`;
     };
 
     useEffect(() => {

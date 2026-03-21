@@ -5,9 +5,9 @@ import { getProductMainAndThumbImages } from "../../api/user/productImageApi";
 import "../../css/user/ProductDetailPage.css";
 import { getProductDetail } from "../../api/user/productApi";
 import { addCartItem } from "../../api/user/cartItemApi";
+import { API_SERVER_HOST } from "../../api/common/apiClient";
 
 const tabMenus = ["상품정보", "사이즈", "관련상품", "구매후기", "상품문의"];
-const API_BASE_URL = "http://localhost:8080";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -176,7 +176,7 @@ const ProductDetailPage = () => {
         optionColor: selectedOption ? selectedOption.color : "",
         stock: selectedOption ? selectedOption.stock : 0,
         imageUrl: currentDisplayImage
-          ? `${API_BASE_URL}${currentDisplayImage.imageUrl}`
+          ? `${API_SERVER_HOST}${currentDisplayImage.imageUrl}`
           : "",
       },
     });
@@ -212,7 +212,7 @@ const ProductDetailPage = () => {
 
                 {currentDisplayImage ? (
                   <img
-                    src={`${API_BASE_URL}${currentDisplayImage.imageUrl}`}
+                    src={`${API_SERVER_HOST}${currentDisplayImage.imageUrl}`}
                     alt={product.name}
                     className="product-main-image"
                   />
@@ -240,7 +240,7 @@ const ProductDetailPage = () => {
                     onClick={() => setCurrentImageIndex(index)}
                   >
                     <img
-                      src={`${API_BASE_URL}${img.imageUrl}`}
+                      src={`${API_SERVER_HOST}${img.imageUrl}`}
                       alt={`썸네일-${index + 1}`}
                     />
                   </button>

@@ -7,8 +7,7 @@ import {
   deleteCartItem,
 } from "../../api/user/cartItemApi";
 import "../../css/user/CartPage.css";
-
-const API_BASE_URL = "http://localhost:8080";
+import { API_SERVER_HOST } from "../../api/common/apiClient";
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -56,10 +55,10 @@ const CartPage = () => {
     if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
       return imageUrl;
     }
-    if (imageUrl.startsWith(API_BASE_URL)) {
+    if (imageUrl.startsWith(API_SERVER_HOST)) {
       return imageUrl;
     }
-    return `${API_BASE_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+    return `${API_SERVER_HOST}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
   };
 
   const formatPrice = (price) => Number(price ?? 0).toLocaleString();
@@ -263,7 +262,7 @@ const CartPage = () => {
                         <div className="cart-item-image-wrap">
                           {item.imageUrl ? (
                             <img
-                              src={`${API_BASE_URL}${item.imageUrl}`}
+                              src={`${API_SERVER_HOST}${item.imageUrl}`}
                               alt={item.productName}
                               className="cart-item-image"
                             />
