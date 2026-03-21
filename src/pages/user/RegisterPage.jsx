@@ -1,8 +1,8 @@
 import { useState } from "react";
 import Header from "../../components/user/Header";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { register } from "../../api/authApi";
 import { useNavigate } from "react-router-dom";
+import { register } from "../../api/common/authApi";
 
 const RegisterPage = () => {
 
