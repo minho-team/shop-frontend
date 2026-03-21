@@ -5,25 +5,26 @@ import {
     useParams,
 } from "react-router-dom";
 import { Suspense, lazy } from "react";
-import Loading from "../pages/Loading";
+import Loading from "../pages/user/Loading";
 import { useUser, UserProvider } from "../context/UserContext";
 
-const MainHome = lazy(() => import("../pages/MainHome"));
-const LoginPage = lazy(() => import("../pages/LoginPage"));
-const CartPage = lazy(() => import("../pages/CartPage"));
-const MyPage = lazy(() => import("../pages/MyPage"));
-const InquiryPage = lazy(() => import("../pages/InquiryPage"));
-const InquiryWritePage = lazy(() => import("../pages/InquiryWritePage"));
-const InquiryMyPage = lazy(() => import("../pages/InquiryMyPage"));
-const RegisterPage = lazy(() => import("../pages/RegisterPage"));
-const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage"));
-const FaqDetailPage = lazy(() => import("../pages/FaqDetailPage"));
-const InquiryMyDetailPage = lazy(() => import("../pages/InquiryMyDetailPage"));
-const OrderWritePage = lazy(() => import("../pages/OrderWritePage"));
-const OrderResultPage = lazy(() => import("../pages/OrderResultPage"));
-const MyOrderDetailPage = lazy(() => import("../pages/MyOrderDetailPage"));
-const ReviewWritePage = lazy(() => import("../pages/ReviewWritePage"));
-const KakaoRedirectPage = lazy(() => import("../pages/KakaoRedirectPage"));
+//user
+const MainHome = lazy(() => import("../pages/user/MainHome"));
+const LoginPage = lazy(() => import("../pages/user/LoginPage"));
+const CartPage = lazy(() => import("../pages/user/CartPage"));
+const MyPage = lazy(() => import("../pages/user/MyPage"));
+const InquiryPage = lazy(() => import("../pages/user/InquiryPage"));
+const InquiryWritePage = lazy(() => import("../pages/user/InquiryWritePage"));
+const InquiryMyPage = lazy(() => import("../pages/user/InquiryMyPage"));
+const RegisterPage = lazy(() => import("../pages/user/RegisterPage"));
+const ProductDetailPage = lazy(() => import("../pages/user/ProductDetailPage"));
+const FaqDetailPage = lazy(() => import("../pages/user/FaqDetailPage"));
+const InquiryMyDetailPage = lazy(() => import("../pages/user/InquiryMyDetailPage"));
+const OrderWritePage = lazy(() => import("../pages/user/OrderWritePage"));
+const OrderResultPage = lazy(() => import("../pages/user/OrderResultPage"));
+const MyOrderDetailPage = lazy(() => import("../pages/user/MyOrderDetailPage"));
+const ReviewWritePage = lazy(() => import("../pages/user/ReviewWritePage"));
+const KakaoRedirectPage = lazy(() => import("../pages/user/KakaoRedirectPage"));
 //admin
 const AdminHome = lazy(() => import("../pages/admin/AdminHome"));
 const AdminMemberListPage = lazy(
