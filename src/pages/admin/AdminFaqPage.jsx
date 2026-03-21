@@ -5,7 +5,7 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminHeader from "../../components/admin/AdminHeader";
-import { getFaqPage, createFaq, deleteFaq } from "../../api/faqApi";
+import { getFaqPage, createFaq, deleteFaq } from "../../api/user/faqApi";
 
 const CATEGORY_LABELS = ["전체", "배송", "주문/결제", "취소/교환/반품", "상품/AS문의", "회원정보", "서비스", "이용안내"];
 

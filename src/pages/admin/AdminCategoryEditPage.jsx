@@ -5,7 +5,7 @@ import AdminHeader from "../../components/admin/AdminHeader";
 const AdminCategoryEditPage = () => {
 
     return (<>
-        <AdminHeader />
+        <AdminHeader/>
         <AdminLayout>
             <p>AdminCategoryEditPage</p>
 

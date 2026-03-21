@@ -1,5 +1,5 @@
-import Header from "../Header";
-import Footer from "../Footer";
+import Header from "../user/Header";
+import Footer from "../user/Footer";
 import AdminNavbar from "./AdminNavbar";
 import "../../css/admin/AdminLayout.css";
 

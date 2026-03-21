@@ -5,10 +5,10 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminHeader from "../../components/admin/AdminHeader";
-import { getInquiryPage, getOneInquiry, adminDeleteInquiry } from "../../api/inquiryApi";
-import { createComment, deleteComment } from "../../api/commentApi";
+import { getInquiryPage, getOneInquiry, adminDeleteInquiry } from "../../api/user/inquiryApi";
+import { createComment, deleteComment } from "../../api/user/commentApi";
 // [수정] 첨부파일 이미지 미리보기를 위해 API_SERVER_HOST import 추가
-import { API_SERVER_HOST } from "../../api/apiClient";
+import { API_SERVER_HOST } from "../../api/common/apiClient";
 
 
 const STATUS_LABELS = ["전체", "답변대기", "답변완료"];
