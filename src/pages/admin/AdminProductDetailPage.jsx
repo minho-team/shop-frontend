@@ -29,7 +29,6 @@ import {
 } from "../../api/admin/adminProductOptionApi";
 
 const AdminProductDetailPage = () => {
-  // 화면이 랜더링될때 가장 위쪽 스크롤로 이동
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -65,9 +64,13 @@ const AdminProductDetailPage = () => {
   // =========================
   // 3. 옵션 상태
   // =========================
-  const [options, setOptions] = useState([]);
+  const [optionInfo, setOptionInfo] = useState({
+    isNoOptionProduct: false,
+    baseStock: 0,
+    options: [],
+  });
 
-  // 옵션 추가용 임시 상태
+  // 옵션 추가용 상태
   const [newOption, setNewOption] = useState({
     color: "",
     size: "",
@@ -75,24 +78,19 @@ const AdminProductDetailPage = () => {
     useYn: "Y",
   });
 
-  // 로딩 상태
   const [loading, setLoading] = useState(true);
 
   // =========================
   // 4. 파일 input ref
-  // 버튼 누르면 숨겨진 파일 input 클릭
   // =========================
   const thumbnailInputRef = useRef(null);
   const mainImageInputRef = useRef(null);
   const galleryAddInputRef = useRef(null);
   const sizeChartInputRef = useRef(null);
-
-  // 갤러리 이미지 "변경"용 ref를 여러 개 관리
   const galleryReplaceInputRefs = useRef({});
 
   // =========================
   // 5. 판매가 자동 계산
-  // 100원 단위 절삭
   // =========================
   const salePrice = useMemo(() => {
     const price = Number(basicInfo.price) || 0;
@@ -111,15 +109,15 @@ const AdminProductDetailPage = () => {
       const data = await getAdminProductDetail(productNo);
 
       setBasicInfo({
-        productNo: data.productNo || "",
-        categoryName: data.categoryName || "",
-        productName: data.productName || "",
-        price: data.price || 0,
-        discountRate: data.discountRate || 0,
-        saleStatus: data.saleStatus || "Y",
-        sameDayDelivery: data.sameDayDelivery || "N",
-        viewCount: data.viewCount || 0,
-        createdAt: data.createdAt || "",
+        productNo: data?.productNo || "",
+        categoryName: data?.categoryId || "",
+        productName: data?.name || "",
+        price: data?.price || 0,
+        discountRate: data?.discountRate || 0,
+        saleStatus: data?.useYn || "Y",
+        sameDayDelivery: data?.sameDayDeliveryYn || "N",
+        viewCount: data?.viewCount || 0,
+        createdAt: data?.createdAt || "",
       });
     } catch (error) {
       console.error("기본정보 조회 실패:", error);
@@ -135,10 +133,10 @@ const AdminProductDetailPage = () => {
       const data = await getAdminProductImages(productNo);
 
       setImageInfo({
-        thumbnailImage: data.thumbnailImage || null,
-        mainImage: data.mainImage || null,
-        galleryImages: data.galleryImages || [],
-        sizeChartImage: data.sizeChartImage || null,
+        thumbnailImage: data?.thumbnailImage || null,
+        mainImage: data?.mainImage || null,
+        galleryImages: data?.galleryImages || [],
+        sizeChartImage: data?.sizeChartImage || null,
       });
     } catch (error) {
       console.error("이미지 조회 실패:", error);
@@ -153,12 +151,33 @@ const AdminProductDetailPage = () => {
     try {
       const data = await getAdminProductOptions(productNo);
 
-      const optionList = (data || []).map((option) => ({
+      // 배열만 오는 경우
+      if (Array.isArray(data)) {
+        const optionList = data.map((option) => ({
+          ...option,
+          isEditing: false,
+        }));
+
+        setOptionInfo({
+          isNoOptionProduct: false,
+          baseStock: 0,
+          options: optionList,
+        });
+
+        return;
+      }
+
+      // 객체로 오는 경우
+      const optionList = (data?.options || []).map((option) => ({
         ...option,
         isEditing: false,
       }));
 
-      setOptions(optionList);
+      setOptionInfo({
+        isNoOptionProduct: data?.isNoOptionProduct ?? false,
+        baseStock: data?.baseStock ?? 0,
+        options: optionList,
+      });
     } catch (error) {
       console.error("옵션 조회 실패:", error);
       alert("옵션 정보를 불러오지 못했습니다.");
@@ -171,7 +190,6 @@ const AdminProductDetailPage = () => {
   const fetchAllDetail = async () => {
     try {
       setLoading(true);
-
       await Promise.all([fetchBasicInfo(), fetchImages(), fetchOptions()]);
     } catch (error) {
       console.error("상세 조회 실패:", error);
@@ -209,8 +227,8 @@ const AdminProductDetailPage = () => {
         productName: basicInfo.productName,
         price: basicInfo.price,
         discountRate: basicInfo.discountRate,
-        saleStatus: basicInfo.saleStatus,
-        sameDayDelivery: basicInfo.sameDayDelivery,
+        useYn: basicInfo.saleStatus,
+        sameDayDeliveryYn: basicInfo.sameDayDelivery,
       };
 
       await putAdminProductBasic(productNo, requestData);
@@ -227,21 +245,23 @@ const AdminProductDetailPage = () => {
   // 12. 옵션 편집 시작
   // =========================
   const handleOptionEdit = (productOptionNo) => {
-    setOptions((prev) =>
-      prev.map((option) =>
+    setOptionInfo((prev) => ({
+      ...prev,
+      options: prev.options.map((option) =>
         option.productOptionNo === productOptionNo
           ? { ...option, isEditing: true }
           : option,
       ),
-    );
+    }));
   };
 
   // =========================
   // 13. 옵션 변경
   // =========================
   const handleOptionChange = (productOptionNo, field, value) => {
-    setOptions((prev) =>
-      prev.map((option) =>
+    setOptionInfo((prev) => ({
+      ...prev,
+      options: prev.options.map((option) =>
         option.productOptionNo === productOptionNo
           ? {
               ...option,
@@ -249,7 +269,7 @@ const AdminProductDetailPage = () => {
             }
           : option,
       ),
-    );
+    }));
   };
 
   // =========================
@@ -257,7 +277,7 @@ const AdminProductDetailPage = () => {
   // =========================
   const handleOptionSave = async (productOptionNo) => {
     try {
-      const targetOption = options.find(
+      const targetOption = optionInfo.options.find(
         (option) => option.productOptionNo === productOptionNo,
       );
 
@@ -268,7 +288,7 @@ const AdminProductDetailPage = () => {
 
       const requestData = {
         color: targetOption.color,
-        size: targetOption.size,
+        optionSize: targetOption.optionSize,
         stock: targetOption.stock,
         useYn: targetOption.useYn,
       };
@@ -285,7 +305,6 @@ const AdminProductDetailPage = () => {
 
   // =========================
   // 15. 옵션 취소
-  // 수정 중 데이터 원복을 위해 재조회
   // =========================
   const handleOptionCancel = async () => {
     await fetchOptions();
@@ -328,7 +347,7 @@ const AdminProductDetailPage = () => {
     try {
       const requestData = {
         color: newOption.color,
-        size: newOption.size,
+        optionSize: newOption.size,
         stock: newOption.stock,
         useYn: newOption.useYn,
       };
@@ -352,7 +371,19 @@ const AdminProductDetailPage = () => {
   };
 
   // =========================
-  // 19. 썸네일 이미지 변경
+  // 19. 무옵션 상품 기본재고 변경
+  // =========================
+  const handleBaseStockChange = (e) => {
+    const { value } = e.target;
+
+    setOptionInfo((prev) => ({
+      ...prev,
+      baseStock: Number(value),
+    }));
+  };
+
+  // =========================
+  // 20. 썸네일 이미지 변경
   // =========================
   const handleThumbnailButtonClick = () => {
     if (thumbnailInputRef.current) {
@@ -378,7 +409,7 @@ const AdminProductDetailPage = () => {
   };
 
   // =========================
-  // 20. 메인 이미지 변경 / 삭제
+  // 21. 메인 이미지 변경 / 삭제
   // =========================
   const handleMainImageButtonClick = () => {
     if (mainImageInputRef.current) {
@@ -419,7 +450,7 @@ const AdminProductDetailPage = () => {
   };
 
   // =========================
-  // 21. 갤러리 이미지 추가
+  // 22. 갤러리 이미지 추가
   // =========================
   const handleGalleryAddButtonClick = () => {
     if (galleryAddInputRef.current) {
@@ -445,7 +476,7 @@ const AdminProductDetailPage = () => {
   };
 
   // =========================
-  // 22. 갤러리 이미지 변경
+  // 23. 갤러리 이미지 변경
   // =========================
   const handleGalleryReplaceButtonClick = (productImgNo) => {
     if (galleryReplaceInputRefs.current[productImgNo]) {
@@ -471,7 +502,7 @@ const AdminProductDetailPage = () => {
   };
 
   // =========================
-  // 23. 갤러리 이미지 삭제
+  // 24. 갤러리 이미지 삭제
   // =========================
   const handleGalleryDelete = async (productImgNo) => {
     const isConfirm = window.confirm("갤러리 이미지를 삭제하시겠습니까?");
@@ -489,7 +520,7 @@ const AdminProductDetailPage = () => {
   };
 
   // =========================
-  // 24. 사이즈표 이미지 변경 / 삭제
+  // 25. 사이즈표 이미지 변경 / 삭제
   // =========================
   const handleSizeChartButtonClick = () => {
     if (sizeChartInputRef.current) {
@@ -530,7 +561,7 @@ const AdminProductDetailPage = () => {
   };
 
   // =========================
-  // 25. 상품 삭제 / 이동
+  // 26. 상품 삭제 / 이동
   // =========================
   const handleDeleteProduct = async () => {
     const isConfirm = window.confirm("현재 상품을 삭제하시겠습니까?");
@@ -608,7 +639,7 @@ const AdminProductDetailPage = () => {
           />
 
           <ProductOptionSection
-            options={options}
+            optionInfo={optionInfo}
             newOption={newOption}
             handleOptionEdit={handleOptionEdit}
             handleOptionChange={handleOptionChange}
@@ -617,6 +648,7 @@ const AdminProductDetailPage = () => {
             handleOptionDelete={handleOptionDelete}
             handleNewOptionChange={handleNewOptionChange}
             handleAddOption={handleAddOption}
+            handleBaseStockChange={handleBaseStockChange}
           />
 
           <div>
@@ -765,7 +797,6 @@ const ProductImageSection = ({
     <section>
       <h3>이미지</h3>
 
-      {/* 썸네일 */}
       <div>
         <h4>썸네일 이미지</h4>
 
@@ -794,7 +825,6 @@ const ProductImageSection = ({
         />
       </div>
 
-      {/* 메인 이미지 */}
       <div>
         <h4>메인 이미지</h4>
 
@@ -826,7 +856,6 @@ const ProductImageSection = ({
         />
       </div>
 
-      {/* 갤러리 이미지 */}
       <div>
         <h4>갤러리 이미지</h4>
 
@@ -881,7 +910,6 @@ const ProductImageSection = ({
         />
       </div>
 
-      {/* 사이즈표 이미지 */}
       <div>
         <h4>사이즈표 이미지</h4>
 
@@ -920,7 +948,7 @@ const ProductImageSection = ({
 // 옵션 섹션
 // ======================================================
 const ProductOptionSection = ({
-  options,
+  optionInfo,
   newOption,
   handleOptionEdit,
   handleOptionChange,
@@ -929,189 +957,221 @@ const ProductOptionSection = ({
   handleOptionDelete,
   handleNewOptionChange,
   handleAddOption,
+  handleBaseStockChange,
 }) => {
+  const { isNoOptionProduct, baseStock, options } = optionInfo;
+
   return (
     <section>
       <h3>옵션 및 재고</h3>
 
-      <table border="1">
-        <thead>
-          <tr>
-            <th>색상</th>
-            <th>사이즈</th>
-            <th>재고</th>
-            <th>사용여부</th>
-            <th>관리</th>
-          </tr>
-        </thead>
+      {isNoOptionProduct ? (
+        <div>
+          <div>
+            <label>상품 유형 </label>
+            <input type="text" value="옵션 없는 상품" readOnly />
+          </div>
 
-        <tbody>
-          {options.length === 0 ? (
-            <tr>
-              <td colSpan="5">등록된 옵션이 없습니다.</td>
-            </tr>
-          ) : (
-            options.map((option) => (
-              <tr key={option.productOptionNo}>
-                <td>
-                  {option.isEditing ? (
-                    <input
-                      type="text"
-                      value={option.color}
-                      onChange={(e) =>
-                        handleOptionChange(
-                          option.productOptionNo,
-                          "color",
-                          e.target.value,
-                        )
-                      }
-                    />
-                  ) : (
-                    option.color
-                  )}
-                </td>
+          <div>
+            <label>기본 재고 </label>
+            <input
+              type="number"
+              value={baseStock}
+              onChange={handleBaseStockChange}
+            />
+          </div>
+        </div>
+      ) : (
+        <>
+          <div>
+            <label>상품 유형 </label>
+            <input type="text" value="옵션형 상품" readOnly />
+          </div>
 
-                <td>
-                  {option.isEditing ? (
-                    <input
-                      type="text"
-                      value={option.size}
-                      onChange={(e) =>
-                        handleOptionChange(
-                          option.productOptionNo,
-                          "size",
-                          e.target.value,
-                        )
-                      }
-                    />
-                  ) : (
-                    option.size
-                  )}
-                </td>
-
-                <td>
-                  {option.isEditing ? (
-                    <input
-                      type="number"
-                      value={option.stock}
-                      onChange={(e) =>
-                        handleOptionChange(
-                          option.productOptionNo,
-                          "stock",
-                          e.target.value,
-                        )
-                      }
-                    />
-                  ) : (
-                    option.stock
-                  )}
-                </td>
-
-                <td>
-                  {option.isEditing ? (
-                    <select
-                      value={option.useYn}
-                      onChange={(e) =>
-                        handleOptionChange(
-                          option.productOptionNo,
-                          "useYn",
-                          e.target.value,
-                        )
-                      }
-                    >
-                      <option value="Y">Y</option>
-                      <option value="N">N</option>
-                    </select>
-                  ) : (
-                    option.useYn
-                  )}
-                </td>
-
-                <td>
-                  {option.isEditing ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => handleOptionSave(option.productOptionNo)}
-                      >
-                        저장
-                      </button>
-                      <button type="button" onClick={handleOptionCancel}>
-                        취소
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => handleOptionEdit(option.productOptionNo)}
-                      >
-                        편집
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleOptionDelete(option.productOptionNo)
-                        }
-                      >
-                        삭제
-                      </button>
-                    </>
-                  )}
-                </td>
+          <table border="1">
+            <thead>
+              <tr>
+                <th>색상</th>
+                <th>사이즈</th>
+                <th>재고</th>
+                <th>사용여부</th>
+                <th>관리</th>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            </thead>
 
-      <h4>옵션 추가</h4>
+            <tbody>
+              {options.length === 0 ? (
+                <tr>
+                  <td colSpan="5">등록된 옵션이 없습니다.</td>
+                </tr>
+              ) : (
+                options.map((option) => (
+                  <tr key={option.productOptionNo}>
+                    <td>
+                      {option.isEditing ? (
+                        <input
+                          type="text"
+                          value={option.color}
+                          onChange={(e) =>
+                            handleOptionChange(
+                              option.productOptionNo,
+                              "color",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      ) : (
+                        option.color
+                      )}
+                    </td>
 
-      <div>
-        <label>색상 </label>
-        <input
-          type="text"
-          name="color"
-          value={newOption.color}
-          onChange={handleNewOptionChange}
-        />
-      </div>
+                    <td>
+                      {option.isEditing ? (
+                        <input
+                          type="text"
+                          value={option.optionSize}
+                          onChange={(e) =>
+                            handleOptionChange(
+                              option.productOptionNo,
+                              "optionSize",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      ) : (
+                        option.optionSize
+                      )}
+                    </td>
 
-      <div>
-        <label>사이즈 </label>
-        <input
-          type="text"
-          name="size"
-          value={newOption.size}
-          onChange={handleNewOptionChange}
-        />
-      </div>
+                    <td>
+                      {option.isEditing ? (
+                        <input
+                          type="number"
+                          value={option.stock}
+                          onChange={(e) =>
+                            handleOptionChange(
+                              option.productOptionNo,
+                              "stock",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      ) : (
+                        option.stock
+                      )}
+                    </td>
 
-      <div>
-        <label>재고 </label>
-        <input
-          type="number"
-          name="stock"
-          value={newOption.stock}
-          onChange={handleNewOptionChange}
-        />
-      </div>
+                    <td>
+                      {option.isEditing ? (
+                        <select
+                          value={option.useYn}
+                          onChange={(e) =>
+                            handleOptionChange(
+                              option.productOptionNo,
+                              "useYn",
+                              e.target.value,
+                            )
+                          }
+                        >
+                          <option value="Y">Y</option>
+                          <option value="N">N</option>
+                        </select>
+                      ) : (
+                        option.useYn
+                      )}
+                    </td>
 
-      <div>
-        <label>사용여부 </label>
-        <select
-          name="useYn"
-          value={newOption.useYn}
-          onChange={handleNewOptionChange}
-        >
-          <option value="Y">Y</option>
-          <option value="N">N</option>
-        </select>
-      </div>
+                    <td>
+                      {option.isEditing ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleOptionSave(option.productOptionNo)
+                            }
+                          >
+                            저장
+                          </button>
+                          <button type="button" onClick={handleOptionCancel}>
+                            취소
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleOptionEdit(option.productOptionNo)
+                            }
+                          >
+                            편집
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleOptionDelete(option.productOptionNo)
+                            }
+                          >
+                            삭제
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
 
-      <button type="button" onClick={handleAddOption}>
-        옵션 추가
-      </button>
+          <h4>옵션 추가</h4>
+
+          <div>
+            <label>색상 </label>
+            <input
+              type="text"
+              name="color"
+              value={newOption.color}
+              onChange={handleNewOptionChange}
+            />
+          </div>
+
+          <div>
+            <label>사이즈 </label>
+            <input
+              type="text"
+              name="size"
+              value={newOption.size}
+              onChange={handleNewOptionChange}
+            />
+          </div>
+
+          <div>
+            <label>재고 </label>
+            <input
+              type="number"
+              name="stock"
+              value={newOption.stock}
+              onChange={handleNewOptionChange}
+            />
+          </div>
+
+          <div>
+            <label>사용여부 </label>
+            <select
+              name="useYn"
+              value={newOption.useYn}
+              onChange={handleNewOptionChange}
+            >
+              <option value="Y">Y</option>
+              <option value="N">N</option>
+            </select>
+          </div>
+
+          <button type="button" onClick={handleAddOption}>
+            옵션 추가
+          </button>
+        </>
+      )}
     </section>
   );
 };
