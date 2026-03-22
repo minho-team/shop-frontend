@@ -3,60 +3,57 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import AdminHeader from "../../components/admin/AdminHeader";
 import { postAdminProductAdd } from "../../api/admin/adminProductApi";
 
-// 백엔드가 categoryId(Long)를 받으므로
-// 화면용 카테고리 선택값에도 실제 id를 넣어야 함
-// 아래 id 값은 예시이므로 실제 DB category_id에 맞게 수정해야 함
 const categoryMap = {
   MEN: {
     OUTER: [
-      { id: 1, label: "코트" },
-      { id: 2, label: "파카" },
-      { id: 3, label: "자켓" },
-      { id: 4, label: "가디건" },
+      { id: 111, label: "코트" },
+      { id: 112, label: "파카" },
+      { id: 113, label: "자켓" },
+      { id: 114, label: "가디건" },
     ],
     TOP: [
-      { id: 5, label: "니트" },
-      { id: 6, label: "셔츠" },
-      { id: 7, label: "스웨트 셔츠" },
-      { id: 8, label: "긴팔" },
-      { id: 9, label: "반팔" },
+      { id: 121, label: "니트" },
+      { id: 122, label: "셔츠" },
+      { id: 123, label: "스웨트 셔츠" },
+      { id: 124, label: "긴팔" },
+      { id: 125, label: "반팔" },
     ],
     BOTTOM: [
-      { id: 10, label: "긴바지" },
-      { id: 11, label: "반바지" },
-      { id: 12, label: "데님" },
+      { id: 131, label: "긴바지" },
+      { id: 132, label: "반바지" },
+      { id: 133, label: "데님" },
     ],
     ACC: [
-      { id: 13, label: "가방" },
-      { id: 14, label: "슈즈" },
-      { id: 15, label: "주얼리" },
-      { id: 16, label: "잡화" },
+      { id: 141, label: "가방" },
+      { id: 142, label: "슈즈" },
+      { id: 143, label: "주얼리" },
+      { id: 144, label: "잡화" },
     ],
   },
   WOMEN: {
     OUTER: [
-      { id: 17, label: "코트" },
-      { id: 18, label: "파카" },
-      { id: 19, label: "자켓" },
-      { id: 20, label: "가디건" },
+      { id: 211, label: "코트" },
+      { id: 212, label: "파카" },
+      { id: 213, label: "자켓" },
+      { id: 214, label: "가디건" },
     ],
     TOP: [
-      { id: 21, label: "니트" },
-      { id: 22, label: "셔츠" },
-      { id: 23, label: "스웨트 셔츠" },
-      { id: 24, label: "긴팔" },
-      { id: 25, label: "반팔" },
+      { id: 221, label: "니트" },
+      { id: 222, label: "셔츠" },
+      { id: 223, label: "스웨트 셔츠" },
+      { id: 224, label: "긴팔" },
+      { id: 225, label: "반팔" },
     ],
     BOTTOM: [
-      { id: 26, label: "긴바지" },
-      { id: 27, label: "반바지" },
-      { id: 28, label: "데님" },
+      { id: 231, label: "긴바지" },
+      { id: 232, label: "반바지" },
+      { id: 233, label: "데님" },
     ],
     ACC: [
-      { id: 29, label: "가방" },
-      { id: 30, label: "슈즈" },
-      { id: 31, label: "주얼리" },
-      { id: 32, label: "잡화" },
+      { id: 241, label: "가방" },
+      { id: 242, label: "슈즈" },
+      { id: 243, label: "주얼리" },
+      { id: 244, label: "잡화" },
     ],
   },
 };
@@ -76,10 +73,7 @@ const createEmptyOption = () => ({
 });
 
 const AdminProductAddPage = () => {
-  // =========================
   // 1. 기본정보 state
-  // 백엔드 DTO 기준 필드명으로 맞춤
-  // =========================
   const [productData, setProductData] = useState({
     genderCategory: "",
     mainCategory: "",
@@ -92,9 +86,7 @@ const AdminProductAddPage = () => {
     description: "",
   });
 
-  // =========================
   // 2. 이미지 state
-  // =========================
   const [imageData, setImageData] = useState({
     thumbImage: null,
     mainImage: null,
@@ -102,14 +94,12 @@ const AdminProductAddPage = () => {
     galleryImages: [null],
   });
 
-  // =========================
   // 3. 옵션 관련 state
-  // =========================
   const [isNoOptionProduct, setIsNoOptionProduct] = useState(false);
   const [baseStock, setBaseStock] = useState("");
   const [options, setOptions] = useState([createEmptyOption()]);
 
-  // 자동 계산값(판매가)
+  // 판매가 자동 계산
   const salePrice = useMemo(() => {
     const price = Number(productData.price);
     const discountRate = Number(productData.discountRate);
@@ -120,12 +110,12 @@ const AdminProductAddPage = () => {
     return Math.floor(calculated);
   }, [productData.price, productData.discountRate]);
 
-  // 현재 선택된 성별에 따른 대분류 목록
+  // 성별에 따른 대분류 목록
   const mainCategoryOptions = productData.genderCategory
     ? Object.keys(categoryMap[productData.genderCategory] || {})
     : [];
 
-  // 현재 선택된 성별 + 대분류에 따른 소분류 목록
+  // 성별 + 대분류에 따른 소분류 목록
   const subCategoryOptions =
     productData.genderCategory && productData.mainCategory
       ? categoryMap[productData.genderCategory]?.[productData.mainCategory] ||
@@ -137,7 +127,7 @@ const AdminProductAddPage = () => {
     const { name, value } = e.target;
 
     setProductData((prev) => {
-      // 성별 변경 시 대분류, 소분류(categoryId) 초기화
+      // 성별 변경 시 대분류, 소분류 초기화
       if (name === "genderCategory") {
         return {
           ...prev,
@@ -147,7 +137,7 @@ const AdminProductAddPage = () => {
         };
       }
 
-      // 대분류 변경 시 소분류(categoryId) 초기화
+      // 대분류 변경 시 소분류 초기화
       if (name === "mainCategory") {
         return {
           ...prev,
@@ -233,6 +223,7 @@ const AdminProductAddPage = () => {
       }
 
       const isLastIndex = index === newGalleryImages.length - 1;
+
       if (isLastIndex && file !== null && filledImagesCount < 20) {
         newGalleryImages.push(null);
       }
@@ -255,6 +246,7 @@ const AdminProductAddPage = () => {
       }
 
       const hasEmptySlot = newGalleryImages.some((item) => item === null);
+
       if (
         !hasEmptySlot &&
         newGalleryImages.filter((item) => item !== null).length < 20
@@ -382,7 +374,6 @@ const AdminProductAddPage = () => {
   const buildProductFormData = () => {
     const formData = new FormData();
 
-    // 백엔드 DTO 필드명 그대로 맞춤
     formData.append("name", productData.name);
     formData.append("categoryId", productData.categoryId);
     formData.append("price", productData.price);
@@ -410,7 +401,7 @@ const AdminProductAddPage = () => {
         formData.append("galleryImages", file);
       });
 
-    // 옵션 없는 상품도 백엔드 DTO에 맞춰 옵션 1개로 변환
+    // 옵션 없는 상품도 옵션 1개로 변환
     const finalOptions = isNoOptionProduct
       ? [
           {
@@ -452,21 +443,14 @@ const AdminProductAddPage = () => {
   // 등록 처리
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("thumbImage:", imageData.thumbImage?.size);
-    console.log("mainImage:", imageData.mainImage?.size);
-    console.log("sizeImage:", imageData.sizeImage?.size);
 
-    imageData.galleryImages.forEach((file, index) => {
-      if (file) {
-        console.log(`galleryImages[${index}] size:`, file.size);
-      }
-    });
     if (!validateForm()) return;
 
     try {
       const formData = buildProductFormData();
 
-      console.log("상품 등록 요청");
+      console.log("전송 categoryId:", productData.categoryId);
+
       for (const [key, value] of formData.entries()) {
         console.log(key, value);
       }
