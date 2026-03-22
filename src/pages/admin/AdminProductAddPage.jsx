@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminHeader from "../../components/admin/AdminHeader";
+import "../../css/admin/AdminProductAddPage.css";
 import { postAdminProductAdd } from "../../api/admin/adminProductApi";
 
 const categoryMap = {
@@ -73,7 +74,11 @@ const createEmptyOption = () => ({
 });
 
 const AdminProductAddPage = () => {
-  // 1. 기본정보 state
+  const thumbImageInputRef = useRef(null);
+  const mainImageInputRef = useRef(null);
+  const sizeImageInputRef = useRef(null);
+  const galleryImageInputRefs = useRef([]);
+
   const [productData, setProductData] = useState({
     genderCategory: "",
     mainCategory: "",
@@ -86,7 +91,6 @@ const AdminProductAddPage = () => {
     description: "",
   });
 
-  // 2. 이미지 state
   const [imageData, setImageData] = useState({
     thumbImage: null,
     mainImage: null,
@@ -94,12 +98,10 @@ const AdminProductAddPage = () => {
     galleryImages: [null],
   });
 
-  // 3. 옵션 관련 state
   const [isNoOptionProduct, setIsNoOptionProduct] = useState(false);
   const [baseStock, setBaseStock] = useState("");
   const [options, setOptions] = useState([createEmptyOption()]);
 
-  // 판매가 자동 계산
   const salePrice = useMemo(() => {
     const price = Number(productData.price);
     const discountRate = Number(productData.discountRate);
@@ -107,27 +109,23 @@ const AdminProductAddPage = () => {
     if (isNaN(price) || isNaN(discountRate)) return 0;
 
     const calculated = price - (price * discountRate) / 100;
-    return Math.floor(calculated);
+    return Math.floor(calculated / 100) * 100;
   }, [productData.price, productData.discountRate]);
 
-  // 성별에 따른 대분류 목록
   const mainCategoryOptions = productData.genderCategory
     ? Object.keys(categoryMap[productData.genderCategory] || {})
     : [];
 
-  // 성별 + 대분류에 따른 소분류 목록
   const subCategoryOptions =
     productData.genderCategory && productData.mainCategory
       ? categoryMap[productData.genderCategory]?.[productData.mainCategory] ||
         []
       : [];
 
-  // 기본정보 변경
   const handleChangeProductData = (e) => {
     const { name, value } = e.target;
 
     setProductData((prev) => {
-      // 성별 변경 시 대분류, 소분류 초기화
       if (name === "genderCategory") {
         return {
           ...prev,
@@ -137,7 +135,6 @@ const AdminProductAddPage = () => {
         };
       }
 
-      // 대분류 변경 시 소분류 초기화
       if (name === "mainCategory") {
         return {
           ...prev,
@@ -146,7 +143,6 @@ const AdminProductAddPage = () => {
         };
       }
 
-      // 할인율 0 ~ 100 제한
       if (name === "discountRate") {
         if (value === "") {
           return {
@@ -164,7 +160,6 @@ const AdminProductAddPage = () => {
         };
       }
 
-      // 가격 음수 방지
       if (name === "price") {
         if (value === "") {
           return {
@@ -188,7 +183,6 @@ const AdminProductAddPage = () => {
     });
   };
 
-  // 단일 이미지 변경
   const handleSingleImageChange = (e) => {
     const { name, files } = e.target;
     const selectedFile = files?.[0] || null;
@@ -199,15 +193,43 @@ const AdminProductAddPage = () => {
     }));
   };
 
-  // 단일 이미지 삭제
+  const handleClickSingleImageButton = (imageFieldName) => {
+    if (imageFieldName === "thumbImage") {
+      thumbImageInputRef.current?.click();
+    }
+
+    if (imageFieldName === "mainImage") {
+      mainImageInputRef.current?.click();
+    }
+
+    if (imageFieldName === "sizeImage") {
+      sizeImageInputRef.current?.click();
+    }
+  };
+
+  const handleClickGalleryImageButton = (index) => {
+    galleryImageInputRefs.current[index]?.click();
+  };
+
   const handleRemoveSingleImage = (imageFieldName) => {
     setImageData((prev) => ({
       ...prev,
       [imageFieldName]: null,
     }));
+
+    if (imageFieldName === "thumbImage" && thumbImageInputRef.current) {
+      thumbImageInputRef.current.value = "";
+    }
+
+    if (imageFieldName === "mainImage" && mainImageInputRef.current) {
+      mainImageInputRef.current.value = "";
+    }
+
+    if (imageFieldName === "sizeImage" && sizeImageInputRef.current) {
+      sizeImageInputRef.current.value = "";
+    }
   };
 
-  // 갤러리 이미지 변경
   const handleGalleryImageChange = (index, file) => {
     setImageData((prev) => {
       const newGalleryImages = [...prev.galleryImages];
@@ -235,7 +257,6 @@ const AdminProductAddPage = () => {
     });
   };
 
-  // 갤러리 이미지 삭제
   const handleRemoveGalleryImage = (index) => {
     setImageData((prev) => {
       const newGalleryImages = [...prev.galleryImages];
@@ -259,14 +280,16 @@ const AdminProductAddPage = () => {
         galleryImages: newGalleryImages,
       };
     });
+
+    if (galleryImageInputRefs.current[index]) {
+      galleryImageInputRefs.current[index].value = "";
+    }
   };
 
-  // 옵션 행 추가
   const handleAddOptionRow = () => {
     setOptions((prev) => [...prev, createEmptyOption()]);
   };
 
-  // 옵션 행 삭제
   const handleRemoveOptionRow = (index) => {
     setOptions((prev) => {
       const next = prev.filter((_, i) => i !== index);
@@ -274,7 +297,6 @@ const AdminProductAddPage = () => {
     });
   };
 
-  // 옵션 값 변경
   const handleChangeOption = (index, field, value) => {
     setOptions((prev) =>
       prev.map((option, i) => {
@@ -295,7 +317,6 @@ const AdminProductAddPage = () => {
     );
   };
 
-  // 옵션 없는 상품 체크 변경
   const handleChangeNoOptionProduct = (e) => {
     const checked = e.target.checked;
     setIsNoOptionProduct(checked);
@@ -307,7 +328,6 @@ const AdminProductAddPage = () => {
     }
   };
 
-  // 유효성 검사
   const validateForm = () => {
     if (!productData.genderCategory) {
       alert("성별 카테고리를 선택해주세요.");
@@ -370,7 +390,6 @@ const AdminProductAddPage = () => {
     return true;
   };
 
-  // FormData 생성
   const buildProductFormData = () => {
     const formData = new FormData();
 
@@ -382,7 +401,6 @@ const AdminProductAddPage = () => {
     formData.append("useYn", productData.useYn);
     formData.append("sameDayDeliveryYn", productData.sameDayDeliveryYn);
 
-    // 이미지
     if (imageData.thumbImage) {
       formData.append("thumbImage", imageData.thumbImage);
     }
@@ -401,7 +419,6 @@ const AdminProductAddPage = () => {
         formData.append("galleryImages", file);
       });
 
-    // 옵션 없는 상품도 옵션 1개로 변환
     const finalOptions = isNoOptionProduct
       ? [
           {
@@ -428,7 +445,6 @@ const AdminProductAddPage = () => {
     return formData;
   };
 
-  // 목록 이동
   const handleMoveToList = () => {
     const isConfirmed = window.confirm(
       "작성 중인 내용이 있을 수 있습니다. 목록으로 이동하시겠습니까?",
@@ -436,11 +452,9 @@ const AdminProductAddPage = () => {
 
     if (!isConfirmed) return;
 
-    // TODO: 실제 라우터 이동 처리
     console.log("목록 페이지로 이동");
   };
 
-  // 등록 처리
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -473,293 +487,347 @@ const AdminProductAddPage = () => {
         <div className="admin-product-add-page">
           <h1>상품 등록</h1>
 
-          <form onSubmit={handleSubmit}>
-            <section className="admin-section">
+          <form onSubmit={handleSubmit} className="admin-product-add-form">
+            <section className="admin-product-section">
               <h2>기본정보</h2>
 
-              <div>
-                <label>상품번호</label>
-                <input
-                  type="text"
-                  value="등록 후 자동생성"
-                  readOnly
-                  placeholder="등록 후 자동 생성됩니다."
-                />
-              </div>
-
-              <div>
-                <label>성별 카테고리</label>
-                <select
-                  name="genderCategory"
-                  value={productData.genderCategory}
-                  onChange={handleChangeProductData}
-                >
-                  <option value="">성별 카테고리를 선택하세요</option>
-                  <option value="WOMEN">여성</option>
-                  <option value="MEN">남성</option>
-                </select>
-              </div>
-
-              <div>
-                <label>대분류</label>
-                <select
-                  name="mainCategory"
-                  value={productData.mainCategory}
-                  onChange={handleChangeProductData}
-                  disabled={!productData.genderCategory}
-                >
-                  <option value="">대분류를 선택하세요</option>
-                  {mainCategoryOptions.map((categoryKey) => (
-                    <option key={categoryKey} value={categoryKey}>
-                      {mainCategoryLabelMap[categoryKey] || categoryKey}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label>소분류</label>
-                <select
-                  name="categoryId"
-                  value={productData.categoryId}
-                  onChange={handleChangeProductData}
-                  disabled={!productData.mainCategory}
-                >
-                  <option value="">소분류를 선택하세요</option>
-                  {subCategoryOptions.map((subCategory) => (
-                    <option key={subCategory.id} value={subCategory.id}>
-                      {subCategory.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label>상품명</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={productData.name}
-                  onChange={handleChangeProductData}
-                  placeholder="상품명을 입력하세요"
-                />
-              </div>
-
-              <div>
-                <label>정가</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={productData.price}
-                  onChange={handleChangeProductData}
-                  placeholder="정가를 입력하세요"
-                  min="0"
-                />
-              </div>
-
-              <div>
-                <label>할인율(%)</label>
-                <input
-                  type="number"
-                  name="discountRate"
-                  value={productData.discountRate}
-                  onChange={handleChangeProductData}
-                  placeholder="0 ~ 100 사이 할인율을 입력하세요"
-                  min="0"
-                  max="100"
-                />
-              </div>
-
-              <div>
-                <label>판매가</label>
-                <input
-                  type="text"
-                  value={salePrice}
-                  readOnly
-                  placeholder="정가와 할인율 입력 시 자동 계산됩니다."
-                />
-              </div>
-
-              <div>
-                <label>판매여부</label>
-                <label>
-                  <input
-                    type="radio"
-                    name="useYn"
-                    value="Y"
-                    checked={productData.useYn === "Y"}
+              <div className="admin-form-row">
+                <label className="admin-form-label">성별 카테고리</label>
+                <div className="admin-form-control">
+                  <select
+                    name="genderCategory"
+                    value={productData.genderCategory}
                     onChange={handleChangeProductData}
-                  />
-                  판매
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="useYn"
-                    value="N"
-                    checked={productData.useYn === "N"}
+                  >
+                    <option value="">성별 카테고리를 선택하세요</option>
+                    <option value="WOMEN">여성</option>
+                    <option value="MEN">남성</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="admin-form-row">
+                <label className="admin-form-label">대분류</label>
+                <div className="admin-form-control">
+                  <select
+                    name="mainCategory"
+                    value={productData.mainCategory}
                     onChange={handleChangeProductData}
-                  />
-                  판매중지
-                </label>
+                    disabled={!productData.genderCategory}
+                  >
+                    <option value="">대분류를 선택하세요</option>
+                    {mainCategoryOptions.map((categoryKey) => (
+                      <option key={categoryKey} value={categoryKey}>
+                        {mainCategoryLabelMap[categoryKey] || categoryKey}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <div>
-                <label>당일배송</label>
-                <label>
-                  <input
-                    type="radio"
-                    name="sameDayDeliveryYn"
-                    value="Y"
-                    checked={productData.sameDayDeliveryYn === "Y"}
+              <div className="admin-form-row">
+                <label className="admin-form-label">소분류</label>
+                <div className="admin-form-control">
+                  <select
+                    name="categoryId"
+                    value={productData.categoryId}
                     onChange={handleChangeProductData}
-                  />
-                  가능
-                </label>
-                <label>
+                    disabled={!productData.mainCategory}
+                  >
+                    <option value="">소분류를 선택하세요</option>
+                    {subCategoryOptions.map((subCategory) => (
+                      <option key={subCategory.id} value={subCategory.id}>
+                        {subCategory.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="admin-form-row">
+                <label className="admin-form-label">상품명</label>
+                <div className="admin-form-control">
                   <input
-                    type="radio"
-                    name="sameDayDeliveryYn"
-                    value="N"
-                    checked={productData.sameDayDeliveryYn === "N"}
+                    type="text"
+                    name="name"
+                    value={productData.name}
                     onChange={handleChangeProductData}
+                    placeholder="상품명을 입력하세요"
                   />
-                  불가
-                </label>
+                </div>
               </div>
 
-              <div>
-                <label>조회수</label>
-                <input
-                  type="text"
-                  value="0"
-                  readOnly
-                  placeholder="신규 등록 시 0으로 시작합니다."
-                />
+              <div className="admin-form-row">
+                <label className="admin-form-label">정가</label>
+                <div className="admin-form-control">
+                  <input
+                    type="number"
+                    name="price"
+                    value={productData.price}
+                    onChange={handleChangeProductData}
+                    placeholder="정가를 입력하세요"
+                    min="0"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label>등록일</label>
-                <input
-                  type="text"
-                  value="등록 후 자동생성"
-                  readOnly
-                  placeholder="등록 후 자동 생성됩니다."
-                />
+              <div className="admin-form-row">
+                <label className="admin-form-label">할인율(%)</label>
+                <div className="admin-form-control">
+                  <input
+                    type="number"
+                    name="discountRate"
+                    value={productData.discountRate}
+                    onChange={handleChangeProductData}
+                    placeholder="0 ~ 100 사이 할인율을 입력하세요"
+                    min="0"
+                    max="100"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label>설명</label>
-                <textarea
-                  name="description"
-                  value={productData.description}
-                  onChange={handleChangeProductData}
-                  placeholder="상품 설명을 입력하세요"
-                />
+              <div className="admin-form-row">
+                <label className="admin-form-label">판매가</label>
+                <div className="admin-form-control">
+                  <div className="admin-sale-price">{salePrice}</div>
+                </div>
+              </div>
+
+              <div className="admin-form-row">
+                <label className="admin-form-label">판매여부</label>
+                <div className="admin-form-control admin-inline-options">
+                  <label>
+                    <input
+                      type="radio"
+                      name="useYn"
+                      value="Y"
+                      checked={productData.useYn === "Y"}
+                      onChange={handleChangeProductData}
+                    />
+                    판매
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="useYn"
+                      value="N"
+                      checked={productData.useYn === "N"}
+                      onChange={handleChangeProductData}
+                    />
+                    판매중지
+                  </label>
+                </div>
+              </div>
+
+              <div className="admin-form-row">
+                <label className="admin-form-label">당일배송</label>
+                <div className="admin-form-control admin-inline-options">
+                  <label>
+                    <input
+                      type="radio"
+                      name="sameDayDeliveryYn"
+                      value="Y"
+                      checked={productData.sameDayDeliveryYn === "Y"}
+                      onChange={handleChangeProductData}
+                    />
+                    가능
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="sameDayDeliveryYn"
+                      value="N"
+                      checked={productData.sameDayDeliveryYn === "N"}
+                      onChange={handleChangeProductData}
+                    />
+                    불가
+                  </label>
+                </div>
+              </div>
+
+              <div className="admin-form-row admin-form-row-full">
+                <label className="admin-form-label">설명</label>
+                <div className="admin-form-control">
+                  <textarea
+                    name="description"
+                    value={productData.description}
+                    onChange={handleChangeProductData}
+                    placeholder="상품 설명을 입력하세요"
+                  />
+                </div>
               </div>
             </section>
 
-            <section className="admin-section">
+            <section className="admin-product-section">
               <h2>이미지</h2>
 
-              <div>
-                <label>썸네일 이미지 (필수)</label>
-                <input
-                  type="file"
-                  name="thumbImage"
-                  accept="image/*"
-                  onChange={handleSingleImageChange}
-                />
-                {imageData.thumbImage && (
-                  <>
-                    <span>{imageData.thumbImage.name}</span>
+              <div className="admin-form-row">
+                <label className="admin-form-label">썸네일 이미지 (필수)</label>
+                <div className="admin-form-control admin-file-row">
+                  <input
+                    type="file"
+                    name="thumbImage"
+                    accept="image/*"
+                    ref={thumbImageInputRef}
+                    onChange={handleSingleImageChange}
+                    style={{ display: "none" }}
+                  />
+
+                  <button
+                    type="button"
+                    className="admin-btn"
+                    onClick={() => handleClickSingleImageButton("thumbImage")}
+                  >
+                    파일 선택
+                  </button>
+
+                  <span className="admin-file-name">
+                    {imageData.thumbImage
+                      ? imageData.thumbImage.name
+                      : "선택된 파일 없음"}
+                  </span>
+
+                  {imageData.thumbImage && (
                     <button
                       type="button"
+                      className="admin-btn admin-btn-danger"
                       onClick={() => handleRemoveSingleImage("thumbImage")}
                     >
                       삭제
                     </button>
-                  </>
-                )}
+                  )}
+                </div>
               </div>
 
-              <div>
-                <label>메인 이미지</label>
-                <input
-                  type="file"
-                  name="mainImage"
-                  accept="image/*"
-                  onChange={handleSingleImageChange}
-                />
-                {imageData.mainImage && (
-                  <>
-                    <span>{imageData.mainImage.name}</span>
+              <div className="admin-form-row">
+                <label className="admin-form-label">메인 이미지</label>
+                <div className="admin-form-control admin-file-row">
+                  <input
+                    type="file"
+                    name="mainImage"
+                    accept="image/*"
+                    ref={mainImageInputRef}
+                    onChange={handleSingleImageChange}
+                    style={{ display: "none" }}
+                  />
+
+                  <button
+                    type="button"
+                    className="admin-btn"
+                    onClick={() => handleClickSingleImageButton("mainImage")}
+                  >
+                    파일 선택
+                  </button>
+
+                  <span className="admin-file-name">
+                    {imageData.mainImage
+                      ? imageData.mainImage.name
+                      : "선택된 파일 없음"}
+                  </span>
+
+                  {imageData.mainImage && (
                     <button
                       type="button"
+                      className="admin-btn admin-btn-danger"
                       onClick={() => handleRemoveSingleImage("mainImage")}
                     >
                       삭제
                     </button>
-                  </>
-                )}
+                  )}
+                </div>
               </div>
 
-              <div>
-                <label>갤러리 이미지 (최대 20장)</label>
-                {imageData.galleryImages.map((file, index) => (
-                  <div key={index}>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) =>
-                        handleGalleryImageChange(
-                          index,
-                          e.target.files?.[0] || null,
-                        )
-                      }
-                    />
+              <div className="admin-form-row">
+                <label className="admin-form-label">
+                  갤러리 이미지 (최대 20장)
+                </label>
+                <div className="admin-form-control">
+                  {imageData.galleryImages.map((file, index) => (
+                    <div key={index} className="admin-file-row">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={(element) => {
+                          galleryImageInputRefs.current[index] = element;
+                        }}
+                        onChange={(e) =>
+                          handleGalleryImageChange(
+                            index,
+                            e.target.files?.[0] || null,
+                          )
+                        }
+                        style={{ display: "none" }}
+                      />
 
-                    {file && (
-                      <>
-                        <span>{file.name}</span>
+                      <button
+                        type="button"
+                        className="admin-btn"
+                        onClick={() => handleClickGalleryImageButton(index)}
+                      >
+                        파일 선택
+                      </button>
+
+                      <span className="admin-file-name">
+                        {file ? file.name : "선택된 파일 없음"}
+                      </span>
+
+                      {file && (
                         <button
                           type="button"
+                          className="admin-btn admin-btn-danger"
                           onClick={() => handleRemoveGalleryImage(index)}
                         >
                           삭제
                         </button>
-                      </>
-                    )}
-                  </div>
-                ))}
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div>
-                <label>사이즈표 이미지</label>
-                <input
-                  type="file"
-                  name="sizeImage"
-                  accept="image/*"
-                  onChange={handleSingleImageChange}
-                />
-                {imageData.sizeImage && (
-                  <>
-                    <span>{imageData.sizeImage.name}</span>
+              <div className="admin-form-row">
+                <label className="admin-form-label">사이즈표 이미지</label>
+                <div className="admin-form-control admin-file-row">
+                  <input
+                    type="file"
+                    name="sizeImage"
+                    accept="image/*"
+                    ref={sizeImageInputRef}
+                    onChange={handleSingleImageChange}
+                    style={{ display: "none" }}
+                  />
+
+                  <button
+                    type="button"
+                    className="admin-btn"
+                    onClick={() => handleClickSingleImageButton("sizeImage")}
+                  >
+                    파일 선택
+                  </button>
+
+                  <span className="admin-file-name">
+                    {imageData.sizeImage
+                      ? imageData.sizeImage.name
+                      : "선택된 파일 없음"}
+                  </span>
+
+                  {imageData.sizeImage && (
                     <button
                       type="button"
+                      className="admin-btn admin-btn-danger"
                       onClick={() => handleRemoveSingleImage("sizeImage")}
                     >
                       삭제
                     </button>
-                  </>
-                )}
+                  )}
+                </div>
               </div>
             </section>
 
-            <section className="admin-section">
+            <section className="admin-product-section">
               <h2>옵션 및 재고</h2>
 
-              <div>
+              <div className="admin-option-toggle">
                 <label>
                   <input
                     type="checkbox"
@@ -771,25 +839,27 @@ const AdminProductAddPage = () => {
               </div>
 
               {isNoOptionProduct ? (
-                <div>
-                  <label>기본 재고</label>
-                  <input
-                    type="number"
-                    value={baseStock}
-                    onChange={(e) =>
-                      setBaseStock(
-                        e.target.value === ""
-                          ? ""
-                          : Math.max(0, Number(e.target.value)),
-                      )
-                    }
-                    placeholder="기본 재고 수량을 입력하세요"
-                    min="0"
-                  />
+                <div className="admin-form-row">
+                  <label className="admin-form-label">기본 재고</label>
+                  <div className="admin-form-control">
+                    <input
+                      type="number"
+                      value={baseStock}
+                      onChange={(e) =>
+                        setBaseStock(
+                          e.target.value === ""
+                            ? ""
+                            : Math.max(0, Number(e.target.value)),
+                        )
+                      }
+                      placeholder="기본 재고 수량을 입력하세요"
+                      min="0"
+                    />
+                  </div>
                 </div>
               ) : (
                 <>
-                  <table border="1" cellPadding="8">
+                  <table className="admin-option-table">
                     <thead>
                       <tr>
                         <th>색상</th>
@@ -861,30 +931,47 @@ const AdminProductAddPage = () => {
                             </select>
                           </td>
                           <td>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveOptionRow(index)}
-                            >
-                              삭제
-                            </button>
+                            <div className="admin-option-actions">
+                              <button
+                                type="button"
+                                className="admin-btn admin-btn-danger"
+                                onClick={() => handleRemoveOptionRow(index)}
+                              >
+                                삭제
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
 
-                  <button type="button" onClick={handleAddOptionRow}>
-                    옵션 추가
-                  </button>
+                  <div className="admin-option-add">
+                    <button
+                      type="button"
+                      className="admin-btn"
+                      onClick={handleAddOptionRow}
+                    >
+                      옵션 추가
+                    </button>
+                  </div>
                 </>
               )}
             </section>
 
-            <section className="admin-section">
-              <button type="submit">상품 등록</button>
-              <button type="button" onClick={handleMoveToList}>
-                목록
-              </button>
+            <section className="admin-product-section">
+              <div className="admin-bottom-actions">
+                <button type="submit" className="admin-btn admin-btn-dark">
+                  상품 등록
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn"
+                  onClick={handleMoveToList}
+                >
+                  목록
+                </button>
+              </div>
             </section>
           </form>
         </div>
