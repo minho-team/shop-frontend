@@ -3,6 +3,7 @@ import AdminHeader from "../../components/admin/AdminHeader";
 import { useEffect, useState } from "react";
 import { getAdminProductList } from "../../api/admin/adminProductApi";
 import { useNavigate } from "react-router-dom";
+import "../../css/admin/AdminProductListPage.css";
 
 const API_BASE_URL = "http://localhost:8080";
 
@@ -93,17 +94,20 @@ const AdminProductListPage = () => {
 
   // 상품 목록 상태
   const [productList, setProductList] = useState([]);
-  // 전체 개수 / 페이지 정보 상태
+  // 전체 개수 상태
   const [totalCount, setTotalCount] = useState(0);
   // 로딩 상태
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
   // 목록 조회 함수
   const fetchProductList = async () => {
     try {
       setLoading(true);
 
       const data = await getAdminProductList(search);
-      console.log("상품목록 응답:", data.list);
+      console.log("상품목록 응답:", data);
 
       setProductList(data.list || []);
       setTotalCount(data.totalCount || 0);
@@ -113,26 +117,30 @@ const AdminProductListPage = () => {
       setLoading(false);
     }
   };
+
   // search 값이 바뀔 때마다 재조회
   useEffect(() => {
     fetchProductList();
   }, [search]);
+
   // 검색 조건 변경 핸들러
   const handleChangeSearch = (e) => {
     const { name, value } = e.target;
 
     setSearch((prev) => {
-      let newSearch = {
+      const newSearch = {
         ...prev,
         [name]: value,
         page: 1,
       };
 
+      // 성별 바꾸면 대분류/소분류 초기화
       if (name === "genderCategoryId") {
         newSearch.mainCategoryId = "";
         newSearch.categoryId = "";
       }
 
+      // 대분류 바꾸면 소분류 초기화
       if (name === "mainCategoryId") {
         newSearch.categoryId = "";
       }
@@ -140,6 +148,7 @@ const AdminProductListPage = () => {
       return newSearch;
     });
   };
+
   // 검색 버튼 클릭 핸들러
   const handleSearch = () => {
     setSearch((prev) => ({
@@ -147,6 +156,7 @@ const AdminProductListPage = () => {
       page: 1,
     }));
   };
+
   // 초기화 버튼 클릭 핸들러
   const handleReset = () => {
     setSearch({
@@ -160,8 +170,7 @@ const AdminProductListPage = () => {
       sameDayDeliveryYn: "",
     });
   };
-  // 페이지 이동 함수
-  const navigate = useNavigate();
+
   // 페이지 변경 핸들러
   const handlePageChange = (pageNum) => {
     setSearch((prev) => ({
@@ -169,22 +178,31 @@ const AdminProductListPage = () => {
       page: pageNum,
     }));
   };
-  // 페이지 계산
+
+  // 전체 페이지 수 계산
   const totalPages = Math.ceil(totalCount / search.size);
-  // 날짜 포맷 함수
+
+  // 날짜 포맷
   const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+
     const d = new Date(dateStr);
-    return d.toLocaleString();
+
+    if (Number.isNaN(d.getTime())) return "-";
+
+    return d.toLocaleDateString("ko-KR");
   };
 
   return (
     <>
       <AdminHeader />
+
       <AdminLayout pageTitle="상품 관리">
-        <div>
+        <div className="admin-product-list-page">
           <h2>상품 목록</h2>
+
           {/* 검색 영역 */}
-          <div>
+          <div className="admin-product-list-search">
             <input
               type="text"
               name="keyword"
@@ -256,109 +274,175 @@ const AdminProductListPage = () => {
               <option value="N">일반배송</option>
             </select>
 
-            <button type="button" onClick={handleReset}>
+            <button
+              type="button"
+              className="admin-btn admin-btn-dark"
+              onClick={handleSearch}
+            >
+              검색
+            </button>
+
+            <button type="button" className="admin-btn" onClick={handleReset}>
               초기화
             </button>
           </div>
 
+          {/* 목록 개수 표시 */}
+          <div className="admin-product-list-summary">
+            총 <strong>{totalCount}</strong>개 상품
+          </div>
+
           {/* 목록 영역 */}
-          {loading ? (
-            <p>로딩중...</p>
-          ) : (
-            <table border="1" cellPadding="10">
-              <thead>
-                <tr>
-                  <th>썸네일</th>
-                  <th>상품번호</th>
-                  <th>상품명</th>
-                  <th>카테고리</th>
-                  <th>정가</th>
-                  <th>할인율</th>
-                  <th>판매가</th>
-                  <th>사용여부</th>
-                  <th>조회수</th>
-                  <th>당일배송</th>
-                  <th>등록일</th>
-                </tr>
-              </thead>
-              <tbody>
-                {productList.length === 0 ? (
-                  <tr>
-                    <td colSpan="11">조회된 상품이 없습니다.</td>
-                  </tr>
-                ) : (
-                  productList.map((product) => {
-                    const imageSrc = product.thumbnailUrl
-                      ? `${API_BASE_URL}${product.thumbnailUrl}`
-                      : "";
+          <div className="admin-product-list-section">
+            {loading ? (
+              <p className="admin-empty-text">로딩중...</p>
+            ) : (
+              <div className="admin-product-list-table-wrap">
+                <table className="admin-product-list-table">
+                  <thead>
+                    <tr>
+                      <th>썸네일</th>
+                      <th>상품번호</th>
+                      <th>상품명</th>
+                      <th>카테고리</th>
+                      <th>정가</th>
+                      <th>할인율</th>
+                      <th>판매가</th>
+                      <th>사용여부</th>
+                      <th>조회수</th>
+                      <th>당일배송</th>
+                      <th>등록일</th>
+                    </tr>
+                  </thead>
 
-                    return (
-                      <tr
-                        key={product.productNo}
-                        onClick={() =>
-                          navigate(`/admin/products/detail/${product.productNo}`)
-                        }
-                        style={{ cursor: "pointer" }}
-                      >
-                        <td>
-                          {product.thumbnailUrl ? (
-                            <img src={imageSrc} alt={product.name} width="60" />
-                          ) : (
-                            "이미지 없음"
-                          )}
+                  <tbody>
+                    {productList.length === 0 ? (
+                      <tr className="admin-empty-row">
+                        <td colSpan="11">
+                          <span className="admin-empty-text">
+                            조회된 상품이 없습니다.
+                          </span>
                         </td>
-                        <td>{product.productNo}</td>
-                        <td>{product.name}</td>
-                        <td>{product.categoryName}</td>
-                        <td>{product.price?.toLocaleString()}원</td>
-                        <td>{product.discountRate}%</td>
-                        <td>{product.salePrice?.toLocaleString()}원</td>
-                        <td>{product.useYn === "Y" ? "사용" : "미사용"}</td>
-                        <td>{product.viewCount}</td>
-                        <td>
-                          {product.sameDayDeliveryYn === "Y"
-                            ? "당일배송"
-                            : "일반배송"}
-                        </td>
-                        <td>{formatDate(product.createdAt)}</td>
                       </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          )}
+                    ) : (
+                      productList.map((product) => {
+                        const imageSrc = product.thumbnailUrl
+                          ? `${API_BASE_URL}${product.thumbnailUrl}`
+                          : "";
 
-          {/* 페이지네이션 */}
-          <div style={{ marginTop: "20px" }}>
-            <button
-              type="button"
-              disabled={search.page === 1}
-              onClick={() => handlePageChange(search.page - 1)}
-            >
-              이전
-            </button>
+                        return (
+                          <tr
+                            key={product.productNo}
+                            onClick={() =>
+                              navigate(
+                                `/admin/products/detail/${product.productNo}`,
+                              )
+                            }
+                          >
+                            <td>
+                              {product.thumbnailUrl ? (
+                                <img
+                                  src={imageSrc}
+                                  alt={product.name}
+                                  className="admin-product-thumbnail"
+                                />
+                              ) : (
+                                <div className="admin-product-no-image">
+                                  이미지 없음
+                                </div>
+                              )}
+                            </td>
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-              (pageNum) => (
-                <button
-                  key={pageNum}
-                  type="button"
-                  onClick={() => handlePageChange(pageNum)}
-                  disabled={search.page === pageNum}
-                >
-                  {pageNum}
-                </button>
-              ),
+                            <td>{product.productNo}</td>
+
+                            <td className="admin-product-name-cell">
+                              <div className="admin-product-name-text">
+                                {product.name}
+                              </div>
+                            </td>
+
+                            <td className="admin-product-category-cell">
+                              {product.categoryName}
+                            </td>
+
+                            <td>{product.price?.toLocaleString()}원</td>
+                            <td>{product.discountRate}%</td>
+                            <td>{product.salePrice?.toLocaleString()}원</td>
+
+                            <td>
+                              <span
+                                className={`admin-badge ${
+                                  product.useYn === "Y"
+                                    ? "admin-badge-use"
+                                    : "admin-badge-not-use"
+                                }`}
+                              >
+                                {product.useYn === "Y" ? "사용" : "미사용"}
+                              </span>
+                            </td>
+
+                            <td>{product.viewCount}</td>
+
+                            <td>
+                              <span
+                                className={`admin-badge ${
+                                  product.sameDayDeliveryYn === "Y"
+                                    ? "admin-badge-delivery"
+                                    : "admin-badge-normal"
+                                }`}
+                              >
+                                {product.sameDayDeliveryYn === "Y"
+                                  ? "당일배송"
+                                  : "일반배송"}
+                              </span>
+                            </td>
+
+                            <td>{formatDate(product.createdAt)}</td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             )}
 
-            <button
-              type="button"
-              disabled={search.page === totalPages || totalPages === 0}
-              onClick={() => handlePageChange(search.page + 1)}
-            >
-              다음
-            </button>
+            {/* 페이지네이션 */}
+            <div className="admin-product-pagination">
+              <button
+                type="button"
+                className="admin-btn admin-btn-page"
+                disabled={search.page === 1}
+                onClick={() => handlePageChange(search.page - 1)}
+              >
+                이전
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (pageNum) => (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    className={`admin-btn admin-btn-page ${
+                      search.page === pageNum ? "active" : ""
+                    }`}
+                    onClick={() => handlePageChange(pageNum)}
+                    disabled={search.page === pageNum}
+                  >
+                    {pageNum}
+                  </button>
+                ),
+              )}
+
+              <button
+                type="button"
+                className="admin-btn admin-btn-page"
+                disabled={search.page === totalPages || totalPages === 0}
+                onClick={() => handlePageChange(search.page + 1)}
+              >
+                다음
+              </button>
+            </div>
           </div>
         </div>
       </AdminLayout>
