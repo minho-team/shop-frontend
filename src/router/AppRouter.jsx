@@ -26,6 +26,8 @@ const MyOrderDetailPage = lazy(() => import("../pages/user/MyOrderDetailPage"));
 const ReviewWritePage = lazy(() => import("../pages/user/ReviewWritePage"));
 const KakaoRedirectPage = lazy(() => import("../pages/user/KakaoRedirectPage"));
 const RefundPage = lazy(() => import("../pages/user/RefundPage"));
+const PaymentSuccessPage = lazy(() => import("../pages/user/PaymentSuccessPage"));
+const PaymentFailPage = lazy(() => import("../pages/user/PaymentFailPage"));
 
 //admin
 const AdminHome = lazy(() => import("../pages/admin/AdminHome"));
@@ -197,6 +199,8 @@ const AppRouterContent = () => {
         { path: "/my/order/detail/:orderNo", element: <ProtectedRouteWrapper Component={MyOrderDetailPage} /> },
         { path: "/my/review/write/:orderItemNo", element: <ProtectedRouteWrapper Component={ReviewWritePage} /> },
         { path: "/refund/write", element: <ProtectedRouteWrapper Component={RefundPage} /> },
+        { path: "/payment/success", element: <ProtectedRouteWrapper Component={PaymentSuccessPage} /> },
+        { path: "/payment/fail", element: <ProtectedRouteWrapper Component={PaymentFailPage} /> },
         
     ]);
     

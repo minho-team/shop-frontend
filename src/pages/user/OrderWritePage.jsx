@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { createOrder } from "../../api/user/ordersApi";
+import { createOrder, preparePayment } from "../../api/user/ordersApi";
 import "../../css/user/OrderWritePage.css";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
+import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
+const TOSS_CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY;
 
 const getImageSrc = (imageUrl) => {
   if (!imageUrl) return "";
@@ -138,74 +140,100 @@ const OrderWritePage = () => {
     }));
   }, [orderItems]);
 
-  const handleSubmitOrder = async () => {
-    if (submitting) return;
+const handleSubmitOrder = async () => {
+  if (submitting) return;
 
-    if (!ordererName.trim()) {
-      alert("주문자명을 입력해주세요.");
-      return;
-    }
+  if (!ordererName.trim()) {
+    alert("주문자명을 입력해주세요.");
+    return;
+  }
 
-    if (!ordererPhone.trim()) {
-      alert("연락처를 입력해주세요.");
-      return;
-    }
+  if (!ordererPhone.trim()) {
+    alert("연락처를 입력해주세요.");
+    return;
+  }
 
-    if (!ordererEmail.trim()) {
-      alert("이메일을 입력해주세요.");
-      return;
-    }
+  if (!ordererEmail.trim()) {
+    alert("이메일을 입력해주세요.");
+    return;
+  }
 
-    if (!receiverName.trim()) {
-      alert("수령인명을 입력해주세요.");
-      return;
-    }
+  if (!receiverName.trim()) {
+    alert("수령인명을 입력해주세요.");
+    return;
+  }
 
-    if (!receiverPhone.trim()) {
-      alert("수령인 연락처를 입력해주세요.");
-      return;
-    }
+  if (!receiverPhone.trim()) {
+    alert("수령인 연락처를 입력해주세요.");
+    return;
+  }
 
-    if (!zipCode.trim() || !baseAddress.trim()) {
-      alert("주소를 입력해주세요.");
-      return;
-    }
+  if (!zipCode.trim() || !baseAddress.trim()) {
+    alert("주소를 입력해주세요.");
+    return;
+  }
 
-    try {
-      setSubmitting(true);
+  try {
+    setSubmitting(true);
 
-      const orderRequest = {
-        ordererName,
-        ordererPhoneNumber: ordererPhone,
-        ordererEmail,
-        receiverName,
-        receiverPhoneNumber: receiverPhone,
-        receiverZipCode: zipCode,
-        receiverBaseAddress: baseAddress,
-        receiverDetailAddress: detailAddress,
-        message,
-        totalPrice,
-        items: resultItems,
-      };
+    const orderRequest = {
+      ordererName,
+      ordererPhoneNumber: ordererPhone,
+      ordererEmail,
+      receiverName,
+      receiverPhoneNumber: receiverPhone,
+      receiverZipCode: zipCode,
+      receiverBaseAddress: baseAddress,
+      receiverDetailAddress: detailAddress,
+      message,
+      totalPrice,
+      items: resultItems,
+    };
 
-      const response = await createOrder(orderRequest);
+    // 1. 서버에 주문/결제 준비 요청
+    const prepared = await preparePayment(orderRequest);
 
-      navigate("/order/result", {
-        state: {
-          orderNo: response.orderNo,
-          totalPrice,
-          createdAt: response.createdAt || new Date().toISOString(),
-          ordererName,
-          items: resultItems,
-        },
-      });
-    } catch (error) {
-      console.error("주문 실패:", error);
-      alert("주문 처리 중 오류가 발생했습니다.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    // prepared 예시:
+    // {
+    //   orderNo: 1,
+    //   orderId: "ORDER_1_20260322",
+    //   orderName: "맨투맨 외 2건",
+    //   amount: 30000,
+    //   customerName: "홍길동",
+    //   customerEmail: "a@a.com",
+    //   customerMobilePhone: "01012341234"
+    // }
+
+    // 2. 토스 SDK 로드
+    const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
+
+    // 3. 결제창 인스턴스 생성
+    const payment = tossPayments.payment({
+      customerKey: `member_${prepared.orderNo}`, 
+    });
+
+    // 4. 결제창 호출
+    await payment.requestPayment({
+      method: "CARD",
+      amount: {
+        currency: "KRW",
+        value: prepared.amount,
+      },
+      orderId: prepared.orderId,
+      orderName: prepared.orderName,
+      successUrl: `${window.location.origin}/payment/success`,
+      failUrl: `${window.location.origin}/payment/fail`,
+      customerEmail: prepared.customerEmail,
+      customerName: prepared.customerName,
+      customerMobilePhone: prepared.customerMobilePhone,
+    });
+  } catch (error) {
+    console.error("결제 요청 실패:", error);
+    alert("결제 요청 중 오류가 발생했습니다.");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   if (!orderData) {
     return null;

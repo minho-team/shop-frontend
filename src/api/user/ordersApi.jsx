@@ -1,6 +1,8 @@
-import apiClient from "../common/apiClient";
+import apiClient, { API_SERVER_HOST } from "../common/apiClient";
 
 const prefix = "/api/orders";
+
+
 
 //결제 시
 export const createOrder = async (orderData) => {
@@ -18,5 +20,20 @@ export const getMyOrderList = async (page = 1) => {
 export const getOrderDetail = async (orderNo) => {
   const res = await apiClient.get(`${prefix}/${orderNo}`);
   console.log(res.data);
+  return res.data;
+};
+
+
+//결제 준비
+export const preparePayment = async (orderRequest) => {
+  const res = await apiClient.post(`${API_SERVER_HOST}/api/payments/prepare`, orderRequest, {
+    withCredentials: true,
+  });
+  return res.data;
+};
+
+//결제 승인
+export const confirmPayment = async (payload) => {
+  const res = await apiClient.post(`${API_SERVER_HOST}/api/payments/confirm`, payload);
   return res.data;
 };
