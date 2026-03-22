@@ -14,6 +14,27 @@ export const getAdminProductList = async (searchParams) => {
   return response.data;
 };
 
+// 상품 기본정보 상세 조회
+export const getAdminProductDetail = async (productNo) => {
+  const response = await apiClient.get(`${prefix}/${productNo}`);
+  return response.data;
+};
+
+// 상품 기본정보 수정
+export const putAdminProductBasic = async (productNo, basicData) => {
+  const response = await apiClient.put(
+    `${prefix}/${productNo}/basic`,
+    basicData,
+  );
+  return response.data;
+};
+
+// 상품 삭제
+export const deleteAdminProduct = async (productNo) => {
+  const response = await apiClient.delete(`${prefix}/${productNo}`);
+  return response.data;
+};
+
 // 관리자 상품 추가
 export const postAdminProductAdd = async (formData) => {
   const response = await apiClient.post(prefix, formData);
