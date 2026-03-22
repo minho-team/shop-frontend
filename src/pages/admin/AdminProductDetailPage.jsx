@@ -28,6 +28,9 @@ import {
   deleteAdminProductOption,
 } from "../../api/admin/adminProductOptionApi";
 
+import { API_SERVER_HOST } from "../../api/common/apiClient";
+import "../../css/admin/AdminProductDetail.css";
+
 const AdminProductDetailPage = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -70,7 +73,6 @@ const AdminProductDetailPage = () => {
     options: [],
   });
 
-  // 옵션 추가용 상태
   const [newOption, setNewOption] = useState({
     color: "",
     size: "",
@@ -151,7 +153,6 @@ const AdminProductDetailPage = () => {
     try {
       const data = await getAdminProductOptions(productNo);
 
-      // 배열만 오는 경우
       if (Array.isArray(data)) {
         const optionList = data.map((option) => ({
           ...option,
@@ -167,7 +168,6 @@ const AdminProductDetailPage = () => {
         return;
       }
 
-      // 객체로 오는 경우
       const optionList = (data?.options || []).map((option) => ({
         ...option,
         isEditing: false,
@@ -601,13 +601,21 @@ const AdminProductDetailPage = () => {
     <>
       <AdminHeader />
       <AdminLayout>
-        <div>
-          <h2>상품 상세 조회 / 수정</h2>
-          <p>상품 번호: {productNo}</p>
+        <div className="admin-product-detail-page">
+          <div className="admin-detail-top">
+            <div>
+              <h2 className="admin-detail-title">상품 상세 조회 / 수정</h2>
+              <p className="admin-detail-subtitle">상품 번호: {productNo}</p>
+            </div>
 
-          <button type="button" onClick={handleMoveToList}>
-            목록으로
-          </button>
+            <button
+              type="button"
+              className="admin-detail-top-button"
+              onClick={handleMoveToList}
+            >
+              목록으로
+            </button>
+          </div>
 
           <ProductBasicSection
             basicInfo={basicInfo}
@@ -651,11 +659,15 @@ const AdminProductDetailPage = () => {
             handleBaseStockChange={handleBaseStockChange}
           />
 
-          <div>
+          <div className="admin-detail-bottom-buttons">
             <button type="button" onClick={handleMoveToAddPage}>
               새상품 등록
             </button>
-            <button type="button" onClick={handleDeleteProduct}>
+            <button
+              type="button"
+              className="danger"
+              onClick={handleDeleteProduct}
+            >
               상품 삭제
             </button>
             <button type="button" onClick={handleMoveToList}>
@@ -680,91 +692,95 @@ const ProductBasicSection = ({
   handleBasicInfoSave,
 }) => {
   return (
-    <section>
-      <h3>기본정보</h3>
+    <section className="admin-detail-section">
+      <h3 className="admin-detail-section-title">기본정보</h3>
 
-      <div>
-        <label>상품번호 </label>
-        <input type="text" value={basicInfo.productNo} readOnly />
+      <div className="admin-detail-form-grid">
+        <div className="admin-detail-form-row">
+          <label>상품번호</label>
+          <input type="text" value={basicInfo.productNo} readOnly />
+        </div>
+
+        <div className="admin-detail-form-row">
+          <label>카테고리</label>
+          <input type="text" value={basicInfo.categoryName} readOnly />
+        </div>
+
+        <div className="admin-detail-form-row admin-detail-form-row-wide">
+          <label>상품명</label>
+          <input
+            type="text"
+            name="productName"
+            value={basicInfo.productName}
+            onChange={handleBasicInfoChange}
+          />
+        </div>
+
+        <div className="admin-detail-form-row">
+          <label>정가</label>
+          <input
+            type="number"
+            name="price"
+            value={basicInfo.price}
+            onChange={handleBasicInfoChange}
+          />
+        </div>
+
+        <div className="admin-detail-form-row">
+          <label>할인율</label>
+          <input
+            type="number"
+            name="discountRate"
+            value={basicInfo.discountRate}
+            onChange={handleBasicInfoChange}
+          />
+        </div>
+
+        <div className="admin-detail-form-row">
+          <label>판매가</label>
+          <input type="number" value={salePrice} readOnly />
+        </div>
+
+        <div className="admin-detail-form-row">
+          <label>판매여부</label>
+          <select
+            name="saleStatus"
+            value={basicInfo.saleStatus}
+            onChange={handleBasicInfoChange}
+          >
+            <option value="Y">Y</option>
+            <option value="N">N</option>
+          </select>
+        </div>
+
+        <div className="admin-detail-form-row">
+          <label>당일배송</label>
+          <select
+            name="sameDayDelivery"
+            value={basicInfo.sameDayDelivery}
+            onChange={handleBasicInfoChange}
+          >
+            <option value="Y">Y</option>
+            <option value="N">N</option>
+          </select>
+        </div>
+
+        <div className="admin-detail-form-row">
+          <label>조회수</label>
+          <input type="number" value={basicInfo.viewCount} readOnly />
+        </div>
+
+        <div className="admin-detail-form-row">
+          <label>등록일</label>
+          <input type="text" value={basicInfo.createdAt} readOnly />
+        </div>
       </div>
 
-      <div>
-        <label>카테고리 </label>
-        <input type="text" value={basicInfo.categoryName} readOnly />
+      <div className="admin-detail-section-actions">
+        <button type="button" onClick={handleBasicInfoSave}>
+          기본정보 저장
+        </button>
       </div>
-
-      <div>
-        <label>상품명 </label>
-        <input
-          type="text"
-          name="productName"
-          value={basicInfo.productName}
-          onChange={handleBasicInfoChange}
-        />
-      </div>
-
-      <div>
-        <label>정가 </label>
-        <input
-          type="number"
-          name="price"
-          value={basicInfo.price}
-          onChange={handleBasicInfoChange}
-        />
-      </div>
-
-      <div>
-        <label>할인율 </label>
-        <input
-          type="number"
-          name="discountRate"
-          value={basicInfo.discountRate}
-          onChange={handleBasicInfoChange}
-        />
-      </div>
-
-      <div>
-        <label>판매가 </label>
-        <input type="number" value={salePrice} readOnly />
-      </div>
-
-      <div>
-        <label>판매여부 </label>
-        <select
-          name="saleStatus"
-          value={basicInfo.saleStatus}
-          onChange={handleBasicInfoChange}
-        >
-          <option value="Y">Y</option>
-          <option value="N">N</option>
-        </select>
-      </div>
-
-      <div>
-        <label>당일배송 </label>
-        <select
-          name="sameDayDelivery"
-          value={basicInfo.sameDayDelivery}
-          onChange={handleBasicInfoChange}
-        >
-          <option value="Y">Y</option>
-          <option value="N">N</option>
-        </select>
-      </div>
-
-      <div>
-        <label>조회수 </label>
-        <input type="number" value={basicInfo.viewCount} readOnly />
-      </div>
-
-      <div>
-        <label>등록일 </label>
-        <input type="text" value={basicInfo.createdAt} readOnly />
-      </div>
-
-      <button type="button" onClick={handleBasicInfoSave}>
-        기본정보 저장
-      </button>
     </section>
   );
 };
@@ -793,113 +809,200 @@ const ProductImageSection = ({
   handleSizeChartFileChange,
   handleSizeChartDelete,
 }) => {
+  const getImageSrc = (imageUrl) => {
+    if (!imageUrl) return "";
+    return `${API_SERVER_HOST}/view?fileName=${encodeURIComponent(imageUrl)}`;
+  };
+
   return (
-    <section>
-      <h3>이미지</h3>
+    <section className="admin-detail-section">
+      <h3 className="admin-detail-section-title">이미지</h3>
 
-      <div>
-        <h4>썸네일 이미지</h4>
+      <div className="admin-detail-image-grid">
+        <div className="admin-image-card">
+          <h4>썸네일 이미지</h4>
 
-        {imageInfo.thumbnailImage ? (
-          <div>
-            <p>{imageInfo.thumbnailImage.fileName}</p>
-            <button type="button" onClick={handleThumbnailButtonClick}>
-              변경
-            </button>
-          </div>
-        ) : (
-          <div>
-            <p>등록된 썸네일 이미지가 없습니다.</p>
-            <button type="button" onClick={handleThumbnailButtonClick}>
-              등록
-            </button>
-          </div>
-        )}
+          {imageInfo.thumbnailImage ? (
+            <>
+              <img
+                src={getImageSrc(imageInfo.thumbnailImage.imageUrl)}
+                alt="썸네일 이미지"
+                className="admin-detail-preview-image thumb"
+              />
+              <div className="admin-image-card-buttons">
+                <button type="button" onClick={handleThumbnailButtonClick}>
+                  변경
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="admin-image-empty">
+                등록된 썸네일 이미지가 없습니다.
+              </div>
+              <div className="admin-image-card-buttons">
+                <button type="button" onClick={handleThumbnailButtonClick}>
+                  등록
+                </button>
+              </div>
+            </>
+          )}
 
-        <input
-          type="file"
-          accept="image/*"
-          ref={thumbnailInputRef}
-          style={{ display: "none" }}
-          onChange={handleThumbnailFileChange}
-        />
+          <input
+            type="file"
+            accept="image/*"
+            ref={thumbnailInputRef}
+            style={{ display: "none" }}
+            onChange={handleThumbnailFileChange}
+          />
+        </div>
+
+        <div className="admin-image-card">
+          <h4>메인 이미지</h4>
+
+          {imageInfo.mainImage ? (
+            <>
+              <img
+                src={getImageSrc(imageInfo.mainImage.imageUrl)}
+                alt="메인 이미지"
+                className="admin-detail-preview-image main"
+              />
+              <div className="admin-image-card-buttons">
+                <button type="button" onClick={handleMainImageButtonClick}>
+                  변경
+                </button>
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={handleMainImageDelete}
+                >
+                  삭제
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="admin-image-empty">
+                등록된 메인 이미지가 없습니다.
+              </div>
+              <div className="admin-image-card-buttons">
+                <button type="button" onClick={handleMainImageButtonClick}>
+                  등록
+                </button>
+              </div>
+            </>
+          )}
+
+          <input
+            type="file"
+            accept="image/*"
+            ref={mainImageInputRef}
+            style={{ display: "none" }}
+            onChange={handleMainImageFileChange}
+          />
+        </div>
+
+        <div className="admin-image-card">
+          <h4>사이즈표 이미지</h4>
+
+          {imageInfo.sizeChartImage ? (
+            <>
+              <img
+                src={getImageSrc(imageInfo.sizeChartImage.imageUrl)}
+                alt="사이즈표 이미지"
+                className="admin-detail-preview-image main"
+              />
+              <div className="admin-image-card-buttons">
+                <button type="button" onClick={handleSizeChartButtonClick}>
+                  변경
+                </button>
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={handleSizeChartDelete}
+                >
+                  삭제
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="admin-image-empty">
+                등록된 사이즈표 이미지가 없습니다.
+              </div>
+              <div className="admin-image-card-buttons">
+                <button type="button" onClick={handleSizeChartButtonClick}>
+                  등록
+                </button>
+              </div>
+            </>
+          )}
+
+          <input
+            type="file"
+            accept="image/*"
+            ref={sizeChartInputRef}
+            style={{ display: "none" }}
+            onChange={handleSizeChartFileChange}
+          />
+        </div>
       </div>
 
-      <div>
-        <h4>메인 이미지</h4>
-
-        {imageInfo.mainImage ? (
-          <div>
-            <p>{imageInfo.mainImage.fileName}</p>
-            <button type="button" onClick={handleMainImageButtonClick}>
-              변경
-            </button>
-            <button type="button" onClick={handleMainImageDelete}>
-              삭제
-            </button>
-          </div>
-        ) : (
-          <div>
-            <p>등록된 메인 이미지가 없습니다.</p>
-            <button type="button" onClick={handleMainImageButtonClick}>
-              등록
-            </button>
-          </div>
-        )}
-
-        <input
-          type="file"
-          accept="image/*"
-          ref={mainImageInputRef}
-          style={{ display: "none" }}
-          onChange={handleMainImageFileChange}
-        />
-      </div>
-
-      <div>
-        <h4>갤러리 이미지</h4>
+      <div className="admin-gallery-section">
+        <div className="admin-gallery-header">
+          <h4>갤러리 이미지</h4>
+          <button type="button" onClick={handleGalleryAddButtonClick}>
+            갤러리 이미지 추가
+          </button>
+        </div>
 
         {imageInfo.galleryImages.length > 0 ? (
-          imageInfo.galleryImages.map((img) => (
-            <div key={img.productImgNo}>
-              <p>{img.fileName}</p>
+          <div className="admin-gallery-grid">
+            {imageInfo.galleryImages.map((img) => (
+              <div key={img.productImgNo} className="admin-gallery-card">
+                <img
+                  src={getImageSrc(img.imageUrl)}
+                  alt="갤러리 이미지"
+                  className="admin-detail-preview-image gallery"
+                />
 
-              <button
-                type="button"
-                onClick={() =>
-                  handleGalleryReplaceButtonClick(img.productImgNo)
-                }
-              >
-                변경
-              </button>
+                <div className="admin-image-card-buttons">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleGalleryReplaceButtonClick(img.productImgNo)
+                    }
+                  >
+                    변경
+                  </button>
+                  <button
+                    type="button"
+                    className="danger"
+                    onClick={() => handleGalleryDelete(img.productImgNo)}
+                  >
+                    삭제
+                  </button>
+                </div>
 
-              <button
-                type="button"
-                onClick={() => handleGalleryDelete(img.productImgNo)}
-              >
-                삭제
-              </button>
-
-              <input
-                type="file"
-                accept="image/*"
-                ref={(element) => {
-                  galleryReplaceInputRefs.current[img.productImgNo] = element;
-                }}
-                style={{ display: "none" }}
-                onChange={(e) =>
-                  handleGalleryReplaceFileChange(img.productImgNo, e)
-                }
-              />
-            </div>
-          ))
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={(element) => {
+                    galleryReplaceInputRefs.current[img.productImgNo] = element;
+                  }}
+                  style={{ display: "none" }}
+                  onChange={(e) =>
+                    handleGalleryReplaceFileChange(img.productImgNo, e)
+                  }
+                />
+              </div>
+            ))}
+          </div>
         ) : (
-          <p>등록된 갤러리 이미지가 없습니다.</p>
+          <div className="admin-image-empty">
+            등록된 갤러리 이미지가 없습니다.
+          </div>
         )}
-
-        <button type="button" onClick={handleGalleryAddButtonClick}>
-          갤러리 이미지 추가
-        </button>
 
         <input
           type="file"
@@ -907,37 +1010,6 @@ const ProductImageSection = ({
           ref={galleryAddInputRef}
           style={{ display: "none" }}
           onChange={handleGalleryAddFileChange}
-        />
-      </div>
-
-      <div>
-        <h4>사이즈표 이미지</h4>
-
-        {imageInfo.sizeChartImage ? (
-          <div>
-            <p>{imageInfo.sizeChartImage.fileName}</p>
-            <button type="button" onClick={handleSizeChartButtonClick}>
-              변경
-            </button>
-            <button type="button" onClick={handleSizeChartDelete}>
-              삭제
-            </button>
-          </div>
-        ) : (
-          <div>
-            <p>등록된 사이즈표 이미지가 없습니다.</p>
-            <button type="button" onClick={handleSizeChartButtonClick}>
-              등록
-            </button>
-          </div>
-        )}
-
-        <input
-          type="file"
-          accept="image/*"
-          ref={sizeChartInputRef}
-          style={{ display: "none" }}
-          onChange={handleSizeChartFileChange}
         />
       </div>
     </section>
@@ -962,18 +1034,18 @@ const ProductOptionSection = ({
   const { isNoOptionProduct, baseStock, options } = optionInfo;
 
   return (
-    <section>
-      <h3>옵션 및 재고</h3>
+    <section className="admin-detail-section">
+      <h3 className="admin-detail-section-title">옵션 및 재고</h3>
 
       {isNoOptionProduct ? (
-        <div>
-          <div>
-            <label>상품 유형 </label>
+        <div className="admin-detail-form-grid">
+          <div className="admin-detail-form-row">
+            <label>상품 유형</label>
             <input type="text" value="옵션 없는 상품" readOnly />
           </div>
 
-          <div>
-            <label>기본 재고 </label>
+          <div className="admin-detail-form-row">
+            <label>기본 재고</label>
             <input
               type="number"
               value={baseStock}
@@ -983,193 +1055,207 @@ const ProductOptionSection = ({
         </div>
       ) : (
         <>
-          <div>
-            <label>상품 유형 </label>
+          <div className="admin-detail-form-row admin-option-type-row">
+            <label>상품 유형</label>
             <input type="text" value="옵션형 상품" readOnly />
           </div>
 
-          <table border="1">
-            <thead>
-              <tr>
-                <th>색상</th>
-                <th>사이즈</th>
-                <th>재고</th>
-                <th>사용여부</th>
-                <th>관리</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {options.length === 0 ? (
+          <div className="admin-option-table-wrap">
+            <table className="admin-option-table">
+              <thead>
                 <tr>
-                  <td colSpan="5">등록된 옵션이 없습니다.</td>
+                  <th>색상</th>
+                  <th>사이즈</th>
+                  <th>재고</th>
+                  <th>사용여부</th>
+                  <th>관리</th>
                 </tr>
-              ) : (
-                options.map((option) => (
-                  <tr key={option.productOptionNo}>
-                    <td>
-                      {option.isEditing ? (
-                        <input
-                          type="text"
-                          value={option.color}
-                          onChange={(e) =>
-                            handleOptionChange(
-                              option.productOptionNo,
-                              "color",
-                              e.target.value,
-                            )
-                          }
-                        />
-                      ) : (
-                        option.color
-                      )}
-                    </td>
+              </thead>
 
-                    <td>
-                      {option.isEditing ? (
-                        <input
-                          type="text"
-                          value={option.optionSize}
-                          onChange={(e) =>
-                            handleOptionChange(
-                              option.productOptionNo,
-                              "optionSize",
-                              e.target.value,
-                            )
-                          }
-                        />
-                      ) : (
-                        option.optionSize
-                      )}
-                    </td>
-
-                    <td>
-                      {option.isEditing ? (
-                        <input
-                          type="number"
-                          value={option.stock}
-                          onChange={(e) =>
-                            handleOptionChange(
-                              option.productOptionNo,
-                              "stock",
-                              e.target.value,
-                            )
-                          }
-                        />
-                      ) : (
-                        option.stock
-                      )}
-                    </td>
-
-                    <td>
-                      {option.isEditing ? (
-                        <select
-                          value={option.useYn}
-                          onChange={(e) =>
-                            handleOptionChange(
-                              option.productOptionNo,
-                              "useYn",
-                              e.target.value,
-                            )
-                          }
-                        >
-                          <option value="Y">Y</option>
-                          <option value="N">N</option>
-                        </select>
-                      ) : (
-                        option.useYn
-                      )}
-                    </td>
-
-                    <td>
-                      {option.isEditing ? (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleOptionSave(option.productOptionNo)
-                            }
-                          >
-                            저장
-                          </button>
-                          <button type="button" onClick={handleOptionCancel}>
-                            취소
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleOptionEdit(option.productOptionNo)
-                            }
-                          >
-                            편집
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleOptionDelete(option.productOptionNo)
-                            }
-                          >
-                            삭제
-                          </button>
-                        </>
-                      )}
-                    </td>
+              <tbody>
+                {options.length === 0 ? (
+                  <tr>
+                    <td colSpan="5">등록된 옵션이 없습니다.</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  options.map((option) => (
+                    <tr key={option.productOptionNo}>
+                      <td>
+                        {option.isEditing ? (
+                          <input
+                            type="text"
+                            value={option.color}
+                            onChange={(e) =>
+                              handleOptionChange(
+                                option.productOptionNo,
+                                "color",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        ) : (
+                          option.color
+                        )}
+                      </td>
 
-          <h4>옵션 추가</h4>
+                      <td>
+                        {option.isEditing ? (
+                          <input
+                            type="text"
+                            value={option.optionSize}
+                            onChange={(e) =>
+                              handleOptionChange(
+                                option.productOptionNo,
+                                "optionSize",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        ) : (
+                          option.optionSize
+                        )}
+                      </td>
 
-          <div>
-            <label>색상 </label>
-            <input
-              type="text"
-              name="color"
-              value={newOption.color}
-              onChange={handleNewOptionChange}
-            />
+                      <td>
+                        {option.isEditing ? (
+                          <input
+                            type="number"
+                            value={option.stock}
+                            onChange={(e) =>
+                              handleOptionChange(
+                                option.productOptionNo,
+                                "stock",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        ) : (
+                          option.stock
+                        )}
+                      </td>
+
+                      <td>
+                        {option.isEditing ? (
+                          <select
+                            value={option.useYn}
+                            onChange={(e) =>
+                              handleOptionChange(
+                                option.productOptionNo,
+                                "useYn",
+                                e.target.value,
+                              )
+                            }
+                          >
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+                          </select>
+                        ) : (
+                          option.useYn
+                        )}
+                      </td>
+
+                      <td>
+                        <div className="admin-option-action-buttons">
+                          {option.isEditing ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleOptionSave(option.productOptionNo)
+                                }
+                              >
+                                저장
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleOptionCancel}
+                              >
+                                취소
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleOptionEdit(option.productOptionNo)
+                                }
+                              >
+                                편집
+                              </button>
+                              <button
+                                type="button"
+                                className="danger"
+                                onClick={() =>
+                                  handleOptionDelete(option.productOptionNo)
+                                }
+                              >
+                                삭제
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
 
-          <div>
-            <label>사이즈 </label>
-            <input
-              type="text"
-              name="size"
-              value={newOption.size}
-              onChange={handleNewOptionChange}
-            />
-          </div>
+          <div className="admin-option-add-box">
+            <h4>옵션 추가</h4>
 
-          <div>
-            <label>재고 </label>
-            <input
-              type="number"
-              name="stock"
-              value={newOption.stock}
-              onChange={handleNewOptionChange}
-            />
-          </div>
+            <div className="admin-detail-form-grid">
+              <div className="admin-detail-form-row">
+                <label>색상</label>
+                <input
+                  type="text"
+                  name="color"
+                  value={newOption.color}
+                  onChange={handleNewOptionChange}
+                />
+              </div>
 
-          <div>
-            <label>사용여부 </label>
-            <select
-              name="useYn"
-              value={newOption.useYn}
-              onChange={handleNewOptionChange}
-            >
-              <option value="Y">Y</option>
-              <option value="N">N</option>
-            </select>
-          </div>
+              <div className="admin-detail-form-row">
+                <label>사이즈</label>
+                <input
+                  type="text"
+                  name="size"
+                  value={newOption.size}
+                  onChange={handleNewOptionChange}
+                />
+              </div>
 
-          <button type="button" onClick={handleAddOption}>
-            옵션 추가
-          </button>
+              <div className="admin-detail-form-row">
+                <label>재고</label>
+                <input
+                  type="number"
+                  name="stock"
+                  value={newOption.stock}
+                  onChange={handleNewOptionChange}
+                />
+              </div>
+
+              <div className="admin-detail-form-row">
+                <label>사용여부</label>
+                <select
+                  name="useYn"
+                  value={newOption.useYn}
+                  onChange={handleNewOptionChange}
+                >
+                  <option value="Y">Y</option>
+                  <option value="N">N</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="admin-detail-section-actions">
+              <button type="button" onClick={handleAddOption}>
+                옵션 추가
+              </button>
+            </div>
+          </div>
         </>
       )}
     </section>
