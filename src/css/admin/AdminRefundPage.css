@@ -1,0 +1,162 @@
+.admin-refund-page {
+  padding: 24px;
+}
+
+.admin-refund-top {
+  margin-bottom: 20px;
+}
+
+.admin-refund-top h2 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.admin-refund-top p {
+  margin: 0;
+  color: #666;
+}
+
+.admin-refund-search {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-refund-search select,
+.admin-refund-search input {
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.admin-refund-search input {
+  width: 320px;
+}
+
+.admin-refund-search button {
+  height: 42px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  cursor: pointer;
+}
+
+.admin-refund-summary {
+  margin-bottom: 12px;
+  color: #444;
+}
+
+.admin-refund-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.admin-refund-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-refund-table th,
+.admin-refund-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.admin-refund-table th {
+  background: #fafafa;
+  font-weight: 700;
+}
+
+.item-cell {
+  text-align: left;
+}
+
+.item-line + .item-line {
+  margin-top: 8px;
+}
+
+.item-name {
+  font-weight: 600;
+}
+
+.sub-text {
+  font-size: 13px;
+  color: #777;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: #fcfcfc;
+}
+
+.empty-cell {
+  padding: 40px 0 !important;
+  color: #888;
+}
+
+.status-badge {
+  display: inline-block;
+  min-width: 76px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-requested {
+  background: #fff4d6;
+  color: #9a6700;
+}
+
+.status-approved {
+  background: #e7f1ff;
+  color: #0b63ce;
+}
+
+.status-rejected {
+  background: #ffe8e8;
+  color: #d1242f;
+}
+
+.status-completed {
+  background: #eaf7ea;
+  color: #18794e;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  min-width: 36px;
+  height: 36px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pagination button.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}

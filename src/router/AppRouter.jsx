@@ -73,6 +73,9 @@ const AdminMemberDetailPage = lazy(
 const AdminMemberEditPage = lazy(
     () => import("../pages/admin/AdminMemberEditPage"),
 );
+const AdminRefundDetailPage = lazy(
+    () => import("../pages/admin/AdminRefundDetailPage"),
+);
 
 // 로그인이 안 돼 있으면 /login페이지로 리다이렉트
 const ProtectedRouteWrapper = ({ Component }) => {
@@ -185,6 +188,10 @@ const AppRouterContent = () => {
         {
             path: "/admin/member/edit/:memberNo",
             element: <AdminRouteWrapper Component={AdminMemberEditPage} />,
+        },
+        {
+            path: "/admin/refund/detail/:refundNo",
+            element: <AdminRouteWrapper Component={AdminRefundDetailPage} />,
         },
 
 
