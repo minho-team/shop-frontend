@@ -59,9 +59,75 @@
 .grade-badge strong {
   display: block;
   font-size: 24px;
-  font-weight: 600;
-  color: #111;
+  font-weight: 700;
   line-height: 1.2;
+}
+
+.grade-basic {
+  color: #555 !important; /* 기본 회색 */
+}
+
+.grade-silver {
+  color: #007bff !important;
+}
+
+.grade-gold {
+  color: #d4af37 !important; /* 금색 */
+  text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1);
+}
+
+.next-grade-info {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #ff4d4f;
+  font-weight: 500;
+}
+
+/* 드로우핏 스타일의 미니멀 사각 배지 */
+.badge-box {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px; /* 자간을 넓혀 고급스러운 느낌 */
+  border-radius: 0; /* 드로우핏은 둥근 모서리보다 직각을 선호합니다 */
+  text-transform: uppercase;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* 등급별 배경 및 글자색 (Draw-fit 컬러감 적용) */
+.badge-basic {
+  background: #f0f0f0;
+  color: #aaa;
+  border: 1px solid #e0e0e0;
+}
+.badge-silver {
+  background: #e8e8e8;
+  color: #555;
+  border: 1px solid #d0d0d0;
+}
+.badge-gold {
+  background: #d4af37;
+  color: #fff;
+} /* 포인트 골드 */
+.badge-vip {
+  background: #222;
+  color: #fff;
+} /* 시크한 블랙 */
+.badge-vvip {
+  background: #000;
+  color: #fff;
+  border: 1px solid #d4af37; /* 블랙 바탕에 골드 테두리 */
+  box-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
+}
+
+/* 등급 텍스트 스타일 */
+.grade-badge strong {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111;
 }
 
 /* ==========================================================================
@@ -197,30 +263,21 @@
 }
 
 /* 각 열의 너비 배분 (합계 100%) */
-/* 주문일자 */
 .custom-table th:nth-child(1),
 .custom-table td:nth-child(1) {
   width: 20%;
 }
-/* 주문번호 */
 .custom-table th:nth-child(2),
 .custom-table td:nth-child(2) {
   width: 35%;
 }
-/* 금액 */
 .custom-table th:nth-child(3),
 .custom-table td:nth-child(3) {
   width: 25%;
 }
-/* 상태 */
 .custom-table th:nth-child(4),
 .custom-table td:nth-child(4) {
   width: 20%;
-}
-
-.custom-table td:nth-child(3) {
-  text-align: center;
-  padding-right: 0;
 }
 
 .custom-table td {
@@ -244,11 +301,8 @@
   box-sizing: border-box;
 }
 
-.custom-table td:nth-child(3) .table-cell-link {
-  justify-content: center;
-}
 /* ==========================================================================
-   8. 페이징 버튼 (Pagination) - [추가됨]
+   8. 페이징 버튼 (Pagination)
    ========================================================================== */
 .pagination-wrapper {
   display: flex;

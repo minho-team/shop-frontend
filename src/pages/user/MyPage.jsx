@@ -7,6 +7,17 @@ import { getMyOrderList } from '../../api/user/ordersApi';
 import apiClient from '../../api/common/apiClient';
 import Footer from '../../components/user/Footer';
 
+/**
+ * [헬퍼 함수] 등급 판별 및 상태 라벨
+ */
+const getGrade = (count) => {
+    if (count >= 30) return "VVIP";
+    if (count >= 20) return "VIP";
+    if (count >= 10) return "GOLD";
+    if (count >= 5) return "SILVER";
+    return "BASIC";
+};
+
 const getStatusLabel = (status) => {
     switch (status) {
         case 'PAYMENT_COMPLETED': return '결제완료';
@@ -21,13 +32,53 @@ const getStatusLabel = (status) => {
 };
 
 /**
- * [컴포넌트] 주문 내역 테이블 (서버 사이드 페이징 적용)
+ * [컴포넌트] 등급 혜택 안내 뷰
  */
-const OrderHistory = ({ user: propsUser, type }) => {
+const GradeInfo = ({ purchaseCount, currentGrade, memberName }) => {
+    const grades = [
+        { name: 'VVIP', condition: '30회 이상', benefit: '10% 할인 쿠폰 + 무료배송' },
+        { name: 'VIP', condition: '20회 이상', benefit: '7% 할인 쿠폰 + 무료배송' },
+        { name: 'GOLD', condition: '10회 이상', benefit: '5% 할인 쿠폰' },
+        { name: 'SILVER', condition: '5회 이상', benefit: '3% 할인 쿠폰' },
+        { name: 'BASIC', condition: '기본 등급', benefit: ' 신규회원! 3000원 할인쿠폰 즉시 사용가능! ' },
+    ];
+
+    return (
+        <div className="grade-info-wrapper">
+            <div className="current-status-box">
+                <p>현재 <strong>{memberName}</strong>님의 누적 구매 횟수는 <strong>{purchaseCount}회</strong>이며,</p>
+                <p>적용된 멤버쉽 등급은 <span className={`badge-box badge-${currentGrade.toLowerCase()}`}>{currentGrade}</span> 입니다.</p>
+            </div>
+
+            <table className="custom-table grade-table">
+                <thead>
+                    <tr>
+                        <th>등급명 (Grade)</th>
+                        <th>조건 (Purchase)</th>
+                        <th>혜택 (Benefits)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {grades.map(g => (
+                        <tr key={g.name} className={currentGrade === g.name ? 'row-highlight' : ''}>
+                            <td><strong>{g.name}</strong></td>
+                            <td>{g.condition}</td>
+                            <td>{g.benefit}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+};
+
+/**
+ * [컴포넌트] 주문 내역 테이블
+ */
+const OrderHistory = ({ user }) => {
     const [pageData, setPageData] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
-    const { user } = useUser();
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -47,7 +98,6 @@ const OrderHistory = ({ user: propsUser, type }) => {
 
     if (loading) return <div className="loading-container">데이터 로드 중...</div>;
 
-    // pageData가 없거나 내부 데이터가 없을 경우를 대비한 안전한 변수 추출
     const { orderList = [], startPage = 0, endPage = 0, prev = false, next = false } = pageData || {};
 
     return (
@@ -62,7 +112,6 @@ const OrderHistory = ({ user: propsUser, type }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {/* 데이터가 있을 때만 map 실행, 없으면 메시지 출력 */}
                     {orderList && orderList.length > 0 ? (
                         orderList.map(o => (
                             <tr key={o.orderNo} className="order-row-hover">
@@ -83,40 +132,18 @@ const OrderHistory = ({ user: propsUser, type }) => {
                             </tr>
                         ))
                     ) : (
-                        <tr>
-                            <td colSpan="4" className="empty-row">최근 주문 내역이 없습니다.</td>
-                        </tr>
+                        <tr><td colSpan="4" className="empty-row">최근 주문 내역이 없습니다.</td></tr>
                     )}
                 </tbody>
             </table>
 
             {pageData && startPage > 0 && (
                 <div className="pagination-wrapper">
-                    <button
-                        className="paging-btn"
-                        disabled={!prev}
-                        onClick={() => setCurrentPage(startPage - 1)}
-                    >
-                        &lt;
-                    </button>
-
+                    <button className="paging-btn" disabled={!prev} onClick={() => setCurrentPage(startPage - 1)}>&lt;</button>
                     {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(num => (
-                        <button
-                            key={num}
-                            className={`paging-btn ${currentPage === num ? 'active' : ''}`}
-                            onClick={() => setCurrentPage(num)}
-                        >
-                            {num}
-                        </button>
+                        <button key={num} className={`paging-btn ${currentPage === num ? 'active' : ''}`} onClick={() => setCurrentPage(num)}>{num}</button>
                     ))}
-
-                    <button
-                        className="paging-btn"
-                        disabled={!next}
-                        onClick={() => setCurrentPage(endPage + 1)}
-                    >
-                        &gt;
-                    </button>
+                    <button className="paging-btn" disabled={!next} onClick={() => setCurrentPage(endPage + 1)}>&gt;</button>
                 </div>
             )}
         </div>
@@ -134,10 +161,7 @@ const ReviewHistory = ({ user }) => {
         const fetchReviews = async () => {
             if (!user) return;
             try {
-                // 1. 하드코딩된 데이터 대신 실제 API를 호출합니다.
                 const response = await apiClient.get('/api/reviews/my');
-
-                // 2. 응답받은 데이터를 상태에 저장합니다.
                 setReviews(response.data);
             } catch (err) {
                 console.error("리뷰 로드 실패:", err);
@@ -162,17 +186,12 @@ const ReviewHistory = ({ user }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {reviews && reviews.length > 0 ? (
+                    {reviews.length > 0 ? (
                         reviews.map(r => (
                             <tr key={r.reviewNo || r.id}>
-                                {/* 날짜 포맷팅 적용 */}
                                 <td>{new Date(r.createdAt).toLocaleDateString()}</td>
                                 <td>
-                                    <Link
-                                        to={`/product/detail/${r.productNo}?tab=review`}
-                                        style={{ textDecoration: 'none', color: '#333', fontWeight: 'bold' }}
-                                    >
-                                        {/* 조인으로 가져온 상품명이 없다면 '상품 보러가기' 등으로 대체 */}
+                                    <Link to={`/product/detail/${r.productNo}?tab=review`} className="table-cell-link">
                                         {r.itemName || '등록된 상품'}
                                     </Link>
                                 </td>
@@ -189,7 +208,6 @@ const ReviewHistory = ({ user }) => {
     );
 };
 
-
 /**
  * [메인 페이지] 마이페이지
  */
@@ -198,6 +216,16 @@ const MyPage = () => {
     const [activeMenu, setActiveMenu] = useState('주문내역조회');
     const navigate = useNavigate();
 
+    const purchaseCount = Number(user?.purchaseCount) || 0;
+    const currentGrade = getGrade(purchaseCount);
+
+    const getNextGradeInfo = () => {
+        if (purchaseCount < 5) return 5 - purchaseCount;
+        if (purchaseCount < 10) return 10 - purchaseCount;
+        if (purchaseCount < 20) return 20 - purchaseCount;
+        if (purchaseCount < 30) return 30 - purchaseCount;
+        return 0;
+    };
 
     if (userLoading) return <div className="loading-container">정보 로딩 중...</div>;
 
@@ -205,84 +233,62 @@ const MyPage = () => {
         <div className="mypage-container">
             <Header />
 
-            {/* 유저 상단 대시보드 */}
             <div className="user-summary-bg">
                 <section className="user-summary">
                     <div className="user-info">
                         <span className="welcome-text">WELCOME</span>
-                        {/* DB에서 가져온 이름 표시, 없으면 '손님' 혹은 로딩 표시 */}
                         <h2>{user?.memberName || '회원'} 님</h2>
-                        <button className="btn-grade-check">멤버쉽 등급확인 {'>'}</button>
+                        <button
+                            className="btn-grade-check"
+                            onClick={() => setActiveMenu('등급 혜택 안내')}
+                        >
+                            멤버쉽 등급확인 {'>'}
+                        </button>
                     </div>
                     <div className="grade-badge">
                         <span className="label">Grade (등급)</span>
-                        {/* DB에서 가져온 등급 표시, 소문자일 경우를 대비해 대문자로 변환(toUpperCase) */}
-                        <strong className={`grade-${user?.memberGrade?.toLowerCase() || 'common'}`}>
-                            {user?.memberGrade || 'BASIC'}
-                        </strong>
+                        <div className="grade-display-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <span className={`badge-box badge-${currentGrade.toLowerCase()}`}>
+                                {currentGrade}
+                            </span>
+                            <div className="grade-text-group">
+                                <strong className={`grade-text-${currentGrade.toLowerCase()}`}>
+                                    {currentGrade}
+                                </strong>
+                                {currentGrade !== 'VVIP' && (
+                                    <span className="next-grade-info" style={{ display: 'block', fontSize: '11px', color: '#ff4d4f', marginTop: '4px' }}>
+                                        다음 등급까지 {getNextGradeInfo()}회 남음
+                                    </span>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </section>
             </div>
 
             <div className="mypage-wrapper">
                 <div className="mypage-body">
-                    {/* 좌측 사이드바 */}
                     <aside className="sidebar">
-                        <MenuSection
-                            title="나의 쇼핑 정보"
-                            items={['주문내역조회', '상품리뷰', '찜목록 조회']}
-                            activeMenu={activeMenu}
-                            setActiveMenu={setActiveMenu}
-                        />
-                        <MenuSection
-                            title="나의 혜택 정보"
-                            items={['쿠폰내역조회']}
-                            activeMenu={activeMenu}
-                            setActiveMenu={setActiveMenu}
-                        />
-                        <MenuSection
-                            title="고객센터"
-                            items={['자주 묻는 질문']}
-                            activeMenu={activeMenu}
-                            setActiveMenu={setActiveMenu}
-                        />
-                        <MenuSection
-                            title="설정"
-                            items={['개인 정보 수정']}
-                            activeMenu={activeMenu}
-                            setActiveMenu={setActiveMenu}
-                        />
+                        <MenuSection title="나의 쇼핑 정보" items={['주문내역조회', '상품리뷰', '찜목록 조회']} activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+                        <MenuSection title="나의 혜택 정보" items={['쿠폰내역조회', '등급 혜택 안내']} activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+                        <MenuSection title="고객센터" items={['자주 묻는 질문']} activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+                        <MenuSection title="설정" items={['개인 정보 수정']} activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
                     </aside>
 
-                    {/* 우측 콘텐츠 영역 */}
                     <main className="content-area">
                         <h3 className="content-title">{activeMenu}</h3>
 
-                        {activeMenu === '주문내역조회' && (
-                            <div className="order-content-wrapper">
-                                <div className="order-tab-container">
-                                    <button className="modern-tab-btn active">주문배송조회</button>
-                                </div>
-                                <div className="order-list-section">
-                                    {/* props 이름을 'user'로 통일해서 넘겨줍니다 */}
-                                    <OrderHistory user={user} type="DELIVERY" />
-                                </div>
-                            </div>
+                        {activeMenu === '주문내역조회' && <OrderHistory user={user} />}
+                        {activeMenu === '상품리뷰' && <ReviewHistory user={user} />}
+                        {activeMenu === '등급 혜택 안내' && (
+                            <GradeInfo
+                                purchaseCount={purchaseCount}
+                                currentGrade={currentGrade}
+                                memberName={user?.memberName}
+                            />
                         )}
 
-                        {activeMenu === '상품리뷰' && (
-                            <div className="order-content-wrapper">
-                                <div className="order-tab-container">
-                                    <button className="modern-tab-btn active">내가 작성한 리뷰</button>
-                                </div>
-                                <div className="order-list-section">
-                                    <ReviewHistory user={user} />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 나머지 메뉴 처리 */}
-                        {!['주문내역조회', '상품리뷰'].includes(activeMenu) && (
+                        {!['주문내역조회', '상품리뷰', '등급 혜택 안내'].includes(activeMenu) && (
                             <div className="empty-content">
                                 <p>현재 {activeMenu} 메뉴는 준비 중입니다.</p>
                             </div>
@@ -290,7 +296,6 @@ const MyPage = () => {
                     </main>
                 </div>
             </div>
-
             <Footer />
         </div>
     );
@@ -298,7 +303,6 @@ const MyPage = () => {
 
 const MenuSection = ({ title, items, activeMenu, setActiveMenu }) => {
     const navigate = useNavigate();
-
     return (
         <div className="menu-group">
             <h4>{title}</h4>
@@ -308,11 +312,8 @@ const MenuSection = ({ title, items, activeMenu, setActiveMenu }) => {
                         key={item}
                         className={`menu-item ${activeMenu === item ? 'active' : ''}`}
                         onClick={() => {
-                            if (item === '자주 묻는 질문') {
-                                navigate('/inquiry');
-                            } else {
-                                setActiveMenu(item);
-                            }
+                            if (item === '자주 묻는 질문') navigate('/inquiry');
+                            else setActiveMenu(item);
                         }}
                     >
                         {item}
@@ -322,4 +323,5 @@ const MenuSection = ({ title, items, activeMenu, setActiveMenu }) => {
         </div>
     );
 };
+
 export default MyPage;
