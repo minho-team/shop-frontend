@@ -1,8 +1,9 @@
 import { useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { postAdminProductAdd } from "../../api/admin/adminProductApi";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminHeader from "../../components/admin/AdminHeader";
 import "../../css/admin/AdminProductAddPage.css";
-import { postAdminProductAdd } from "../../api/admin/adminProductApi";
 
 const categoryMap = {
   MEN: {
@@ -78,6 +79,7 @@ const AdminProductAddPage = () => {
   const mainImageInputRef = useRef(null);
   const sizeImageInputRef = useRef(null);
   const galleryImageInputRefs = useRef([]);
+  const navigate = useNavigate();
 
   const [productData, setProductData] = useState({
     genderCategory: "",
@@ -452,7 +454,7 @@ const AdminProductAddPage = () => {
 
     if (!isConfirmed) return;
 
-    console.log("목록 페이지로 이동");
+    navigate("/admin/products");
   };
 
   const handleSubmit = async (e) => {
@@ -473,6 +475,7 @@ const AdminProductAddPage = () => {
       console.log("상품 등록 결과:", result);
 
       alert("상품이 등록되었습니다.");
+      navigate("/admin/products");
     } catch (error) {
       console.error("상품 등록 실패:", error);
       alert("상품 등록 중 오류가 발생했습니다.");

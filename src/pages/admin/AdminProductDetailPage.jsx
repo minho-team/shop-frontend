@@ -571,7 +571,7 @@ const AdminProductDetailPage = () => {
       await deleteAdminProduct(productNo);
 
       alert("상품이 삭제되었습니다.");
-      navigate("/admin/product");
+      navigate("/admin/products");
     } catch (error) {
       console.error("상품 삭제 실패:", error);
       alert("상품 삭제에 실패했습니다.");
@@ -579,11 +579,11 @@ const AdminProductDetailPage = () => {
   };
 
   const handleMoveToList = () => {
-    navigate("/admin/product");
+    navigate("/admin/products");
   };
 
   const handleMoveToAddPage = () => {
-    navigate("/admin/product/add");
+    navigate("/admin/products/add");
   };
 
   if (loading) {
