@@ -21,8 +21,7 @@ apiClient.interceptors.response.use(
     // refresh 요청 자체가 실패한 경우 무한루프 방지
     if (
       originalRequest.url === "/api/auth/refresh" ||
-      originalRequest.url === "/api/auth/kakao"||
-      originalRequest.url === "/api/auth/me"
+      originalRequest.url === "/api/auth/kakao"
     ) {
       return Promise.reject(error);
     }
