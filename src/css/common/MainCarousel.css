@@ -1,20 +1,38 @@
+/* =====================================================
+   MainCarousel.css — fade 전환 겹침 버그 수정
+   핵심: .carousel-inner에 고정 height 설정
+         .carousel-item을 absolute로 겹침 방지
+   ===================================================== */
+
 .main-carousel-section {
   width: 100%;
-  max-width: 1460px;
-  margin: 0 auto 56px;
-  padding-left: 28px;
-  padding-right: 28px;
-  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+/* ── Bootstrap fade 겹침 버그 수정 ── */
+/* fade 모드에서 이전/다음 슬라이드가 쌓이는 문제:
+   carousel-inner에 명시적 height 부여 */
+.main-carousel-section .carousel,
+.main-carousel-section .carousel-inner {
+  margin: 0;
+  padding: 0;
+  height: 72vh;
+  min-height: 480px;
+  max-height: 720px;
+}
+
+.main-carousel-section .carousel-item {
+  height: 100%;
 }
 
 .carousel-image-wrap {
   position: relative;
   width: 100%;
-  height: 62vh;
-  min-height: 480px;
-  max-height: 680px;
+  height: 100%;
   overflow: hidden;
-  border-radius: 11px;
+  border-radius: 0;
 }
 
 .carousel-image {
@@ -22,7 +40,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  animation: zoomEffect 6s ease-in-out infinite;
+  animation: zoomEffect 7s ease-in-out infinite;
 }
 
 .carousel-overlay {
@@ -30,133 +48,120 @@
   inset: 0;
   background: linear-gradient(
     to right,
-    rgba(0, 0, 0, 0.55),
-    rgba(0, 0, 0, 0.2),
-    rgba(0, 0, 0, 0.15)
+    rgba(26, 26, 22, 0.62) 0%,
+    rgba(26, 26, 22, 0.22) 55%,
+    rgba(26, 26, 22, 0.05) 100%
   );
 }
 
 .carousel-caption-custom {
   position: absolute;
-  left: 10%;
+  left: 9%;
   right: auto;
   top: 50%;
   bottom: auto;
   transform: translateY(-50%);
   text-align: left;
-  max-width: 650px;
+  max-width: 620px;
   z-index: 5;
 }
 
 .carousel-subtitle {
   display: inline-block;
-  margin-bottom: 14px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 3px;
-  color: #f3f3f3;
+  margin-bottom: 16px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 4px;
+  color: var(--color-warm);
+  text-transform: uppercase;
 }
 
 .carousel-caption-custom h2 {
-  font-size: 54px;
-  font-weight: 800;
+  font-family: var(--font-sans);
+  font-size: 56px;
+  font-weight: 700;
   color: #fff;
   line-height: 1.1;
   margin-bottom: 16px;
+  letter-spacing: -1px;
+  word-break: keep-all;
 }
 
 .carousel-caption-custom p {
-  font-size: 18px;
-  color: #f5f5f5;
-  margin-bottom: 24px;
-  line-height: 1.6;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 28px;
+  line-height: 1.7;
+  word-break: keep-all;
 }
 
 .carousel-btn {
   display: inline-block;
-  padding: 13px 28px;
-  background-color: #fff;
-  color: #111;
+  padding: 13px 32px;
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.65);
   text-decoration: none;
-  border-radius: 999px;
-  font-weight: 700;
-  transition: all 0.25s ease;
+  border-radius: 0;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
 }
 
 .carousel-btn:hover {
-  background-color: #111;
-  color: #fff;
+  background: #fff;
+  color: var(--color-accent);
+  border-color: #fff;
 }
 
 .carousel-control-prev,
-.carousel-control-next {
-  width: 7%;
-}
+.carousel-control-next { width: 6%; }
 
 .carousel-indicators [data-bs-target] {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  width: 28px;
+  height: 2px;
+  border-radius: 0;
+  border: none;
+  background: rgba(255, 255, 255, 0.45);
+  margin: 0 4px;
+  transition: all 0.3s;
+}
+
+.carousel-indicators .active {
+  background: #fff;
+  width: 42px;
 }
 
 @keyframes zoomEffect {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.06);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.04); }
+  100% { transform: scale(1); }
 }
 
 @media (max-width: 992px) {
-  .carousel-image-wrap {
-    height: 52vh;
-    min-height: 400px;
-    max-height: 560px;
+  .main-carousel-section .carousel,
+  .main-carousel-section .carousel-inner {
+    height: 60vh;
+    min-height: 380px;
   }
-
-  .carousel-caption-custom h2 {
-    font-size: 40px;
-  }
-
-  .carousel-caption-custom p {
-    font-size: 16px;
-  }
+  .carousel-caption-custom h2 { font-size: 40px; }
+  .carousel-caption-custom p  { font-size: 15px; }
 }
 
 @media (max-width: 768px) {
-  .carousel-image-wrap {
-    height: 44vh;
+  .main-carousel-section .carousel,
+  .main-carousel-section .carousel-inner {
+    height: 50vh;
     min-height: 300px;
-    max-height: 420px;
   }
-
-  .carousel-caption-custom {
-    left: 7%;
-    max-width: 90%;
-  }
-
-  .carousel-subtitle {
-    margin-bottom: 10px;
-    font-size: 11px;
-    letter-spacing: 2px;
-  }
-
-  .carousel-caption-custom h2 {
-    font-size: 28px;
-    margin-bottom: 12px;
-  }
-
-  .carousel-caption-custom p {
-    font-size: 14px;
-    margin-bottom: 18px;
-  }
-
-  .carousel-btn {
-    padding: 10px 18px;
-    font-size: 13px;
-  }
+  .carousel-caption-custom { left: 6%; max-width: 88%; }
+  .carousel-subtitle { font-size: 10px; letter-spacing: 3px; margin-bottom: 12px; }
+  .carousel-caption-custom h2 { font-size: 28px; margin-bottom: 12px; }
+  .carousel-caption-custom p  { font-size: 13px; margin-bottom: 20px; }
+  .carousel-btn { padding: 10px 22px; font-size: 11px; }
 }

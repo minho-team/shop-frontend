@@ -1,0 +1,44 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap');
+
+:root {
+  --color-bg:         #F2F0ED;
+  --color-surface:    #EDEAE6;
+  --color-border:     #D5D0C8;
+  --color-text:       #1A1A16;
+  --color-text-muted: #7F7A73;
+  --color-accent:     #35322A;
+  --color-warm:       #AEA493;
+  --color-white:      #FAFAF8;
+
+  --font-sans:     'Pretendard', -apple-system, BlinkMacSystemFont,
+                   'Apple SD Gothic Neo', sans-serif;
+  --font-serif:    'Playfair Display', Georgia, serif;
+  --font-ko-serif: 'Pretendard', -apple-system, sans-serif;
+
+  --space-section: 100px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.6;
+  word-break: keep-all;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a      { color: inherit; text-decoration: none; }
+img    { display: block; max-width: 100%; }
+button { cursor: pointer; font-family: var(--font-sans); }

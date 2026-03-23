@@ -1,162 +1,130 @@
 .footer {
   width: 100%;
-  background-color: #f7f7f7;
-  margin-top: 80px;
-  border-top: 1px solid #dcdcdc;
+  background: var(--color-accent);
+  margin-top: 0;
+  border-top: none;
 }
 
 .footer-top-menu {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 42px;
-  padding: 18px 20px;
-  background-color: #fff;
-  border-bottom: 1px solid #e5e5e5;
+  gap: 40px;
+  padding: 16px 20px;
+  background: #2A2720;
+  border-bottom: 1px solid rgba(242, 240, 237, 0.1);
   flex-wrap: wrap;
 }
 
 .footer-top-link {
+  font-family: var(--font-sans);
   font-size: 12px;
-  color: #222;
+  font-weight: 400;
+  color: var(--color-warm);
   text-decoration: none;
-  line-height: 1;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+  word-break: keep-all;
 }
 
-.footer-top-link:hover {
-  color: #000;
-}
-
-.footer-top-link.strong {
-  font-weight: 700;
-}
+.footer-top-link:hover  { color: var(--color-bg); }
+.footer-top-link.strong { font-weight: 600; color: var(--color-bg); }
 
 .footer-main {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 42px 40px 36px;
+  padding: 50px 48px 44px;
   display: grid;
   grid-template-columns: 1.4fr 1.2fr 0.8fr;
-  gap: 40px;
+  gap: 48px;
 }
 
-.footer-col {
-  min-width: 0;
-}
+.footer-col { min-width: 0; }
 
 .footer-company {
-  padding-right: 40px;
-  border-right: 1px solid #d9d9d9;
+  padding-right: 48px;
+  border-right: 1px solid rgba(242, 240, 237, 0.12);
 }
 
 .footer-logo {
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: #3a3a3a;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--color-bg);
   margin: 0 0 22px;
+  text-transform: uppercase;
 }
 
 .footer-company p,
 .footer-center p,
 .footer-bank p {
   margin: 0 0 8px;
-  font-size: 14px;
-  line-height: 1.55;
-  color: #666;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--color-warm);
+  word-break: keep-all;
 }
 
 .footer-inline-link {
-  color: #222;
+  color: var(--color-bg);
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 500;
+  transition: color 0.2s;
 }
 
-.footer-inline-link:hover {
-  text-decoration: underline;
-}
+.footer-inline-link:hover { color: var(--color-warm); }
 
-.footer-center {
-  padding: 0 10px;
-}
+.footer-center { padding: 0 10px; }
 
 .footer-block h3,
 .footer-bank h3 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #000;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-bg);
   margin: 0 0 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .footer-phone {
   display: block;
-  font-size: 40px;
-  font-weight: 800;
-  color: #000;
+  font-family: var(--font-sans);
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--color-bg);
   margin-bottom: 16px;
   line-height: 1;
+  letter-spacing: 1px;
 }
 
 .footer-divider {
-  margin: 28px 0 24px;
-  border-top: 1px solid #d9d9d9;
+  margin: 26px 0 22px;
+  border-top: 1px solid rgba(242, 240, 237, 0.12);
 }
 
-.footer-bank {
-  padding-left: 20px;
-}
+.footer-bank { padding-left: 20px; }
 
 .footer-bank-line {
-  margin-top: 34px;
+  margin-top: 32px;
   width: 85%;
-  border-top: 1px solid #d9d9d9;
+  border-top: 1px solid rgba(242, 240, 237, 0.12);
 }
 
 @media (max-width: 1024px) {
-  .footer-main {
-    grid-template-columns: 1fr;
-    gap: 28px;
-    padding: 36px 24px 30px;
-  }
-
-  .footer-company {
-    padding-right: 0;
-    border-right: none;
-    border-bottom: 1px solid #d9d9d9;
-    padding-bottom: 24px;
-  }
-
-  .footer-bank {
-    padding-left: 0;
-  }
-
-  .footer-bank-line {
-    width: 100%;
-  }
+  .footer-main { grid-template-columns: 1fr; gap: 28px; padding: 38px 28px 34px; }
+  .footer-company { padding-right: 0; border-right: none; border-bottom: 1px solid rgba(242,240,237,0.12); padding-bottom: 26px; }
+  .footer-bank { padding-left: 0; }
+  .footer-bank-line { width: 100%; }
 }
 
 @media (max-width: 600px) {
-  .footer-top-menu {
-    gap: 18px;
-    padding: 16px 12px;
-  }
-
-  .footer-logo {
-    font-size: 32px;
-  }
-
-  .footer-block h3,
-  .footer-bank h3 {
-    font-size: 20px;
-  }
-
-  .footer-phone {
-    font-size: 30px;
-  }
-
-  .footer-company p,
-  .footer-center p,
-  .footer-bank p {
-    font-size: 13px;
-  }
+  .footer-top-menu { gap: 16px; padding: 14px 12px; }
+  .footer-logo { font-size: 22px; }
+  .footer-block h3, .footer-bank h3 { font-size: 11px; }
+  .footer-phone { font-size: 28px; }
+  .footer-company p, .footer-center p, .footer-bank p { font-size: 12px; }
 }

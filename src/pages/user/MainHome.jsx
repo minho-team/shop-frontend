@@ -5,6 +5,10 @@ import MainCarousel from "../../components/user/MainCarousel";
 import MainProductList from "../../components/user/MainProductList";
 import Footer from "../../components/user/Footer";
 import HomeProductSection from "../../components/user/HomeProductSection";
+import NoticeBanner from "../../components/user/NoticeBanner"; // 더 이상 사용 안 함 (헤더에 통합)
+import PopularKeywords from "../../components/user/PopularKeywords";
+import RecentlyViewed from "../../components/user/RecentlyViewed";
+import HomeReviewSection from "../../components/user/HomeReviewSection";
 import { getHomeMainData } from "../../api/user/productApi";
 
 const MainHome = () => {
@@ -23,6 +27,8 @@ const MainHome = () => {
     bestProducts: [],
     saleProducts: [],
     recommendProducts: [],
+    recentReviews: [],
+    popularKeywords: [],
   });
   const [loading, setLoading] = useState(false);
 
@@ -33,13 +39,14 @@ const MainHome = () => {
       try {
         setLoading(true);
         const productRes = await getHomeMainData();
-
         setHomeData(
           productRes || {
             newProducts: [],
             bestProducts: [],
             saleProducts: [],
             recommendProducts: [],
+            recentReviews: [],
+            popularKeywords: [],
           }
         );
       } catch (error) {
@@ -61,6 +68,8 @@ const MainHome = () => {
       ) : (
         <>
           <MainCarousel />
+
+          <PopularKeywords keywords={homeData.popularKeywords} />
 
           <HomeProductSection
             label="NEW ARRIVAL"
@@ -97,6 +106,10 @@ const MainHome = () => {
             loading={loading}
             moreLink="/?sort=new"
           />
+
+          <HomeReviewSection reviews={homeData.recentReviews} />
+
+          <RecentlyViewed />
         </>
       )}
 

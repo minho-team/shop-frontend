@@ -1,6 +1,6 @@
 .home-category-quick-section {
   padding: 10px 0 60px;
-  background: #fff;
+  background: var(--color-bg);
 }
 
 .home-category-quick-inner {
@@ -70,7 +70,7 @@
 
 .home-category-section-box {
   padding: 18px;
-  background: #fff;
+  background: var(--color-bg);
   border-radius: 16px;
   border: 1px solid #f0f0f0;
 }

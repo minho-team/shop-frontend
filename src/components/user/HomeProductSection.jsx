@@ -45,11 +45,16 @@ const HomeProductSection = ({
               const isSale = item.discountRate && item.discountRate > 0;
               const salePrice = getSalePrice(item.price, item.discountRate);
 
+              // 7일 이내 등록 상품이면 NEW 배지
+              const isNew = item.createdAt
+                ? (new Date() - new Date(item.createdAt)) / (1000 * 60 * 60 * 24) <= 7
+                : false;
+
               return (
                 <Link
                   to={`/product/detail/${item.productNo}`}
                   className="home-product-card"
-                  key={item.productNo}
+                  key={`product-${item.productNo}`}
                 >
                   <div className="home-product-thumb">
                     {item.imageUrl ? (
@@ -58,17 +63,21 @@ const HomeProductSection = ({
                       <div className="home-product-no-image">NO IMAGE</div>
                     )}
 
-                    {isSale && (
+                    {isNew ? (
+                      <span className="home-product-badge new-badge">NEW</span>
+                    ) : null}
+
+                    {isSale ? (
                       <span className="home-product-badge sale">
                         {item.discountRate}% OFF
                       </span>
-                    )}
+                    ) : null}
 
-                    {item.sameDayDeliveryYn === "Y" && (
+                    {item.sameDayDeliveryYn === "Y" ? (
                       <span className="home-product-badge delivery">
                         당일배송
                       </span>
-                    )}
+                    ) : null}
                   </div>
 
                   <div className="home-product-info">
