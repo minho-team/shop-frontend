@@ -3,7 +3,7 @@ import Footer from "../../components/user/Footer";
 import Header from "../../components/user/Header";
 import { useMemo, useState } from "react";
 import { createRefund } from "../../api/user/refundApi";
-
+import { API_SERVER_HOST } from "../../api/common/apiClient";
 
 const REFUND_REASON_OPTIONS = [
   { value: "CHANGE_OF_MIND", label: "단순변심" },
@@ -16,7 +16,7 @@ const REFUND_REASON_OPTIONS = [
 const getImageUrl = (url) => {
   if (!url) return "/default-product.png";
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  return `http://localhost:8080${url}`;
+  return `${API_SERVER_HOST}${url}`;
 };
 
 const RefundPage = () => {
