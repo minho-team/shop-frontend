@@ -8,6 +8,7 @@ import Header from "../../components/user/Header";
 import ProductInfoTab from "../../components/user/ProductInfoTab";
 import ProductSizeTab from "../../components/user/ProductSizeTab";
 import "../../css/user/ProductDetailPage.css";
+import { addRecentlyViewed } from "../../components/user/RecentlyViewed";
 
 const tabMenus = ["상품정보", "사이즈", "관련상품", "구매후기", "상품문의"];
 
@@ -51,6 +52,23 @@ const ProductDetailPage = () => {
         setSelectedOptionNo("");
         // 수량 1로 초기화
         setQuantity(1);
+        // 최근 본 상품 저장
+        if (productRes.product) {
+          const thumbImg = imageRes?.images?.find(
+            (img) => img.imageType === "THUMB"
+          )?.imageUrl;
+
+          const cleanUrl = thumbImg
+            ? `${API_SERVER_HOST}${thumbImg.startsWith("/upload/") ? thumbImg : "/upload/" + thumbImg}`
+            : null;
+
+          addRecentlyViewed({
+            productNo: productRes.product.productNo,
+            name: productRes.product.name,
+            price: productRes.product.price,
+            imageUrl: cleanUrl,
+          });
+        }
       } catch (error) {
         console.error("상품 상세 조회 실패:", error);
       }
@@ -268,9 +286,8 @@ const ProductDetailPage = () => {
                   <button
                     key={img.productImgNo}
                     type="button"
-                    className={`thumbnail-button ${
-                      currentImageIndex === index ? "active" : ""
-                    }`}
+                    className={`thumbnail-button ${currentImageIndex === index ? "active" : ""
+                      }`}
                     onClick={() => setCurrentImageIndex(index)}
                   >
                     <img
@@ -431,9 +448,8 @@ const ProductDetailPage = () => {
                 <button
                   key={tab}
                   type="button"
-                  className={`detail-tab-button ${
-                    activeTab === tab ? "active" : ""
-                  }`}
+                  className={`detail-tab-button ${activeTab === tab ? "active" : ""
+                    }`}
                   onClick={() => setActiveTab(tab)}
                 >
                   {tab}
