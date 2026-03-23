@@ -11,10 +11,10 @@ export const getAdminProductImages = async (productNo) => {
 // 썸네일 이미지 변경
 export const putThumbnailImage = async (productNo, imageFile) => {
   const formData = new FormData();
-  formData.append("image", imageFile);
+  formData.append("file", imageFile);
 
   const response = await apiClient.put(
-    `${prefix}/${productNo}/images/thumbnail`,
+    `${prefix}/${productNo}/images/thumb`,
     formData,
     {
       headers: {
@@ -29,7 +29,7 @@ export const putThumbnailImage = async (productNo, imageFile) => {
 // 메인 이미지 변경
 export const putMainImage = async (productNo, imageFile) => {
   const formData = new FormData();
-  formData.append("image", imageFile);
+  formData.append("file", imageFile);
 
   const response = await apiClient.put(
     `${prefix}/${productNo}/images/main`,
@@ -53,7 +53,7 @@ export const deleteMainImage = async (productNo) => {
 // 갤러리 이미지 추가
 export const postGalleryImage = async (productNo, imageFile) => {
   const formData = new FormData();
-  formData.append("image", imageFile);
+  formData.append("file", imageFile);
 
   const response = await apiClient.post(
     `${prefix}/${productNo}/images/gallery`,
@@ -71,7 +71,7 @@ export const postGalleryImage = async (productNo, imageFile) => {
 // 갤러리 이미지 변경
 export const putGalleryImage = async (productNo, productImgNo, imageFile) => {
   const formData = new FormData();
-  formData.append("image", imageFile);
+  formData.append("file", imageFile);
 
   const response = await apiClient.put(
     `${prefix}/${productNo}/images/gallery/${productImgNo}`,
@@ -97,10 +97,10 @@ export const deleteGalleryImage = async (productNo, productImgNo) => {
 // 사이즈표 이미지 변경
 export const putSizeChartImage = async (productNo, imageFile) => {
   const formData = new FormData();
-  formData.append("image", imageFile);
+  formData.append("file", imageFile);
 
   const response = await apiClient.put(
-    `${prefix}/${productNo}/images/size-chart`,
+    `${prefix}/${productNo}/images/size`,
     formData,
     {
       headers: {
@@ -114,8 +114,6 @@ export const putSizeChartImage = async (productNo, imageFile) => {
 
 // 사이즈표 이미지 삭제
 export const deleteSizeChartImage = async (productNo) => {
-  const response = await apiClient.delete(
-    `${prefix}/${productNo}/images/size-chart`,
-  );
+  const response = await apiClient.delete(`${prefix}/${productNo}/images/size`);
   return response.data;
 };
