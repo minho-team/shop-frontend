@@ -80,11 +80,15 @@ const MainProductList = () => {
             const isSale = item.discountRate && item.discountRate > 0;
             const salePrice = getSalePrice(item.price, item.discountRate);
 
+            const isNew = item.createdAt
+              ? (new Date() - new Date(item.createdAt)) / (1000 * 60 * 60 * 24) <= 7
+              : false;
+
             return (
               <Link
                 to={`/product/detail/${item.productNo}`}
                 className="product-card"
-                key={item.productNo ?? index}
+                key={`product-${item.productNo ?? index}`}
               >
                 <div className="product-thumb">
                   {item.imageUrl ? (
@@ -93,15 +97,19 @@ const MainProductList = () => {
                     <div className="product-no-image">NO IMAGE</div>
                   )}
 
-                  {isSale && (
+                  {isNew ? (
+                    <span className="product-badge badge-new">NEW</span>
+                  ) : null}
+
+                  {isSale ? (
                     <span className="product-badge badge-sale">
                       {item.discountRate}% OFF
                     </span>
-                  )}
+                  ) : null}
 
-                  {item.sameDayDeliveryYn === "Y" && (
+                  {item.sameDayDeliveryYn === "Y" ? (
                     <span className="product-delivery-badge">당일배송</span>
-                  )}
+                  ) : null}
                 </div>
 
                 <div className="product-info">

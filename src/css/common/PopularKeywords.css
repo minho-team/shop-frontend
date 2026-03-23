@@ -1,0 +1,84 @@
+.popular-keywords-section {
+  padding: 32px 0 24px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.popular-keywords-inner {
+  width: 90%;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.popular-keywords-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  color: var(--color-warm);
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.popular-keywords-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.popular-keyword-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: all 0.2s;
+}
+
+.popular-keyword-chip:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.popular-keyword-chip:hover .keyword-rank,
+.popular-keyword-chip:hover .keyword-name {
+  color: var(--color-bg);
+}
+
+.keyword-rank {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-accent);
+  min-width: 14px;
+  transition: color 0.2s;
+}
+
+/* 1~3위는 레드 강조 */
+.popular-keyword-chip.top3 .keyword-rank {
+  color: #8B3A3A;
+}
+
+.popular-keyword-chip.top3 {
+  border-color: rgba(139, 58, 58, 0.3);
+}
+
+.popular-keyword-chip.top3:hover {
+  background: #8B3A3A;
+  border-color: #8B3A3A;
+}
+
+.keyword-name {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text);
+  transition: color 0.2s;
+  white-space: nowrap;
+}

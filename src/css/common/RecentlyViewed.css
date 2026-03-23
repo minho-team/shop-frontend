@@ -1,0 +1,108 @@
+.recently-viewed-section {
+  padding: 60px 0 80px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.recently-viewed-inner {
+  width: 90%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.recently-viewed-header {
+  margin-bottom: 32px;
+}
+
+.recently-viewed-label {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  color: var(--color-warm);
+  text-transform: uppercase;
+}
+
+.recently-viewed-header h2 {
+  font-family: var(--font-sans);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.recently-viewed-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+.recently-viewed-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.recently-viewed-thumb {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-white);
+  width: 100%;
+  height: 200px;
+  margin-bottom: 10px;
+}
+
+.recently-viewed-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  transition: transform 0.5s ease;
+  background: var(--color-white);
+}
+
+.recently-viewed-card:hover .recently-viewed-thumb img {
+  transform: scale(1.05);
+}
+
+.recently-viewed-no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--color-warm);
+  letter-spacing: 1px;
+}
+
+.recently-viewed-info { padding: 0 2px; }
+
+.recently-viewed-name {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 4px;
+  line-height: 1.4;
+  word-break: keep-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recently-viewed-price {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+@media (max-width: 1200px) { .recently-viewed-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 768px)  { .recently-viewed-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 480px)  { .recently-viewed-grid { grid-template-columns: repeat(2, 1fr); } }
