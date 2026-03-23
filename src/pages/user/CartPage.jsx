@@ -177,6 +177,10 @@ const CartPage = () => {
     navigate("/order/write", {
       state: {
         cartItems: items,
+        orderedCartItemNos: items
+          .map((item) => item.cartItemNo)
+          .filter(Boolean),
+        orderSource: "cart",
       },
     });
   };
