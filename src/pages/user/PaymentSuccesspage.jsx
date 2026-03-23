@@ -18,12 +18,22 @@ const PaymentSuccessPage = () => {
         return;
       }
 
+      // 결제 전 저장해둔 장바구니 상품 번호(cartItemNo) 목록 복원
+      const savedCartItemNos = sessionStorage.getItem(`cartOrder:${orderId}`);
+      const orderedCartItemNos = savedCartItemNos
+        ? JSON.parse(savedCartItemNos)
+        : [];
+
       try {
         const result = await confirmPayment({
           paymentKey,
           orderId,
           amount: Number(amount),
+          orderedCartItemNos,
         });
+
+        // 결제 승인 후 더 이상 필요 없는 임시 저장 데이터 삭제
+        sessionStorage.removeItem(`cartOrder:${orderId}`);
 
         navigate("/order/result", {
           state: {

@@ -31,8 +31,11 @@ const OrderWritePage = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const orderData = location.state;
+  const orderedCartItemNos = location.state?.orderedCartItemNos || [];
+  const orderSource = location.state?.orderSource || "direct";
 
   const toOrderItem = (item, isCartItem = false) => ({
+    cartItemNo: isCartItem ? item.cartItemNo : null,
     productOptionNo: item.productOptionNo,
     itemName: item.productName,
     itemColor: isCartItem ? item.color : item.optionColor,
@@ -130,6 +133,7 @@ const OrderWritePage = () => {
 
   const resultItems = useMemo(() => {
     return orderItems.map((item) => ({
+      cartItemNo: item.cartItemNo ?? null,
       productOptionNo: item.productOptionNo,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
@@ -140,100 +144,128 @@ const OrderWritePage = () => {
     }));
   }, [orderItems]);
 
-const handleSubmitOrder = async () => {
-  if (submitting) return;
+  const normalizePhone = (phone) => phone.replace(/[^0-9]/g, "").trim();
+  const isValidPhone = (phone) => /^\d{10,11}$/.test(phone);
 
-  if (!ordererName.trim()) {
-    alert("주문자명을 입력해주세요.");
-    return;
-  }
+  const handleSubmitOrder = async () => {
+    if (submitting) return;
 
-  if (!ordererPhone.trim()) {
-    alert("연락처를 입력해주세요.");
-    return;
-  }
+    if (!ordererName.trim()) {
+      alert("주문자명을 입력해주세요.");
+      return;
+    }
 
-  if (!ordererEmail.trim()) {
-    alert("이메일을 입력해주세요.");
-    return;
-  }
+    if (!ordererPhone.trim()) {
+      alert("연락처를 입력해주세요.");
+      return;
+    }
 
-  if (!receiverName.trim()) {
-    alert("수령인명을 입력해주세요.");
-    return;
-  }
+    if (!ordererEmail.trim()) {
+      alert("이메일을 입력해주세요.");
+      return;
+    }
 
-  if (!receiverPhone.trim()) {
-    alert("수령인 연락처를 입력해주세요.");
-    return;
-  }
+    if (!receiverName.trim()) {
+      alert("수령인명을 입력해주세요.");
+      return;
+    }
 
-  if (!zipCode.trim() || !baseAddress.trim()) {
-    alert("주소를 입력해주세요.");
-    return;
-  }
+    if (!receiverPhone.trim()) {
+      alert("수령인 연락처를 입력해주세요.");
+      return;
+    }
 
-  try {
-    setSubmitting(true);
+    if (!zipCode.trim() || !baseAddress.trim()) {
+      alert("주소를 입력해주세요.");
+      return;
+    }
 
-    const orderRequest = {
-      ordererName,
-      ordererPhoneNumber: ordererPhone,
-      ordererEmail,
-      receiverName,
-      receiverPhoneNumber: receiverPhone,
-      receiverZipCode: zipCode,
-      receiverBaseAddress: baseAddress,
-      receiverDetailAddress: detailAddress,
-      message,
-      totalPrice,
-      items: resultItems,
-    };
+    const normalizedOrdererPhone = normalizePhone(ordererPhone);
+    const normalizedReceiverPhone = normalizePhone(receiverPhone);
 
-    // 1. 서버에 주문/결제 준비 요청
-    const prepared = await preparePayment(orderRequest);
+    if (!isValidPhone(normalizedOrdererPhone)) {
+      alert(
+        "주문자 연락처를 올바른 형식으로 입력해주세요. ('-' 제외 10~11자리 숫자)",
+      );
+      return;
+    }
 
-    // prepared 예시:
-    // {
-    //   orderNo: 1,
-    //   orderId: "ORDER_1_20260322",
-    //   orderName: "맨투맨 외 2건",
-    //   amount: 30000,
-    //   customerName: "홍길동",
-    //   customerEmail: "a@a.com",
-    //   customerMobilePhone: "01012341234"
-    // }
+    if (!isValidPhone(normalizedReceiverPhone)) {
+      alert(
+        "수령인 연락처를 올바른 형식으로 입력해주세요. ('-' 제외 10~11자리 숫자)",
+      );
+      return;
+    }
 
-    // 2. 토스 SDK 로드
-    const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
+    try {
+      setSubmitting(true);
 
-    // 3. 결제창 인스턴스 생성
-    const payment = tossPayments.payment({
-      customerKey: `member_${prepared.orderNo}`, 
-    });
+      const orderRequest = {
+        ordererName,
+        ordererPhoneNumber: normalizedOrdererPhone,
+        ordererEmail,
+        receiverName,
+        receiverPhoneNumber: normalizedReceiverPhone,
+        receiverZipCode: zipCode,
+        receiverBaseAddress: baseAddress,
+        receiverDetailAddress: detailAddress,
+        message,
+        totalPrice,
+        items: resultItems,
+      };
 
-    // 4. 결제창 호출
-    await payment.requestPayment({
-      method: "CARD",
-      amount: {
-        currency: "KRW",
-        value: prepared.amount,
-      },
-      orderId: prepared.orderId,
-      orderName: prepared.orderName,
-      successUrl: `${window.location.origin}/payment/success`,
-      failUrl: `${window.location.origin}/payment/fail`,
-      customerEmail: prepared.customerEmail,
-      customerName: prepared.customerName,
-      customerMobilePhone: prepared.customerMobilePhone,
-    });
-  } catch (error) {
-    console.error("결제 요청 실패:", error);
-    alert("결제 요청 중 오류가 발생했습니다.");
-  } finally {
-    setSubmitting(false);
-  }
-};
+      // 1. 서버에 주문/결제 준비 요청
+      const prepared = await preparePayment(orderRequest);
+
+      // 장바구니에서 온 주문이면 orderId 기준으로 cartItemNo 저장
+      if (orderSource === "cart" && orderedCartItemNos.length > 0) {
+        sessionStorage.setItem(
+          `cartOrder:${prepared.orderId}`,
+          JSON.stringify(orderedCartItemNos),
+        );
+      }
+
+      // prepared 예시:
+      // {
+      //   orderNo: 1,
+      //   orderId: "ORDER_1_20260322",
+      //   orderName: "맨투맨 외 2건",
+      //   amount: 30000,
+      //   customerName: "홍길동",
+      //   customerEmail: "a@a.com",
+      //   customerMobilePhone: "01012341234"
+      // }
+
+      // 2. 토스 SDK 로드
+      const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
+
+      // 3. 결제창 인스턴스 생성
+      const payment = tossPayments.payment({
+        customerKey: `member_${prepared.orderNo}`,
+      });
+
+      // 4. 결제창 호출
+      await payment.requestPayment({
+        method: "CARD",
+        amount: {
+          currency: "KRW",
+          value: prepared.amount,
+        },
+        orderId: prepared.orderId,
+        orderName: prepared.orderName,
+        successUrl: `${window.location.origin}/payment/success`,
+        failUrl: `${window.location.origin}/payment/fail`,
+        customerEmail: prepared.customerEmail,
+        customerName: prepared.customerName,
+        customerMobilePhone: prepared.customerMobilePhone,
+      });
+    } catch (error) {
+      console.error("결제 요청 실패:", error);
+      alert("결제 요청 중 오류가 발생했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (!orderData) {
     return null;
@@ -345,9 +377,11 @@ const handleSubmitOrder = async () => {
                   <label>연락처</label>
                   <input
                     type="text"
-                    placeholder="010-0000-0000"
+                    placeholder="‘-’ 없이 숫자만 입력해 주세요"
                     value={ordererPhone}
-                    onChange={(e) => setOrdererPhone(e.target.value)}
+                    onChange={(e) =>
+                      setOrdererPhone(e.target.value.replace(/[^0-9]/g, ""))
+                    }
                   />
                 </div>
 
@@ -393,9 +427,11 @@ const handleSubmitOrder = async () => {
                   <label>수령인 연락처</label>
                   <input
                     type="text"
-                    placeholder="010-0000-0000"
+                    placeholder="‘-’ 없이 숫자만 입력해 주세요"
                     value={receiverPhone}
-                    onChange={(e) => setReceiverPhone(e.target.value)}
+                    onChange={(e) =>
+                      setReceiverPhone(e.target.value.replace(/[^0-9]/g, ""))
+                    }
                   />
                 </div>
 

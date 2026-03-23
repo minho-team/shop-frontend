@@ -2,6 +2,14 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../css/user/OrderResultPage.css";
 
+const API_BASE_URL = "http://localhost:8080";
+
+const getImageSrc = (imageUrl) => {
+  if (!imageUrl) return "";
+  if (imageUrl.startsWith("http")) return imageUrl;
+  return `${API_BASE_URL}${imageUrl}`;
+};
+
 const formatPrice = (value) => Number(value ?? 0).toLocaleString();
 
 const formatDate = (value) => {
@@ -112,7 +120,7 @@ const OrderResultPage = () => {
                 <div className="order-item-image-wrap">
                   {item.imageUrl ? (
                     <img
-                      src={item.imageUrl}
+                      src={getImageSrc(item.imageUrl)}
                       alt={item.itemName}
                       className="order-item-image"
                     />
