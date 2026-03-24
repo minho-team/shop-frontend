@@ -9,9 +9,11 @@ import { addCartItem } from "../../api/user/cartItemApi";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
 import ProductDetailTabs from "../../components/user/Productdetailtabs";
 import Header from "../../components/user/Header";
-import { addRecentlyViewed } from "../../components/user/RecentlyViewed";
+import RecentlyViewed, { addRecentlyViewed } from "../../components/user/RecentlyViewed";
 import "../../css/user/ProductDetailPage.css";
 import "../../css/common/MainProductList.css";
+import PopularKeywords from "../../components/user/PopularKeywords";
+import Footer from "../../components/user/Footer";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -262,7 +264,6 @@ const ProductDetailPage = () => {
   return (
     <>
       <Header />
-
       <div className="product-detail-page">
         <div className="product-detail-container">
           <section className="product-top-section">
@@ -302,9 +303,8 @@ const ProductDetailPage = () => {
                   <button
                     key={img.productImgNo}
                     type="button"
-                    className={`thumbnail-button ${
-                      currentImageIndex === index ? "active" : ""
-                    }`}
+                    className={`thumbnail-button ${currentImageIndex === index ? "active" : ""
+                      }`}
                     onClick={() => setCurrentImageIndex(index)}
                   >
                     <img
@@ -480,8 +480,11 @@ const ProductDetailPage = () => {
               relatedLoading={relatedLoading}
             />
           </section>
+
         </div>
       </div>
+      <RecentlyViewed />
+      <Footer />
     </>
   );
 };

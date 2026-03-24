@@ -4,6 +4,7 @@ import { createOrder, preparePayment } from "../../api/user/ordersApi";
 import "../../css/user/OrderWritePage.css";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
+import Header from "../../components/user/Header";
 const TOSS_CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY;
 
 const getImageSrc = (imageUrl) => {
@@ -272,6 +273,8 @@ const OrderWritePage = () => {
   }
 
   return (
+    <>
+    <Header/>
     <div className="order-page">
       <div className="order-container">
         <div className="order-header">
@@ -529,6 +532,7 @@ const OrderWritePage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
