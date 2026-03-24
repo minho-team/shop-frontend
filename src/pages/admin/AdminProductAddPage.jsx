@@ -100,6 +100,14 @@ const AdminProductAddPage = () => {
     galleryImages: [null],
   });
 
+  // 이미지 미리보기 관리를 위한 상태
+  const [previews, setPreviews] = useState({
+    thumbImage: null,
+    mainImage: null,
+    sizeImage: null,
+    galleryImages: [],
+  });
+
   const [isNoOptionProduct, setIsNoOptionProduct] = useState(false);
   const [baseStock, setBaseStock] = useState("");
   const [options, setOptions] = useState([createEmptyOption()]);
@@ -187,12 +195,14 @@ const AdminProductAddPage = () => {
 
   const handleSingleImageChange = (e) => {
     const { name, files } = e.target;
-    const selectedFile = files?.[0] || null;
+    const file = files?.[0];
 
-    setImageData((prev) => ({
-      ...prev,
-      [name]: selectedFile,
-    }));
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+
+      setImageData((prev) => ({ ...prev, [name]: file }));
+      setPreviews((prev) => ({ ...prev, [name]: previewUrl }));
+    }
   };
 
   const handleClickSingleImageButton = (imageFieldName) => {
@@ -218,6 +228,17 @@ const AdminProductAddPage = () => {
       ...prev,
       [imageFieldName]: null,
     }));
+
+    setPreviews((prev) => {
+      if (prev[imageFieldName]) {
+        URL.revokeObjectURL(prev[imageFieldName]);
+      }
+
+      return {
+        ...prev,
+        [imageFieldName]: null,
+      };
+    });
 
     if (imageFieldName === "thumbImage" && thumbImageInputRef.current) {
       thumbImageInputRef.current.value = "";
@@ -251,6 +272,12 @@ const AdminProductAddPage = () => {
       if (isLastIndex && file !== null && filledImagesCount < 20) {
         newGalleryImages.push(null);
       }
+      // 이미지 미리보기 업데이트
+      setPreviews((prevP) => {
+        const newPreviews = [...prevP.galleryImages];
+        newPreviews[index] = URL.createObjectURL(file);
+        return { ...prevP, galleryImages: newPreviews };
+      });
 
       return {
         ...prev,
@@ -280,6 +307,21 @@ const AdminProductAddPage = () => {
       return {
         ...prev,
         galleryImages: newGalleryImages,
+      };
+    });
+
+    setPreviews((prev) => {
+      const newPreviews = [...prev.galleryImages];
+
+      if (newPreviews[index]) {
+        URL.revokeObjectURL(newPreviews[index]);
+      }
+
+      newPreviews.splice(index, 1);
+
+      return {
+        ...prev,
+        galleryImages: newPreviews,
       };
     });
 
@@ -667,6 +709,15 @@ const AdminProductAddPage = () => {
               <div className="admin-form-row">
                 <label className="admin-form-label">썸네일 이미지 (필수)</label>
                 <div className="admin-form-control admin-file-row">
+                  {previews.thumbImage && (
+                    <div className="admin-preview-container">
+                      <img
+                        src={previews.thumbImage}
+                        alt="thumbnail"
+                        className="admin-preview-img"
+                      />
+                    </div>
+                  )}
                   <input
                     type="file"
                     name="thumbImage"
@@ -676,6 +727,12 @@ const AdminProductAddPage = () => {
                     style={{ display: "none" }}
                   />
 
+                  <span className="admin-file-name">
+                    {imageData.thumbImage
+                      ? imageData.thumbImage.name
+                      : "선택된 파일 없음"}
+                  </span>
+
                   <button
                     type="button"
                     className="admin-btn"
@@ -683,12 +740,6 @@ const AdminProductAddPage = () => {
                   >
                     파일 선택
                   </button>
-
-                  <span className="admin-file-name">
-                    {imageData.thumbImage
-                      ? imageData.thumbImage.name
-                      : "선택된 파일 없음"}
-                  </span>
 
                   {imageData.thumbImage && (
                     <button
@@ -705,6 +756,15 @@ const AdminProductAddPage = () => {
               <div className="admin-form-row">
                 <label className="admin-form-label">메인 이미지</label>
                 <div className="admin-form-control admin-file-row">
+                  {previews.mainImage && (
+                    <div className="admin-preview-container">
+                      <img
+                        src={previews.mainImage}
+                        alt="main"
+                        className="admin-preview-img"
+                      />
+                    </div>
+                  )}
                   <input
                     type="file"
                     name="mainImage"
@@ -714,6 +774,12 @@ const AdminProductAddPage = () => {
                     style={{ display: "none" }}
                   />
 
+                  <span className="admin-file-name">
+                    {imageData.mainImage
+                      ? imageData.mainImage.name
+                      : "선택된 파일 없음"}
+                  </span>
+
                   <button
                     type="button"
                     className="admin-btn"
@@ -721,12 +787,6 @@ const AdminProductAddPage = () => {
                   >
                     파일 선택
                   </button>
-
-                  <span className="admin-file-name">
-                    {imageData.mainImage
-                      ? imageData.mainImage.name
-                      : "선택된 파일 없음"}
-                  </span>
 
                   {imageData.mainImage && (
                     <button
@@ -747,6 +807,15 @@ const AdminProductAddPage = () => {
                 <div className="admin-form-control">
                   {imageData.galleryImages.map((file, index) => (
                     <div key={index} className="admin-file-row">
+                      {previews.galleryImages[index] && (
+                        <div className="admin-preview-container">
+                          <img
+                            src={previews.galleryImages[index]}
+                            alt={`gallery-${index}`}
+                            className="admin-preview-img"
+                          />
+                        </div>
+                      )}
                       <input
                         type="file"
                         accept="image/*"
@@ -762,6 +831,10 @@ const AdminProductAddPage = () => {
                         style={{ display: "none" }}
                       />
 
+                      <span className="admin-file-name">
+                        {file ? file.name : "선택된 파일 없음"}
+                      </span>
+
                       <button
                         type="button"
                         className="admin-btn"
@@ -769,10 +842,6 @@ const AdminProductAddPage = () => {
                       >
                         파일 선택
                       </button>
-
-                      <span className="admin-file-name">
-                        {file ? file.name : "선택된 파일 없음"}
-                      </span>
 
                       {file && (
                         <button
@@ -791,6 +860,15 @@ const AdminProductAddPage = () => {
               <div className="admin-form-row">
                 <label className="admin-form-label">사이즈표 이미지</label>
                 <div className="admin-form-control admin-file-row">
+                  {previews.sizeImage && (
+                    <div className="admin-preview-container">
+                      <img
+                        src={previews.sizeImage}
+                        alt="size"
+                        className="admin-preview-img"
+                      />
+                    </div>
+                  )}
                   <input
                     type="file"
                     name="sizeImage"
@@ -800,6 +878,12 @@ const AdminProductAddPage = () => {
                     style={{ display: "none" }}
                   />
 
+                  <span className="admin-file-name">
+                    {imageData.sizeImage
+                      ? imageData.sizeImage.name
+                      : "선택된 파일 없음"}
+                  </span>
+
                   <button
                     type="button"
                     className="admin-btn"
@@ -807,12 +891,6 @@ const AdminProductAddPage = () => {
                   >
                     파일 선택
                   </button>
-
-                  <span className="admin-file-name">
-                    {imageData.sizeImage
-                      ? imageData.sizeImage.name
-                      : "선택된 파일 없음"}
-                  </span>
 
                   {imageData.sizeImage && (
                     <button
