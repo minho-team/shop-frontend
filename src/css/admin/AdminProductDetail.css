@@ -147,7 +147,7 @@
 
 .admin-detail-image-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
   gap: 18px;
   margin-bottom: 30px;
 }
@@ -179,7 +179,7 @@
 }
 
 .admin-detail-preview-image.thumb {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 4;
 }
 
 .admin-detail-preview-image.main {
@@ -193,9 +193,11 @@
 .admin-image-card-buttons,
 .admin-option-action-buttons {
   display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 14px;
+  flex-wrap: nowrap;
+  margin-top: 0;
 }
 
 .admin-image-empty {
@@ -228,12 +230,43 @@
 
 .admin-gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
 }
 
 .admin-gallery-card {
   padding: 12px;
+}
+
+.admin-size-chart-section {
+  margin-top: 6px;
+}
+
+.admin-size-chart-section h4 {
+  margin: 0 0 14px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #1f2937;
+}
+
+.admin-size-chart-card {
+  margin-top: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 14px;
+  background: #fbfbfc;
+}
+
+.admin-detail-preview-image.size-chart {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  aspect-ratio: auto;
+  background: #ffffff;
+}
+
+.admin-size-chart-empty {
+  min-height: 180px;
 }
 
 .admin-option-type-row {
