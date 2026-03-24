@@ -1,21 +1,27 @@
+// src/pages/admin/AdminMemberEditPage.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminHeader from "../../components/admin/AdminHeader";
 import { getAdminMemberDetail, updateAdminMember } from "../../api/admin/adminMemberApi";
 
+// [추가] 가입경로 표시
+const PROVIDER_LABEL = { LOCAL: "일반 가입", KAKAO: "카카오 로그인" };
+
 const AdminMemberEditPage = () => {
     const { memberNo } = useParams();
     const navigate = useNavigate();
 
-    // 수정 폼 데이터 - gender, birthday 추가
+    // provider는 읽기 전용이라 별도로 관리
+    const [provider, setProvider] = useState("");
+
     const [form, setForm] = useState({
         name: "",
         nickName: "",
         email: "",
         phoneNumber: "",
-        gender: "",           // 추가
-        birthday: "",         // 추가 (YYYY-MM-DD 형식)
+        gender: "",
+        birthday: "",
         zipCode: "",
         basicAddress: "",
         detailAddress: "",
@@ -32,23 +38,25 @@ const AdminMemberEditPage = () => {
             setLoading(true);
             try {
                 const data = await getAdminMemberDetail(memberNo);
+                const m = data.member;
+
+                // [추가] provider 별도 저장 (수정 불가 표시용)
+                setProvider(m.provider || "LOCAL");
+
                 setForm({
-                    name: data.member.name || "",
-                    nickName: data.member.nickName || "",
-                    email: data.member.email || "",
-                    phoneNumber: data.member.phoneNumber || "",
-                    // gender: "M"/"F"/null → 빈 문자열 처리
-                    gender: data.member.gender || "",
-                    // birthday: "2000-01-01" 형식으로 변환 (백엔드가 LocalDate면 그대로 사용)
-                    birthday: data.member.birthday
-                        ? String(data.member.birthday).substring(0, 10)
-                        : "",
-                    zipCode: data.member.zipCode || "",
-                    basicAddress: data.member.basicAddress || "",
-                    detailAddress: data.member.detailAddress || "",
-                    bankName: data.member.bankName || "",
-                    bankCode: data.member.bankCode || "",
-                    accountHolderName: data.member.accountHolderName || "",
+                    name: m.name || "",
+                    nickName: m.nickName || "",
+                    email: m.email || "",
+                    phoneNumber: m.phoneNumber || "",
+                    gender: m.gender || "",
+                    // birthday: LocalDate → "YYYY-MM-DD" 앞 10자리
+                    birthday: m.birthday ? String(m.birthday).substring(0, 10) : "",
+                    zipCode: m.zipCode || "",
+                    basicAddress: m.basicAddress || "",
+                    detailAddress: m.detailAddress || "",
+                    bankName: m.bankName || "",
+                    bankCode: m.bankCode || "",
+                    accountHolderName: m.accountHolderName || "",
                 });
             } catch (e) {
                 console.error("회원 정보 조회 실패:", e);
@@ -61,17 +69,15 @@ const AdminMemberEditPage = () => {
         fetchDetail();
     }, [memberNo]);
 
-    // 일반 input 공통 핸들러
     const handleChange = (e) => {
         const { name, value } = e.target;
         setForm((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSave = async () => {
-        if (!form.name.trim()) { alert("이름을 입력해주세요."); return; }
+        // [수정] 소셜 가입자는 name/email/phone이 null일 수 있으므로
+        //        nickName만 필수 체크, 나머지는 선택
         if (!form.nickName.trim()) { alert("닉네임을 입력해주세요."); return; }
-        if (!form.email.trim()) { alert("이메일을 입력해주세요."); return; }
-        if (!form.phoneNumber.trim()) { alert("전화번호를 입력해주세요."); return; }
         if (!window.confirm("회원 정보를 수정하시겠습니까?")) return;
 
         setSaving(true);
@@ -80,8 +86,7 @@ const AdminMemberEditPage = () => {
             alert("수정되었습니다.");
             navigate(`/admin/member/detail/${memberNo}`);
         } catch (e) {
-            const msg = e.response?.data || "수정 중 오류가 발생했습니다.";
-            alert(msg);
+            alert(e.response?.data || "수정 중 오류가 발생했습니다.");
         } finally {
             setSaving(false);
         }
@@ -103,36 +108,35 @@ const AdminMemberEditPage = () => {
                 <div style={card}>
                     <h3 style={cardTitle}>기본 정보</h3>
                     <div style={grid2}>
-                        <FormRow label="이름 *" name="name" value={form.name} onChange={handleChange} />
+                        <FormRow label="이름" name="name" value={form.name} onChange={handleChange} />
                         <FormRow label="닉네임 *" name="nickName" value={form.nickName} onChange={handleChange} />
-                        <FormRow label="이메일 *" name="email" value={form.email} onChange={handleChange} type="email" />
-                        <FormRow label="전화번호 *" name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="010-0000-0000" />
+                        <FormRow label="이메일" name="email" value={form.email} onChange={handleChange} type="email" />
+                        <FormRow label="전화번호" name="phoneNumber" value={form.phoneNumber} onChange={handleChange} placeholder="010-0000-0000" />
 
-                        {/* 성별 - select 드롭다운 */}
+                        {/* 성별 */}
                         <div style={{ padding: "10px 0", borderBottom: "1px solid #f0f0f0" }}>
-                            <label style={{ display: "block", fontSize: "12px", color: "#888", fontWeight: "bold", marginBottom: "4px" }}>
-                                성별
-                            </label>
-                            <select
-                                name="gender"
-                                value={form.gender}
-                                onChange={handleChange}
-                                style={{ width: "100%", padding: "8px 10px", border: "1px solid #ddd", borderRadius: "4px", fontSize: "14px", boxSizing: "border-box", background: "#fff" }}
-                            >
+                            <label style={formLabel}>성별</label>
+                            <select name="gender" value={form.gender} onChange={handleChange}
+                                style={{ width: "100%", padding: "8px 10px", border: "1px solid #ddd", borderRadius: "4px", fontSize: "14px", boxSizing: "border-box", background: "#fff" }}>
                                 <option value="">선택 안함</option>
                                 <option value="M">남성</option>
                                 <option value="F">여성</option>
                             </select>
                         </div>
 
-                        {/* 생년월일 - date input */}
-                        <FormRow
-                            label="생년월일"
-                            name="birthday"
-                            value={form.birthday}
-                            onChange={handleChange}
-                            type="date"
-                        />
+                        {/* 생년월일 */}
+                        <FormRow label="생년월일" name="birthday" value={form.birthday} onChange={handleChange} type="date" />
+
+                        {/* [추가] 가입경로 - 읽기 전용 표시 */}
+                        <div style={{ padding: "10px 0", borderBottom: "1px solid #f0f0f0" }}>
+                            <label style={formLabel}>가입경로 (변경 불가)</label>
+                            <div style={{
+                                padding: "8px 10px", border: "1px solid #eee", borderRadius: "4px",
+                                fontSize: "14px", background: "#f9f9f9", color: "#666"
+                            }}>
+                                {PROVIDER_LABEL[provider] || provider || "-"}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -158,8 +162,7 @@ const AdminMemberEditPage = () => {
 
                 {/* 하단 버튼 */}
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
-                    <button
-                        onClick={() => navigate(`/admin/member/detail/${memberNo}`)}
+                    <button onClick={() => navigate(`/admin/member/detail/${memberNo}`)}
                         style={{ padding: "10px 24px", border: "1px solid #ddd", borderRadius: "4px", background: "#fff", cursor: "pointer", fontSize: "14px" }}>
                         취소
                     </button>
@@ -176,15 +179,8 @@ const AdminMemberEditPage = () => {
 
 const FormRow = ({ label, name, value, onChange, type = "text", placeholder = "" }) => (
     <div style={{ padding: "10px 0", borderBottom: "1px solid #f0f0f0" }}>
-        <label style={{ display: "block", fontSize: "12px", color: "#888", fontWeight: "bold", marginBottom: "4px" }}>
-            {label}
-        </label>
-        <input
-            type={type}
-            name={name}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
+        <label style={formLabel}>{label}</label>
+        <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder}
             style={{ width: "100%", padding: "8px 10px", border: "1px solid #ddd", borderRadius: "4px", fontSize: "14px", boxSizing: "border-box" }}
         />
     </div>
@@ -193,5 +189,6 @@ const FormRow = ({ label, name, value, onChange, type = "text", placeholder = ""
 const card = { background: "#fff", border: "1px solid #eee", borderRadius: "8px", padding: "20px 24px", marginBottom: "16px" };
 const cardTitle = { fontSize: "15px", fontWeight: "bold", marginBottom: "16px", color: "#222", borderBottom: "2px solid #222", paddingBottom: "8px" };
 const grid2 = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 40px" };
+const formLabel = { display: "block", fontSize: "12px", color: "#888", fontWeight: "bold", marginBottom: "4px" };
 
 export default AdminMemberEditPage;

@@ -5,15 +5,19 @@ import MainCarousel from "../../components/user/MainCarousel";
 import MainProductList from "../../components/user/MainProductList";
 import Footer from "../../components/user/Footer";
 import HomeProductSection from "../../components/user/HomeProductSection";
-import NoticeBanner from "../../components/user/NoticeBanner"; // 더 이상 사용 안 함 (헤더에 통합)
 import PopularKeywords from "../../components/user/PopularKeywords";
 import RecentlyViewed from "../../components/user/RecentlyViewed";
 import HomeReviewSection from "../../components/user/HomeReviewSection";
 import { getHomeMainData } from "../../api/user/productApi";
+import { useUser } from "../../context/UserContext";
+// ★ 룰렛 모달 import 추가
+import RouletteModal from "../../components/user/RouletteModal";
 
 const MainHome = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  // ★ 로그인 여부 확인용
+  const { user } = useUser();
 
   const categoryId = searchParams.get("categoryId");
   const keyword = searchParams.get("keyword");
@@ -32,36 +36,56 @@ const MainHome = () => {
   });
   const [loading, setLoading] = useState(false);
 
+  // ★ 룰렛 모달 표시 여부
+  const [showRoulette, setShowRoulette] = useState(false);
+
+  // 메인 데이터 로드
   useEffect(() => {
     if (isFiltered) return;
-
     const fetchHomeData = async () => {
       try {
         setLoading(true);
         const productRes = await getHomeMainData();
-        setHomeData(
-          productRes || {
-            newProducts: [],
-            bestProducts: [],
-            saleProducts: [],
-            recommendProducts: [],
-            recentReviews: [],
-            popularKeywords: [],
-          }
-        );
+        setHomeData(productRes || {
+          newProducts: [],
+          bestProducts: [],
+          saleProducts: [],
+          recommendProducts: [],
+          recentReviews: [],
+          popularKeywords: [],
+        });
       } catch (error) {
         console.error("메인 데이터 불러오기 실패:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchHomeData();
   }, [isFiltered]);
+
+  // ★ 로그인한 회원에게 하루 1번 룰렛 팝업 자동 표시
+  useEffect(() => {
+    if (!user) return; // 비로그인이면 팝업 안 띄움
+
+    const lastSpun = localStorage.getItem("roulette_last_spun");
+    const today = new Date().toISOString().slice(0, 10);
+
+    // 오늘 아직 안 돌렸으면 팝업 표시
+    if (lastSpun !== today) {
+      // 0.5초 딜레이 후 팝업 (페이지 로드 직후 바로 뜨면 어색해서)
+      const timer = setTimeout(() => setShowRoulette(true), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [user]);
 
   return (
     <>
       <Header />
+
+      {/* ★ 로그인 회원에게 룰렛 모달 표시 */}
+      {showRoulette && (
+        <RouletteModal onClose={() => setShowRoulette(false)} />
+      )}
 
       {isFiltered ? (
         <MainProductList key={location.search} />
