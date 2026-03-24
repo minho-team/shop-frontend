@@ -26,7 +26,7 @@ const OrderResultPage = lazy(() => import("../pages/user/OrderResultPage"));
 const MyOrderDetailPage = lazy(() => import("../pages/user/MyOrderDetailPage"));
 const ReviewWritePage = lazy(() => import("../pages/user/ReviewWritePage"));
 const KakaoRedirectPage = lazy(() => import("../pages/user/KakaoRedirectPage"));
-const RefundPage = lazy(() => import("../pages/user/RefundPage"));
+const RefundWritePage = lazy(() => import("../pages/user/RefundWritePage"));
 const PaymentSuccessPage = lazy(() => import("../pages/user/PaymentSuccessPage"));
 const PaymentFailPage = lazy(() => import("../pages/user/PaymentFailPage"));
 // ★ 룰렛 페이지 추가
@@ -129,7 +129,7 @@ const AppRouterContent = () => {
         { path: "/order/result", element: <ProtectedRouteWrapper Component={OrderResultPage} /> },
         { path: "/my/order/detail/:orderNo", element: <ProtectedRouteWrapper Component={MyOrderDetailPage} /> },
         { path: "/my/review/write/:orderItemNo", element: <ProtectedRouteWrapper Component={ReviewWritePage} /> },
-        { path: "/refund/write", element: <ProtectedRouteWrapper Component={RefundPage} /> },
+        { path: "/refund/write", element: <ProtectedRouteWrapper Component={RefundWritePage} /> },
         { path: "/payment/success", element: <ProtectedRouteWrapper Component={PaymentSuccessPage} /> },
         { path: "/payment/fail", element: <ProtectedRouteWrapper Component={PaymentFailPage} /> },
         // ★ 룰렛 페이지 - 로그인한 회원만 접근 가능
