@@ -112,7 +112,6 @@ const AdminRefundDetailPage = () => {
           <div className="detail-top">
             <div>
               <h2>환불 상세</h2>
-              <p>환불번호 {refundDetail.refundNo}</p>
             </div>
             <button className="back-btn" onClick={() => navigate("/admin/orders/refunds")}>
               목록으로
@@ -120,7 +119,6 @@ const AdminRefundDetailPage = () => {
           </div>
 
           <div className="detail-card">
-            <h3>기본 정보</h3>
             <div className="detail-grid">
               <div>
                 <span className="label">환불번호</span>
@@ -134,6 +132,15 @@ const AdminRefundDetailPage = () => {
                 <span className="label">회원ID</span>
                 <strong>{refundDetail.memberId}</strong>
               </div>
+              <div>
+                <span className="label">은행명</span>
+                <strong>{refundDetail.bankName}</strong>
+              </div>
+              <div>
+                <span className="label">계좌번호</span>
+                <strong>{refundDetail.bankCode}</strong>
+              </div>
+
               <div>
                 <span className="label">회원명</span>
                 <strong>{refundDetail.name}</strong>
