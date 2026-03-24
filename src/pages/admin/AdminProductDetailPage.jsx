@@ -52,6 +52,7 @@ const AdminProductDetailPage = () => {
     sameDayDelivery: "N",
     viewCount: 0,
     createdAt: "",
+    updatedAt: "",
   });
 
   // =========================
@@ -112,7 +113,7 @@ const AdminProductDetailPage = () => {
 
       setBasicInfo({
         productNo: data?.productNo || "",
-        categoryName: data?.categoryId || "",
+        categoryName: data?.categoryName || "",
         productName: data?.name || "",
         price: data?.price || 0,
         discountRate: data?.discountRate || 0,
@@ -120,6 +121,7 @@ const AdminProductDetailPage = () => {
         sameDayDelivery: data?.sameDayDeliveryYn || "N",
         viewCount: data?.viewCount || 0,
         createdAt: data?.createdAt || "",
+        updatedAt: data?.updatedAt || "",
       });
     } catch (error) {
       console.error("기본정보 조회 실패:", error);
@@ -578,12 +580,30 @@ const AdminProductDetailPage = () => {
     }
   };
 
+  // =========================
+  // 27. 상품 목록 페이지 이동
+  // =========================
   const handleMoveToList = () => {
     navigate("/admin/products");
   };
 
-  const handleMoveToAddPage = () => {
-    navigate("/admin/products/add");
+  // =========================
+  // 28. 날짜/시간 포맷 함수
+  // =========================
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return "";
+
+    const date = new Date(dateStr);
+
+    return date.toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
 
   if (loading) {
@@ -605,7 +625,6 @@ const AdminProductDetailPage = () => {
           <div className="admin-detail-top">
             <div>
               <h2 className="admin-detail-title">상품 상세 조회 / 수정</h2>
-              <p className="admin-detail-subtitle">상품 번호: {productNo}</p>
             </div>
 
             <button
@@ -622,6 +641,7 @@ const AdminProductDetailPage = () => {
             salePrice={salePrice}
             handleBasicInfoChange={handleBasicInfoChange}
             handleBasicInfoSave={handleBasicInfoSave}
+            formatDateTime={formatDateTime}
           />
 
           <ProductImageSection
@@ -660,9 +680,6 @@ const AdminProductDetailPage = () => {
           />
 
           <div className="admin-detail-bottom-buttons">
-            <button type="button" onClick={handleMoveToAddPage}>
-              새상품 등록
-            </button>
             <button
               type="button"
               className="danger"
@@ -690,6 +707,7 @@ const ProductBasicSection = ({
   salePrice,
   handleBasicInfoChange,
   handleBasicInfoSave,
+  formatDateTime,
 }) => {
   return (
     <section className="admin-detail-section">
@@ -727,21 +745,6 @@ const ProductBasicSection = ({
         </div>
 
         <div className="admin-detail-form-row">
-          <label>할인율</label>
-          <input
-            type="number"
-            name="discountRate"
-            value={basicInfo.discountRate}
-            onChange={handleBasicInfoChange}
-          />
-        </div>
-
-        <div className="admin-detail-form-row">
-          <label>판매가</label>
-          <input type="number" value={salePrice} readOnly />
-        </div>
-
-        <div className="admin-detail-form-row">
           <label>판매여부</label>
           <select
             name="saleStatus"
@@ -751,6 +754,16 @@ const ProductBasicSection = ({
             <option value="Y">Y</option>
             <option value="N">N</option>
           </select>
+        </div>
+
+        <div className="admin-detail-form-row">
+          <label>할인율</label>
+          <input
+            type="number"
+            name="discountRate"
+            value={basicInfo.discountRate}
+            onChange={handleBasicInfoChange}
+          />
         </div>
 
         <div className="admin-detail-form-row">
@@ -766,13 +779,31 @@ const ProductBasicSection = ({
         </div>
 
         <div className="admin-detail-form-row">
+          <label>판매가</label>
+          <input type="number" value={salePrice} readOnly />
+        </div>
+
+        <div className="admin-detail-form-row">
           <label>조회수</label>
           <input type="number" value={basicInfo.viewCount} readOnly />
         </div>
 
         <div className="admin-detail-form-row">
           <label>등록일</label>
-          <input type="text" value={basicInfo.createdAt} readOnly />
+          <input
+            type="text"
+            value={formatDateTime(basicInfo.createdAt)}
+            readOnly
+          />
+        </div>
+
+        <div className="admin-detail-form-row">
+          <label>수정일</label>
+          <input
+            type="text"
+            value={formatDateTime(basicInfo.updatedAt)}
+            readOnly
+          />
         </div>
       </div>
 
@@ -901,51 +932,6 @@ const ProductImageSection = ({
             onChange={handleMainImageFileChange}
           />
         </div>
-
-        <div className="admin-image-card">
-          <h4>사이즈표 이미지</h4>
-
-          {imageInfo.sizeChartImage ? (
-            <>
-              <img
-                src={getImageSrc(imageInfo.sizeChartImage.imageUrl)}
-                alt="사이즈표 이미지"
-                className="admin-detail-preview-image main"
-              />
-              <div className="admin-image-card-buttons">
-                <button type="button" onClick={handleSizeChartButtonClick}>
-                  변경
-                </button>
-                <button
-                  type="button"
-                  className="danger"
-                  onClick={handleSizeChartDelete}
-                >
-                  삭제
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="admin-image-empty">
-                등록된 사이즈표 이미지가 없습니다.
-              </div>
-              <div className="admin-image-card-buttons">
-                <button type="button" onClick={handleSizeChartButtonClick}>
-                  등록
-                </button>
-              </div>
-            </>
-          )}
-
-          <input
-            type="file"
-            accept="image/*"
-            ref={sizeChartInputRef}
-            style={{ display: "none" }}
-            onChange={handleSizeChartFileChange}
-          />
-        </div>
       </div>
 
       <div className="admin-gallery-section">
@@ -1010,6 +996,51 @@ const ProductImageSection = ({
           ref={galleryAddInputRef}
           style={{ display: "none" }}
           onChange={handleGalleryAddFileChange}
+        />
+      </div>
+
+      <div className="admin-size-chart-card">
+        <h4>사이즈표 이미지</h4>
+
+        {imageInfo.sizeChartImage ? (
+          <>
+            <img
+              src={getImageSrc(imageInfo.sizeChartImage.imageUrl)}
+              alt="사이즈표 이미지"
+              className="admin-detail-preview-image size-chart"
+            />
+            <div className="admin-image-card-buttons">
+              <button type="button" onClick={handleSizeChartButtonClick}>
+                변경
+              </button>
+              <button
+                type="button"
+                className="danger"
+                onClick={handleSizeChartDelete}
+              >
+                삭제
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="admin-image-empty">
+              등록된 사이즈표 이미지가 없습니다.
+            </div>
+            <div className="admin-image-card-buttons">
+              <button type="button" onClick={handleSizeChartButtonClick}>
+                등록
+              </button>
+            </div>
+          </>
+        )}
+
+        <input
+          type="file"
+          accept="image/*"
+          ref={sizeChartInputRef}
+          style={{ display: "none" }}
+          onChange={handleSizeChartFileChange}
         />
       </div>
     </section>
