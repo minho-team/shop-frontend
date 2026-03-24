@@ -19,13 +19,15 @@ const RegisterPage = () => {
     }
 
 
-    const clickRegisterButton = async ()=>{
+    const clickRegisterButton = async () => {
 
-        try{
+        try {
             const data = await register(input)
             console.log(data);
+            // ★ 신규가입 후 룰렛 캐시 초기화
+            localStorage.removeItem("roulette_last_spun");
             nav('/');
-        }catch(err){
+        } catch (err) {
             console.log(err);
         }
     }

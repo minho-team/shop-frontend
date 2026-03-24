@@ -7,6 +7,30 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
+// Add request interceptor for debugging
+apiClient.interceptors.request.use(
+  (request) => {
+    console.log('API Request:', request.method?.toUpperCase(), request.url, request.data || request.params);
+    return request;
+  },
+  (error) => {
+    console.error('API Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for debugging
+apiClient.interceptors.response.use(
+  (response) => {
+    console.log('API Response:', response.config.method?.toUpperCase(), response.config.url, response.status, response.data);
+    return response;
+  },
+  (error) => {
+    console.error('API Response Error:', error.config?.method?.toUpperCase(), error.config?.url, error.response?.status, error.response?.data);
+    return Promise.reject(error);
+  }
+);
+
 // 401 발생 시 refresh 후 원래 요청 재시도
 apiClient.interceptors.response.use(
   (response) => response,
