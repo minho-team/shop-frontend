@@ -1,0 +1,103 @@
+/* 탭 네비게이션 공통 스타일 */
+ 
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+ 
+:root {
+  --tab-bg: #fff;
+  --tab-border: #e0e0e0;
+  --tab-active-color: #1a1a1a;
+  --tab-inactive-color: #999;
+  --tab-accent: #c9a882;
+  --tab-font: 'Noto Sans KR', sans-serif;
+  --tab-title-font: 'Cormorant Garamond', serif;
+}
+ 
+.pdt-wrapper {
+  width: 100%;
+  font-family: var(--tab-font);
+  margin-top: 60px;
+}
+ 
+/* 탭 네비게이션 */
+.pdt-tab-nav {
+  display: flex;
+  border-top: 2px solid #1a1a1a;
+  border-bottom: 1px solid var(--tab-border);
+  background: var(--tab-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+ 
+.pdt-tab-btn {
+  flex: 1;
+  padding: 18px 0;
+  background: none;
+  border: none;
+  border-right: 1px solid var(--tab-border);
+  font-family: var(--tab-font);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--tab-inactive-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+ 
+.pdt-tab-btn:last-child {
+  border-right: none;
+}
+ 
+.pdt-tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #1a1a1a;
+  transition: width 0.3s ease;
+}
+ 
+.pdt-tab-btn:hover {
+  color: #1a1a1a;
+}
+ 
+.pdt-tab-btn:hover::after {
+  width: 100%;
+}
+ 
+.pdt-tab-btn--active {
+  color: #1a1a1a;
+  font-weight: 700;
+}
+ 
+.pdt-tab-btn--active::after {
+  width: 100%;
+}
+ 
+/* 탭 콘텐츠 */
+.pdt-tab-content {
+  padding: 0;
+  animation: fadeIn 0.3s ease;
+}
+ 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+ 
+/* 플레이스홀더  */
+.pdt-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}
+ 
+.pdt-placeholder-text {
+  color: #bbb;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}

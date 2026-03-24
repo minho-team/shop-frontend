@@ -177,10 +177,36 @@
   flex-wrap: wrap;
 }
 
-.product-origin-price {
-  font-size: 16px;
-  color: #999;
+.product-price-line {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.product-sale-price {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1;
+  color: #111;
+}
+
+.product-original-price {
+  font-size: 18px;
+  color: #8f8f8f;
   text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: #8f8f8f;
+  text-underline-offset: 0;
+}
+
+.product-discount-rate {
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 700;
+  color: #9f684c;
+  line-height: 1;
+  transform: translateY(-2px);
 }
 
 .product-sale-price {

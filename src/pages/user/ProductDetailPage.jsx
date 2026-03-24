@@ -1,42 +1,52 @@
 import { useMemo, useState, useEffect } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getProductMainAndThumbImages } from "../../api/user/productImageApi";
-import { getProductDetail } from "../../api/user/productApi";
+import {
+  getProductDetail,
+  getRelatedProducts,
+} from "../../api/user/productApi";
 import { addCartItem } from "../../api/user/cartItemApi";
-import apiClient, { API_SERVER_HOST } from "../../api/common/apiClient";
+import { API_SERVER_HOST } from "../../api/common/apiClient";
+import ProductDetailTabs from "../../components/user/Productdetailtabs";
 import Header from "../../components/user/Header";
-import ProductInfoTab from "../../components/user/ProductInfoTab";
-import ProductSizeTab from "../../components/user/ProductSizeTab";
-import "../../css/user/ProductDetailPage.css";
 import { addRecentlyViewed } from "../../components/user/RecentlyViewed";
-
-const tabMenus = ["상품정보", "사이즈", "관련상품", "구매후기", "상품문의"];
+import "../../css/user/ProductDetailPage.css";
+import "../../css/common/MainProductList.css";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [product, setProduct] = useState(null);
   const [options, setOptions] = useState([]);
+
+  // 관련상품 목록 저장용 state
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  // 관련상품 로딩 상태
+  const [relatedLoading, setRelatedLoading] = useState(false);
+
   const [imageData, setImageData] = useState(null);
   // 현재 메인으로 보여줄 이미지 인덱스
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isWished, setIsWished] = useState(false);
-  const [activeTab, setActiveTab] = useState("상품정보");
   const [selectedOptionNo, setSelectedOptionNo] = useState("");
 
-  const [reviews, setReviews] = useState([]);
-  const [reviewLoading, setReviewLoading] = useState(false);
+  // 할인율이 있으면 할인된 가격 계산
+  const getSalePrice = (price, discountRate) => {
+    if (!discountRate || discountRate <= 0) return price;
+    return Math.floor((price * (100 - discountRate)) / 100 / 100) * 100;
+  };
 
   useEffect(() => {
     const fetchDetailData = async () => {
+      setRelatedLoading(true);
       try {
-        // 상품 정보랑 이미지 정보를 동시에 요청
-        const [productRes, imageRes] = await Promise.all([
+        // 상품 정보, 이미지, 관련상품을 동시에 요청
+        const [productRes, imageRes, relatedRes] = await Promise.all([
           getProductDetail(id),
           getProductMainAndThumbImages(id),
+          getRelatedProducts(id),
         ]);
 
         // 상세페이지 들어오면 스크롤 맨 위
@@ -46,16 +56,18 @@ const ProductDetailPage = () => {
         // 옵션 없을 수도 있으니까 빈 배열 처리
         setOptions(productRes.options || []);
         setImageData(imageRes);
+        setRelatedProducts(Array.isArray(relatedRes) ? relatedRes : []);
         // 상품 바뀌면 첫 이미지부터 다시 보여주기
         setCurrentImageIndex(0);
         // 상품 바뀌면 옵션 선택 초기화
         setSelectedOptionNo("");
         // 수량 1로 초기화
         setQuantity(1);
+
         // 최근 본 상품 저장
         if (productRes.product) {
           const thumbImg = imageRes?.images?.find(
-            (img) => img.imageType === "THUMB"
+            (img) => img.imageType === "THUMB",
           )?.imageUrl;
 
           const cleanUrl = thumbImg
@@ -65,44 +77,28 @@ const ProductDetailPage = () => {
           addRecentlyViewed({
             productNo: productRes.product.productNo,
             name: productRes.product.name,
-            price: productRes.product.price,
+            price:
+              productRes.product.salePrice ??
+              getSalePrice(
+                productRes.product.price,
+                productRes.product.discountRate,
+              ),
             imageUrl: cleanUrl,
           });
         }
       } catch (error) {
         console.error("상품 상세 조회 실패:", error);
+
+        // 실패하면 관련상품도 빈 배열로 초기화
+        setRelatedProducts([]);
+      } finally {
+        // 관련상품 로딩 종료
+        setRelatedLoading(false);
       }
     };
 
     fetchDetailData();
   }, [id]); // id 바뀔 때마다 다시 조회
-
-  // 구매후기 탭 클릭 시 리뷰 데이터를 가져오는 로직
-  useEffect(() => {
-    const fetchReviews = async () => {
-      if (activeTab === "구매후기") {
-        setReviewLoading(true);
-        try {
-          // 상품별 리뷰 조회 API 호출
-          const response = await apiClient.get(`/api/reviews/product/${id}`);
-          setReviews(response.data || []);
-        } catch (error) {
-          console.error("리뷰 목록 로드 실패:", error);
-        } finally {
-          setReviewLoading(false);
-        }
-      }
-    };
-
-    fetchReviews();
-  }, [activeTab, id]);
-
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    if (queryParams.get("tab") === "review") {
-      setActiveTab("구매후기");
-    }
-  }, [location]);
 
   const imageList = useMemo(() => {
     if (!imageData?.images) return [];
@@ -128,10 +124,27 @@ const ProductDetailPage = () => {
     );
   }, [options, selectedOptionNo]);
 
-  const finalPrice = useMemo(() => {
-    // 상품 가격 숫자 변환
+  const originalPrice = useMemo(() => {
     return Number(product?.price ?? 0);
   }, [product?.price]);
+
+  const discountRate = useMemo(() => {
+    return Number(product?.discountRate ?? 0);
+  }, [product?.discountRate]);
+
+  const finalPrice = useMemo(() => {
+    if (!product) return 0;
+
+    // 백엔드에서 salePrice 내려주면 그거 우선 사용
+    if (product.salePrice != null) {
+      return Number(product.salePrice);
+    }
+
+    // 혹시 백엔드 값이 없으면 프론트에서 한 번 더 계산
+    return getSalePrice(originalPrice, discountRate);
+  }, [product, originalPrice, discountRate]);
+
+  const isSale = discountRate > 0;
 
   const totalPrice = useMemo(() => {
     return finalPrice * quantity;
@@ -217,7 +230,10 @@ const ProductDetailPage = () => {
       state: {
         productNo: product.productNo,
         productName: product.name,
-        productPrice: Number(product.price ?? 0),
+        productPrice: finalPrice,
+        originalPrice: originalPrice,
+        discountRate: discountRate,
+        salePrice: finalPrice,
         quantity: quantity,
         totalPrice: totalPrice,
         productOptionNo: selectedOption ? selectedOption.productOptionNo : null,
@@ -286,8 +302,9 @@ const ProductDetailPage = () => {
                   <button
                     key={img.productImgNo}
                     type="button"
-                    className={`thumbnail-button ${currentImageIndex === index ? "active" : ""
-                      }`}
+                    className={`thumbnail-button ${
+                      currentImageIndex === index ? "active" : ""
+                    }`}
                     onClick={() => setCurrentImageIndex(index)}
                   >
                     <img
@@ -318,9 +335,23 @@ const ProductDetailPage = () => {
 
               <div className="product-price-block">
                 <div className="product-price-line">
-                  <strong className="product-sale-price">
-                    {Number(product.price ?? 0).toLocaleString()}원
-                  </strong>
+                  {isSale ? (
+                    <>
+                      <strong className="product-sale-price">
+                        {finalPrice.toLocaleString()}원
+                      </strong>
+                      <span className="product-original-price">
+                        {originalPrice.toLocaleString()}원
+                      </span>
+                      <span className="product-discount-rate">
+                        {discountRate}% OFF
+                      </span>
+                    </>
+                  ) : (
+                    <strong className="product-sale-price">
+                      {originalPrice.toLocaleString()}원
+                    </strong>
+                  )}
                 </div>
 
                 <p className="product-discount-text">
@@ -440,78 +471,14 @@ const ProductDetailPage = () => {
               </div>
             </div>
           </section>
-
           <section className="product-bottom-section">
-            {/* 하단 탭 버튼들 */}
-            <div className="detail-tab-row">
-              {tabMenus.map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  className={`detail-tab-button ${activeTab === tab ? "active" : ""
-                    }`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-
-            <div className="detail-tab-content">
-              {activeTab === "상품정보" && <ProductInfoTab product={product} />}
-              {activeTab === "사이즈" && <ProductSizeTab product={product} />}
-              {activeTab === "관련상품" && (
-                <div className="detail-placeholder">관련상품 영역입니다.</div>
-              )}
-              {activeTab === "구매후기" && (
-                <div className="review-tab-container">
-                  {reviewLoading ? (
-                    <div className="loading-text">
-                      후기를 불러오는 중입니다...
-                    </div>
-                  ) : reviews.length > 0 ? (
-                    <div className="review-list-wrap">
-                      {reviews.map((rev) => (
-                        <div key={rev.reviewNo} className="review-item">
-                          <div className="review-header">
-                            <span className="review-rating">
-                              {"⭐".repeat(rev.rating)}
-                            </span>
-                            <span className="review-user-info">
-                              {rev.nickName || rev.name || "회원"} |{" "}
-                              {new Date(rev.createdAt).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <div className="review-body">
-                            <h4 className="review-title">{rev.title}</h4>
-                            <p className="review-text">{rev.content}</p>
-                            {rev.imageUrl && (
-                              <div className="review-image">
-                                <img
-                                  src={`${API_SERVER_HOST}/upload/${rev.imageUrl}`}
-                                  alt="후기이미지"
-                                />
-                              </div>
-                            )}
-                          </div>
-                          <div className="review-footer">
-                            스펙: {rev.userHeight}cm / {rev.userWeight}kg |
-                            사이즈: {rev.sizeRating}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="empty-review-text">
-                      아직 작성된 구매후기가 없습니다.
-                    </div>
-                  )}
-                </div>
-              )}
-              {activeTab === "상품문의" && (
-                <div className="detail-placeholder">상품문의 영역입니다.</div>
-              )}
-            </div>
+            <ProductDetailTabs
+              product={product}
+              options={options}
+              images={imageData?.images || []}
+              relatedProducts={relatedProducts}
+              relatedLoading={relatedLoading}
+            />
           </section>
         </div>
       </div>

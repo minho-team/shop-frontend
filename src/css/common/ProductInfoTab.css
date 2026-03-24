@@ -1,0 +1,274 @@
+/* ── 전체 래퍼 ────────────────────────────────────── */
+.pit-wrap {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 60px 20px 80px;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #1a1a1a;
+}
+ 
+/* ── 갤러리 이미지 ────────────────────────────────── */
+.pit-gallery {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 80px;
+}
+ 
+.pit-gallery-img {
+  width: 100%;
+  max-width: 720px;
+  display: block;
+}
+ 
+/* ── 섹션 공통 ─────────────────────────────────────── */
+.pit-section {
+  margin-bottom: 72px;
+}
+ 
+.pit-section-title {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-align: center;
+  color: #1a1a1a;
+  margin: 0 0 36px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+ 
+/* ── PRODUCT INFO 속성 체크박스 표 ──────────────────── */
+.pit-attr-table {
+  border-top: 1px solid #1a1a1a;
+  border-bottom: 1px solid #e0e0e0;
+}
+ 
+.pit-attr-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ebebeb;
+  min-height: 52px;
+}
+ 
+.pit-attr-label {
+  width: 120px;
+  min-width: 120px;
+  padding: 0 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 0.02em;
+  background: #fafafa;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid #ebebeb;
+}
+ 
+.pit-attr-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  flex: 1;
+  padding: 0 12px;
+}
+ 
+.pit-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 20px;
+  cursor: default;
+  user-select: none;
+}
+ 
+.pit-checkbox {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #ccc;
+  border-radius: 2px;
+  position: relative;
+  flex-shrink: 0;
+}
+ 
+.pit-checkbox--on {
+  background: #c9a882;
+  border-color: #c9a882;
+}
+ 
+.pit-checkbox--on::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 1px;
+  width: 5px;
+  height: 8px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+ 
+.pit-checkbox-text {
+  font-size: 13px;
+  color: #555;
+  letter-spacing: 0.01em;
+}
+ 
+.pit-checkbox-item--checked .pit-checkbox-text {
+  color: #1a1a1a;
+  font-weight: 500;
+}
+ 
+/* ── 법적 고지 박스 ────────────────────────────────── */
+.pit-legal-box {
+  margin-top: 24px;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  padding: 20px 24px;
+  background: #fafafa;
+}
+ 
+.pit-legal-row {
+  display: flex;
+  gap: 16px;
+  padding: 5px 0;
+  font-size: 12px;
+  color: #555;
+  line-height: 1.6;
+}
+ 
+.pit-legal-key {
+  min-width: 72px;
+  color: #888;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+ 
+.pit-legal-val {
+  color: #444;
+  flex: 1;
+}
+ 
+/* ── 계절 섹션 ─────────────────────────────────────── */
+.pit-season-grid {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 20px 0;
+}
+ 
+.pit-season-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 24px;
+  border-radius: 50%;
+  width: 110px;
+  height: 110px;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+ 
+.pit-season-card--on {
+  background: #f5ede2;
+  color: #c9a882;
+}
+ 
+.pit-season-card--off {
+  background: #f5f5f5;
+  color: #ccc;
+}
+ 
+.pit-season-icon {
+  width: 36px;
+  height: 36px;
+}
+ 
+.pit-season-icon svg {
+  width: 100%;
+  height: 100%;
+}
+ 
+.pit-season-name {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+ 
+/* ── 배송/교환 안내 카드 ──────────────────────────── */
+.pit-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+ 
+.pit-info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px 20px;
+  border: 1px solid #ebebeb;
+  border-radius: 6px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+ 
+.pit-info-card:hover {
+  border-color: #c9a882;
+}
+ 
+.pit-info-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+ 
+.pit-info-text strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+ 
+.pit-info-text p {
+  margin: 0;
+  font-size: 12px;
+  color: #777;
+  line-height: 1.6;
+}
+ 
+/* ── 반응형 ────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .pit-attr-label {
+    width: 80px;
+    min-width: 80px;
+    font-size: 11px;
+    padding: 0 10px;
+  }
+ 
+  .pit-checkbox-item {
+    padding: 10px 12px;
+  }
+ 
+  .pit-season-grid {
+    gap: 16px;
+  }
+ 
+  .pit-season-card {
+    width: 76px;
+    height: 76px;
+    padding: 0;
+  }
+ 
+  .pit-info-grid {
+    grid-template-columns: 1fr;
+  }
+}

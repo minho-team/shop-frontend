@@ -16,3 +16,9 @@ export const getHomeMainData = async () => {
   const res = await apiClient.get(`${prefix}/home`);
   return res.data;
 };
+
+// 현재 보고 있는 상품과 같은 카테고리의 관련상품 조회
+export const getRelatedProducts = async (id) => {
+  const res = await apiClient.get(`${prefix}/${id}/related`);
+  return res.data;
+};
