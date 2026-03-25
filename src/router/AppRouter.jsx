@@ -8,7 +8,9 @@ import { Suspense, lazy } from "react";
 import Loading from "../pages/user/Loading";
 import { useUser, UserProvider } from "../context/UserContext";
 
-//user
+// ================================================
+// 사용자 페이지
+// ================================================
 const MainHome = lazy(() => import("../pages/user/MainHome"));
 const LoginPage = lazy(() => import("../pages/user/LoginPage"));
 const CartPage = lazy(() => import("../pages/user/CartPage"));
@@ -32,8 +34,12 @@ const PaymentSuccessPage = lazy(
   () => import("../pages/user/PaymentSuccessPage"),
 );
 const PaymentFailPage = lazy(() => import("../pages/user/PaymentFailPage"));
+// ★ 룰렛 페이지 추가
+const RoulettePage = lazy(() => import("../pages/user/RoulettePage"));
 
-//admin
+// ================================================
+// 관리자 페이지
+// ================================================
 const AdminHome = lazy(() => import("../pages/admin/AdminHome"));
 const AdminMemberListPage = lazy(
   () => import("../pages/admin/AdminMemberListPage"),
@@ -84,7 +90,9 @@ const AdminDashboardPage = lazy(
   () => import("../pages/admin/AdminDashboardPage"),
 );
 
-// 로그인이 안 돼 있으면 /login페이지로 리다이렉트
+// ================================================
+// 로그인 필요 가드 - 비로그인 시 /login 으로 이동
+// ================================================
 const ProtectedRouteWrapper = ({ Component }) => {
   const { user, loading } = useUser();
 
@@ -97,7 +105,9 @@ const ProtectedRouteWrapper = ({ Component }) => {
   );
 };
 
-// 관리자만 통과할 수 있는 가드
+// ================================================
+// 관리자 전용 가드 - ROLE_ADMIN 없으면 / 으로 이동
+// ================================================
 const AdminRouteWrapper = ({ Component }) => {
   const { user, loading } = useUser();
 
@@ -113,7 +123,9 @@ const AdminRouteWrapper = ({ Component }) => {
   );
 };
 
+// ================================================
 // 라우터 정의
+// ================================================
 const AppRouterContent = () => {
   const router = createBrowserRouter([
     /*누구나 들어올 수 있는 페이지*/

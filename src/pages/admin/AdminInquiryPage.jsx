@@ -5,7 +5,8 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminHeader from "../../components/admin/AdminHeader";
-import { getInquiryPage, getOneInquiry, adminDeleteInquiry } from "../../api/user/inquiryApi";
+import { getInquiryPage, adminDeleteInquiry } from "../../api/admin/adminInquiryApi";
+import { getOneInquiry } from "../../api/user/inquiryApi";
 import { createComment, deleteComment } from "../../api/user/commentApi";
 // [수정] 첨부파일 이미지 미리보기를 위해 API_SERVER_HOST import 추가
 import { API_SERVER_HOST } from "../../api/common/apiClient";
@@ -71,6 +72,14 @@ const AdminInquiryPage = () => {
     const fetchList = async () => {
         setLoading(true);
         try {
+            console.log('Fetching inquiry list with params:', {
+                page: currentPage,
+                size: PAGE_SIZE,
+                status: statusFilter,
+                category: categoryFilter,
+                keyword: appliedKeyword,
+            });
+
             // 서버에 page, size, status, category, keyword 전달
             const data = await getInquiryPage({
                 page: currentPage,
@@ -79,11 +88,15 @@ const AdminInquiryPage = () => {
                 category: categoryFilter,
                 keyword: appliedKeyword,
             });
+
+            console.log('Received inquiry data:', data);
+
             setInquiryList(data.list);      // 현재 페이지 문의 목록
             setTotalCount(data.totalCount); // 전체 건수
             setTotalPages(data.totalPages); // 전체 페이지 수
         } catch (e) {
             console.error("문의 목록 조회 실패:", e);
+            alert("문의 목록 조회 실패: " + e.message);
         } finally {
             setLoading(false);
         }

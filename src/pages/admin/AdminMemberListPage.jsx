@@ -1,3 +1,4 @@
+// src/pages/admin/AdminMemberListPage.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
@@ -17,43 +18,30 @@ const STATUS_STYLE = {
     SUSPENDED: { background: "#fce4ec", color: "#c62828" },
 };
 
-// 페이지당 5개, 페이지 그룹 5개
+// [추가] 가입경로 표시
+const PROVIDER_LABEL = { LOCAL: "일반", KAKAO: "카카오" };
+const PROVIDER_STYLE = {
+    LOCAL: { background: "#f5f5f5", color: "#444" },
+    KAKAO: { background: "#fff9c4", color: "#f57f17" },
+};
+
 const PAGE_SIZE = 5;
 const PAGE_GROUP_SIZE = 5;
 
 const AdminMemberListPage = () => {
     const navigate = useNavigate();
 
-    // 현재 페이지 회원 목록
     const [memberList, setMemberList] = useState([]);
-
-    // 전체 건수
     const [totalCount, setTotalCount] = useState(0);
-
-    // 전체 페이지 수
     const [totalPages, setTotalPages] = useState(1);
-
-    // 현재 페이지 번호 (1부터 시작)
     const [currentPage, setCurrentPage] = useState(1);
-
-    // 상태 필터 ("전체" 또는 "ACTIVE" / "DORMANT" / "SUSPENDED")
     const [statusFilter, setStatusFilter] = useState("전체");
-
-    // 검색어 입력값 (input에 연결)
     const [searchInput, setSearchInput] = useState("");
-
-    // 실제 API 호출에 사용되는 검색어 (검색 버튼 클릭 시 적용)
     const [appliedKeyword, setAppliedKeyword] = useState("");
-
-    // 로딩 상태
     const [loading, setLoading] = useState(false);
 
-    // ================================================
-    // 필터, 검색어, 페이지 변경 시 목록 재조회
-    // ================================================
-    useEffect(() => {
-        fetchList();
-    }, [statusFilter, appliedKeyword, currentPage]);
+    // 필터/검색/페이지 변경 시 목록 재조회
+    useEffect(() => { fetchList(); }, [statusFilter, appliedKeyword, currentPage]);
 
     const fetchList = async () => {
         setLoading(true);
@@ -61,7 +49,6 @@ const AdminMemberListPage = () => {
             const data = await getAdminMemberList({
                 page: currentPage,
                 size: PAGE_SIZE,
-                // "전체"면 파라미터 생략 → 서버에서 전체 조회
                 status: statusFilter === "전체" ? null : statusFilter,
                 keyword: appliedKeyword,
             });
@@ -75,47 +62,21 @@ const AdminMemberListPage = () => {
         }
     };
 
-    // 상태 필터 변경 → 첫 페이지로 이동
-    const handleStatusFilter = (value) => {
-        setStatusFilter(value);
-        setCurrentPage(1);
-    };
+    const handleStatusFilter = (value) => { setStatusFilter(value); setCurrentPage(1); };
+    const handleSearch = () => { setAppliedKeyword(searchInput); setCurrentPage(1); };
+    const handleRowClick = (memberNo) => { navigate(`/admin/member/detail/${memberNo}`); };
 
-    // 검색 실행 (버튼 클릭 또는 엔터키)
-    const handleSearch = () => {
-        setAppliedKeyword(searchInput);
-        setCurrentPage(1);
-    };
+    // 가입일 포맷
+    const formatDate = (ts) => (!ts ? "-" : new Date(ts).toLocaleDateString("ko-KR"));
 
-    // 행 클릭 → 상세 페이지 이동
-    const handleRowClick = (memberNo) => {
-        navigate(`/admin/member/detail/${memberNo}`);
-    };
-
-    // ================================================
-    // 가입일 포맷 (날짜만 표시)
-    // ================================================
-    const formatDate = (ts) => {
-        if (!ts) return "-";
-        return new Date(ts).toLocaleDateString("ko-KR");
-    };
-
-    // ================================================
-    // 전화번호 하이픈 포맷
-    // DB에 하이픈 있는 경우 / 없는 경우 모두 통일해서 표시
-    // 예) 01012341234 → 010-1234-1234
-    // ================================================
+    // 전화번호 하이픈 포맷 (null 방어)
     const formatPhone = (phone) => {
         if (!phone) return "-";
-        // 기존 하이픈 제거 후 재포맷
-        const cleaned = phone.replace(/-/g, "");
-        if (cleaned.length === 11) {
-            return cleaned.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
-        }
-        return phone;
+        const c = phone.replace(/-/g, "");
+        return c.length === 11 ? c.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3") : phone;
     };
 
-    // 페이지 그룹 계산 (5개씩 묶어서 표시)
+    // 페이지 그룹 계산
     const currentGroup = Math.ceil(currentPage / PAGE_GROUP_SIZE);
     const startPage = (currentGroup - 1) * PAGE_GROUP_SIZE + 1;
     const endPage = Math.min(startPage + PAGE_GROUP_SIZE - 1, totalPages);
@@ -125,10 +86,10 @@ const AdminMemberListPage = () => {
             <AdminHeader />
             <AdminLayout pageTitle="회원 관리">
 
-                {/* 필터 + 검색 영역 */}
+                {/* 필터 + 검색 */}
                 <div style={{ display: "flex", gap: "10px", marginBottom: "16px", alignItems: "center", flexWrap: "wrap" }}>
 
-                    {/* 상태 필터 (pill 버튼) */}
+                    {/* 상태 필터 */}
                     <div style={{ display: "flex", gap: "6px" }}>
                         {STATUS_OPTIONS.map((s) => (
                             <button key={s} onClick={() => handleStatusFilter(s)}
@@ -143,10 +104,8 @@ const AdminMemberListPage = () => {
                         ))}
                     </div>
 
-                    {/* 키워드 검색 (아이디 또는 이름) */}
-                    <input
-                        type="text"
-                        placeholder="아이디 또는 이름 검색"
+                    {/* 키워드 검색 */}
+                    <input type="text" placeholder="아이디 또는 이름 검색"
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -158,9 +117,7 @@ const AdminMemberListPage = () => {
                     </button>
 
                     {/* 전체 건수 */}
-                    <span style={{ marginLeft: "auto", fontSize: "13px", color: "#888" }}>
-                        총 {totalCount}명
-                    </span>
+                    <span style={{ marginLeft: "auto", fontSize: "13px", color: "#888" }}>총 {totalCount}명</span>
                 </div>
 
                 {/* 회원 목록 테이블 */}
@@ -175,6 +132,7 @@ const AdminMemberListPage = () => {
                                 <th style={th}>이름</th>
                                 <th style={th}>이메일</th>
                                 <th style={th}>전화번호</th>
+                                <th style={th}>가입경로</th>  {/* [추가] */}
                                 <th style={th}>구매횟수</th>
                                 <th style={th}>가입일</th>
                                 <th style={th}>상태</th>
@@ -183,7 +141,7 @@ const AdminMemberListPage = () => {
                         <tbody>
                             {memberList.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} style={{ textAlign: "center", padding: "40px", color: "#999" }}>
+                                    <td colSpan={9} style={{ textAlign: "center", padding: "40px", color: "#999" }}>
                                         조회된 회원이 없습니다.
                                     </td>
                                 </tr>
@@ -196,10 +154,19 @@ const AdminMemberListPage = () => {
                                         onMouseLeave={(e) => e.currentTarget.style.background = ""}>
                                         <td style={td}>{m.memberNo}</td>
                                         <td style={td}>{m.memberId}</td>
-                                        <td style={td}>{m.name}</td>
-                                        <td style={td}>{m.email}</td>
-                                        {/* 전화번호 하이픈 포맷 적용 */}
+                                        {/* null 방어 */}
+                                        <td style={td}>{m.name || "-"}</td>
+                                        <td style={td}>{m.email || "-"}</td>
                                         <td style={td}>{formatPhone(m.phoneNumber)}</td>
+                                        {/* [추가] 가입경로 뱃지 */}
+                                        <td style={td}>
+                                            <span style={{
+                                                padding: "3px 10px", borderRadius: "12px", fontSize: "12px",
+                                                ...(PROVIDER_STYLE[m.provider] || { background: "#f5f5f5", color: "#444" })
+                                            }}>
+                                                {PROVIDER_LABEL[m.provider] || m.provider || "-"}
+                                            </span>
+                                        </td>
                                         <td style={td}>{m.purchaseCount}</td>
                                         <td style={td}>{formatDate(m.createdAt)}</td>
                                         <td style={td}>
@@ -217,26 +184,17 @@ const AdminMemberListPage = () => {
                     </table>
                 )}
 
-                {/* 페이지네이션 (5개씩 그룹) */}
+                {/* 페이지네이션 */}
                 {totalPages > 1 && (
                     <div style={{ display: "flex", justifyContent: "center", gap: "6px", marginTop: "24px" }}>
-                        {/* 이전 그룹 버튼 */}
                         <button onClick={() => setCurrentPage(startPage - 1)} disabled={startPage === 1}
                             style={{ ...pageBtn, color: startPage === 1 ? "#ccc" : "#333" }}>&lt;</button>
-
-                        {/* 페이지 번호 버튼 (현재 그룹 5개만 표시) */}
                         {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map((page) => (
                             <button key={page} onClick={() => setCurrentPage(page)}
-                                style={{
-                                    ...pageBtn,
-                                    background: currentPage === page ? "#222" : "#fff",
-                                    color: currentPage === page ? "#fff" : "#333",
-                                }}>
+                                style={{ ...pageBtn, background: currentPage === page ? "#222" : "#fff", color: currentPage === page ? "#fff" : "#333" }}>
                                 {page}
                             </button>
                         ))}
-
-                        {/* 다음 그룹 버튼 */}
                         <button onClick={() => setCurrentPage(endPage + 1)} disabled={endPage === totalPages}
                             style={{ ...pageBtn, color: endPage === totalPages ? "#ccc" : "#333" }}>&gt;</button>
                     </div>
@@ -247,7 +205,6 @@ const AdminMemberListPage = () => {
     );
 };
 
-// 공통 스타일
 const th = { padding: "10px 12px", fontWeight: "bold", textAlign: "center", borderBottom: "1px solid #ddd" };
 const td = { padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #f0f0f0" };
 const pageBtn = { padding: "6px 12px", border: "1px solid #ddd", borderRadius: "4px", background: "#fff", cursor: "pointer", fontSize: "13px" };
