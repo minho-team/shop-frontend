@@ -8,18 +8,11 @@ const Footer = () => {
         <Link to="/" className="footer-top-link">
           홈으로
         </Link>
-        <Link to="/company" className="footer-top-link">
-          회사소개
-        </Link>
-        <Link to="/terms" className="footer-top-link">
-          이용약관
-        </Link>
-        <Link to="/privacy" className="footer-top-link strong">
-          개인정보처리방침
-        </Link>
-        <Link to="/guide" className="footer-top-link">
-          이용안내
-        </Link>
+
+        <span className="footer-top-link disabled">회사소개</span>
+        <span className="footer-top-link disabled">이용약관</span>
+        <span className="footer-top-link disabled">개인정보처리방침</span>
+        <span className="footer-top-link disabled">이용안내</span>
       </div>
 
       <div className="footer-main">
@@ -28,15 +21,13 @@ const Footer = () => {
 
           <p>COMPANY : 에르딘(주) / CEO : 강민호</p>
           <p>CALL CENTER : 1111-2222</p>
-          <p>ADDRESS : 서울특별시 강남구 테헤란로14길 6 남도빌딩 2F, 3F, 4F, 5F, 6F</p>
           <p>
-            개인정보관리책임자 : 강민호
+            ADDRESS : 서울특별시 강남구 테헤란로14길 6 남도빌딩 2F, 3F,
+            4F, 5F, 6F
           </p>
+          <p>개인정보관리책임자 : 강민호</p>
           <p>
             사업자등록번호 : 333-33-33333{" "}
-            <a href="/" className="footer-inline-link">
-              [사업자정보확인]
-            </a>
           </p>
           <p>통신판매업 신고번호 : 제3333-서울-0333호</p>
         </div>
@@ -54,7 +45,10 @@ const Footer = () => {
 
           <div className="footer-block">
             <h3>RETURN / EXCHANGE</h3>
-            <p>서울특별시 강남구 테헤란로14길 6 남도빌딩 2F, 3F, 4F, 5F, 6F (에르딘)</p>
+            <p>
+              서울특별시 강남구 테헤란로14길 6 남도빌딩 2F, 3F, 4F,
+              5F, 6F (에르딘)
+            </p>
           </div>
         </div>
 
