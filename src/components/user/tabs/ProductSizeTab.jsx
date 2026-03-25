@@ -1,9 +1,13 @@
 import { API_SERVER_HOST } from "../../../api/common/apiClient";
 import "../../../css/common/ProductSizeTab.css";
 
-export default function ProductSizeTab({ options = [] }) {
-  const sizeGuideImageUrl =
-    options.find((o) => o.sizeGuideImageUrl)?.sizeGuideImageUrl ?? null;
+export default function ProductSizeTab({ images = [] }) {
+  const sizeImage =
+    images.find(
+      (img) => String(img.imageType || "").toUpperCase() === "SIZE",
+    ) ?? null;
+
+  const sizeGuideImageUrl = sizeImage?.imageUrl ?? null;
 
   return (
     <div className="pst-wrap">

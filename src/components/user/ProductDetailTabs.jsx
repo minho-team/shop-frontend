@@ -1,10 +1,9 @@
 import { useEffect, useState, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ProductInfoTab from "./tabs/ProductInfoTab";
 import ProductSizeTab from "./tabs/ProductSizeTab";
 import ProductRelatedTab from "./tabs/ProductRelatedTab";
 import ProductReviewTab from "./tabs/ProductReviewTab";
-import ProductQnaTab from "./tabs/ProductQnaTab";
 import "../../css/common/ProductDetailTabs.css";
 
 const TAB_LIST = [
@@ -25,6 +24,7 @@ export default function ProductDetailTabs({
   const [activeTab, setActiveTab] = useState("info");
   const tabRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -34,6 +34,12 @@ export default function ProductDetailTabs({
   }, [location]);
 
   const handleTabClick = (key) => {
+    if (key === "qna") {
+      if (!product?.productNo) return;
+      navigate(`/inquiry/write?productNo=${product.productNo}`);
+      return;
+    }
+
     setActiveTab(key);
     tabRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -44,7 +50,7 @@ export default function ProductDetailTabs({
         return <ProductInfoTab product={product} images={images} />;
 
       case "size":
-        return <ProductSizeTab options={options} />;
+        return <ProductSizeTab options={options} images={images} />;
 
       case "related":
         return (
@@ -56,9 +62,6 @@ export default function ProductDetailTabs({
 
       case "review":
         return <ProductReviewTab productId={product?.productNo} />;
-
-      case "qna":
-        return <ProductQnaTab productId={product?.productNo} />;
 
       default:
         return null;

@@ -9,7 +9,9 @@ import { addCartItem } from "../../api/user/cartItemApi";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
 import ProductDetailTabs from "../../components/user/Productdetailtabs";
 import Header from "../../components/user/Header";
-import RecentlyViewed, { addRecentlyViewed } from "../../components/user/RecentlyViewed";
+import RecentlyViewed, {
+  addRecentlyViewed,
+} from "../../components/user/RecentlyViewed";
 import "../../css/user/ProductDetailPage.css";
 import "../../css/common/MainProductList.css";
 import PopularKeywords from "../../components/user/PopularKeywords";
@@ -104,12 +106,19 @@ const ProductDetailPage = () => {
 
   const imageList = useMemo(() => {
     if (!imageData?.images) return [];
+
     return imageData.images;
   }, [imageData]);
 
   const displayImages = useMemo(() => {
     if (!imageList.length) return [];
-    return imageList;
+
+    return imageList.filter(
+      (img) =>
+        img.imageType === "MAIN" ||
+        img.imageType === "THUMB" ||
+        img.imageType === "SUB",
+    );
   }, [imageList]);
 
   const currentDisplayImage = useMemo(() => {
@@ -303,8 +312,9 @@ const ProductDetailPage = () => {
                   <button
                     key={img.productImgNo}
                     type="button"
-                    className={`thumbnail-button ${currentImageIndex === index ? "active" : ""
-                      }`}
+                    className={`thumbnail-button ${
+                      currentImageIndex === index ? "active" : ""
+                    }`}
                     onClick={() => setCurrentImageIndex(index)}
                   >
                     <img
@@ -480,7 +490,6 @@ const ProductDetailPage = () => {
               relatedLoading={relatedLoading}
             />
           </section>
-
         </div>
       </div>
       <RecentlyViewed />
