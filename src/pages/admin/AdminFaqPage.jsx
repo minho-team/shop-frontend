@@ -5,7 +5,9 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminHeader from "../../components/admin/AdminHeader";
-import { getFaqPage, createFaq, deleteFaq } from "../../api/user/faqApi";
+import { getFaqPage } from "../../api/user/faqApi";
+// 관리자 전용 FAQ 등록/삭제는 /api/admin/faq 경로 사용
+import { adminCreateFaq, adminDeleteFaq } from "../../api/admin/adminFaqApi";
 
 const CATEGORY_LABELS = ["전체", "배송", "주문/결제", "취소/교환/반품", "상품/AS문의", "회원정보", "서비스", "이용안내"];
 
@@ -112,7 +114,7 @@ const AdminFaqPage = () => {
     const handleDelete = async (faqNo) => {
         if (!window.confirm("FAQ를 삭제하시겠습니까?")) return;  // 확인 대화상자
         try {
-            await deleteFaq(faqNo);  // FAQ 삭제 API 호출
+            await adminDeleteFaq(faqNo);  // 관리자 FAQ 삭제 API 호출
             alert("삭제되었습니다.");
             fetchList();  // 목록 재조회
         } catch (e) {
@@ -137,7 +139,7 @@ const AdminFaqPage = () => {
             return;
         }
         try {
-            await createFaq({ ...addForm, sortOrder: Number(addForm.sortOrder) });  // FAQ 등록 API 호출
+            await adminCreateFaq({ ...addForm, sortOrder: Number(addForm.sortOrder) });  // 관리자 FAQ 등록 API 호출
             alert("FAQ가 등록되었습니다.");
             setShowAddModal(false);  // 모달 닫기
             setAddForm({ category: "배송", question: "", answer: "", sortOrder: 0 });  // 폼 초기화
@@ -253,7 +255,8 @@ const AdminFaqPage = () => {
                         </div>
 
                         {/* FAQ 아코디언 목록 */}
-                        {faqList.map(faq => (
+                        {/* index: 페이지 기반 순번 계산에 사용 */}
+                        {faqList.map((faq, index) => (
                             <div key={faq.faqNo} style={{ borderBottom: "1px solid #f0f0f0" }}>
                                 {/* 질문 행 */}
                                 <div style={{
@@ -263,7 +266,12 @@ const AdminFaqPage = () => {
                                 }}
                                     onMouseEnter={e => e.currentTarget.style.background = "#fafafa"}
                                     onMouseLeave={e => e.currentTarget.style.background = openFaqNo === faq.faqNo ? "#fafafa" : "#fff"}>
-                                    <span style={{ textAlign: "center", fontSize: "13px", color: "#999" }}>{faq.faqNo}</span>
+                                    {/* 번호: DB의 faqNo 대신 페이지 기반 순번으로 표시
+                                        - 수식: (현재페이지 - 1) * 페이지크기 + 현재인덱스 + 1
+                                        - 삭제/추가 후 fetchList 재호출 시 자동으로 재번호 매김 */}
+                                    <span style={{ textAlign: "center", fontSize: "13px", color: "#999" }}>
+                                        {(currentPage - 1) * PAGE_SIZE + index + 1}
+                                    </span>
                                     <span style={{ fontSize: "13px" }}>
                                         <span style={{
                                             padding: "2px 8px", borderRadius: "10px", background: "#f0f0f0",
