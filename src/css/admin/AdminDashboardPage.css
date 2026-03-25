@@ -1,0 +1,472 @@
+.admin-dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  background-color: #f7f8fa;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+/* =========================
+   헤더
+========================= */
+.admin-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-dashboard-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #222;
+}
+
+.admin-dashboard-refresh-btn {
+  border: 1px solid #d0d7de;
+  background-color: #ffffff;
+  color: #333;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-dashboard-refresh-btn:hover {
+  background-color: #f3f4f6;
+  border-color: #b8c0c8;
+}
+
+.admin-dashboard-refresh-btn:active {
+  background-color: #e9edf2;
+}
+
+/* =========================
+   카드 공통
+========================= */
+.admin-dashboard-card-row {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-dashboard-card-row-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-dashboard-card-row-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.admin-dashboard-summary-card {
+  background-color: #ffffff;
+  border: 1px solid #e7ebf0;
+  border-radius: 16px;
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+}
+
+.admin-dashboard-summary-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.admin-dashboard-summary-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+.admin-dashboard-summary-card.is-today {
+  background-color: #fcfcfd;
+}
+
+.admin-dashboard-summary-card.is-warning {
+  border-color: #f3d38a;
+  background-color: #fffaf0;
+}
+
+.admin-dashboard-summary-card.is-warning .admin-dashboard-summary-value {
+  color: #b7791f;
+}
+
+.admin-dashboard-summary-card.is-danger {
+  border-color: #efb4b4;
+  background-color: #fff5f5;
+}
+
+.admin-dashboard-summary-card.is-danger .admin-dashboard-summary-value {
+  color: #c53030;
+}
+
+/* =========================
+   2열 패널 영역
+========================= */
+.admin-dashboard-grid-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+/* =========================
+   패널 공통
+========================= */
+.admin-dashboard-panel {
+  background-color: #ffffff;
+  border: 1px solid #e7ebf0;
+  border-radius: 18px;
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+.admin-dashboard-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.admin-dashboard-panel-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.admin-dashboard-more-btn {
+  border: none;
+  background-color: transparent;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.admin-dashboard-more-btn:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* =========================
+   매출 그래프
+========================= */
+.admin-dashboard-chart-panel {
+  min-height: 360px;
+}
+
+.admin-dashboard-chart-box {
+  height: 280px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 8px 4px;
+  border-top: 1px solid #f1f3f5;
+}
+
+.admin-dashboard-chart-item {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-dashboard-chart-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: center;
+  word-break: keep-all;
+}
+
+.admin-dashboard-chart-bar-wrap {
+  width: 100%;
+  max-width: 70px;
+  height: 180px;
+  background-color: #f3f4f6;
+  border-radius: 14px 14px 10px 10px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.admin-dashboard-chart-bar {
+  width: 100%;
+  border-radius: 14px 14px 10px 10px;
+  background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
+  min-height: 12px;
+  transition: height 0.3s ease;
+}
+
+.admin-dashboard-chart-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #374151;
+}
+
+/* =========================
+   인기상품 TOP
+========================= */
+.admin-dashboard-top-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-dashboard-top-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  border-radius: 12px;
+  background-color: #f9fafb;
+  border: 1px solid #eef2f6;
+}
+
+.admin-dashboard-top-rank {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background-color: #e8f0ff;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-dashboard-top-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.admin-dashboard-top-sales {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #4b5563;
+}
+
+/* =========================
+   테이블
+========================= */
+.admin-dashboard-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.admin-dashboard-table thead tr {
+  background-color: #f8fafc;
+}
+
+.admin-dashboard-table th {
+  padding: 14px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+  font-weight: 700;
+  color: #374151;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.admin-dashboard-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #eef2f6;
+  font-size: 14px;
+  color: #374151;
+  text-align: center;
+  vertical-align: middle;
+  background-color: #ffffff;
+}
+
+.admin-dashboard-table tbody tr:hover td {
+  background-color: #fafcff;
+}
+
+.admin-dashboard-empty {
+  padding: 28px 12px !important;
+  color: #9ca3af !important;
+  font-weight: 500;
+}
+
+/* =========================
+   버튼
+========================= */
+.admin-dashboard-action-btn {
+  border: 1px solid #d7dce2;
+  background-color: #ffffff;
+  color: #374151;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-dashboard-action-btn:hover {
+  background-color: #f3f4f6;
+  border-color: #bfc7d1;
+}
+
+.admin-dashboard-action-btn:active {
+  background-color: #e8edf3;
+}
+
+/* =========================
+   재고 상태 배지
+========================= */
+.admin-dashboard-stock-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.admin-dashboard-stock-badge.is-warning {
+  background-color: #fff7e6;
+  color: #b7791f;
+}
+
+.admin-dashboard-stock-badge.is-danger {
+  background-color: #ffeaea;
+  color: #d14343;
+}
+
+/* =========================
+   반응형
+========================= */
+@media (max-width: 1400px) {
+  .admin-dashboard-card-row-5 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1200px) {
+  .admin-dashboard-card-row-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-dashboard-grid-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-dashboard-page {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .admin-dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-dashboard-title {
+    font-size: 24px;
+  }
+
+  .admin-dashboard-card-row-5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-dashboard-summary-card {
+    min-height: 96px;
+    padding: 18px;
+  }
+
+  .admin-dashboard-summary-value {
+    font-size: 24px;
+  }
+
+  .admin-dashboard-panel {
+    padding: 16px;
+  }
+
+  .admin-dashboard-chart-box {
+    gap: 12px;
+  }
+
+  .admin-dashboard-chart-bar-wrap {
+    max-width: 56px;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-dashboard-card-row-4,
+  .admin-dashboard-card-row-5 {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-dashboard-title {
+    font-size: 22px;
+  }
+
+  .admin-dashboard-summary-label {
+    font-size: 13px;
+  }
+
+  .admin-dashboard-summary-value {
+    font-size: 22px;
+  }
+
+  .admin-dashboard-panel-title {
+    font-size: 16px;
+  }
+
+  .admin-dashboard-chart-box {
+    min-width: 520px;
+  }
+
+  .admin-dashboard-top-name {
+    font-size: 13px;
+  }
+}

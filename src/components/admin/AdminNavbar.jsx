@@ -13,9 +13,9 @@ const AdminNavbar = () => {
       <div className="admin-navbar-inner">
         <ul className="admin-menu-list">
           <li
-            className={`admin-menu-item ${location.pathname === "/admin" ? "active" : ""}`}
+            className={`admin-menu-item ${location.pathname === "/admin/dashboard" ? "active" : ""}`}
           >
-            <Link to="/admin">대시보드</Link>
+            <Link to="/admin/dashboard">대시보드</Link>
           </li>
 
           <li
