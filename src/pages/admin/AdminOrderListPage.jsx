@@ -1,7 +1,9 @@
-import AdminLayout from "../../components/admin/AdminLayout";
 import { useEffect, useState } from "react";
-import { getOrderList } from "../../api/admin/adminOrdersApi";
 import { useNavigate } from "react-router-dom";
+import AdminLayout from "../../components/admin/AdminLayout";
+import AdminHeader from "../../components/admin/AdminHeader";
+import { getOrderList } from "../../api/admin/adminOrdersApi";
+import "../../css/admin/AdminOrderListPage.css";
 
 const ORDER_STATUS_LABEL = {
   PENDING_PAYMENT: "결제대기",
@@ -10,6 +12,17 @@ const ORDER_STATUS_LABEL = {
   SHIPPING: "배송중",
   DELIVERED: "배송완료",
   CANCELED: "주문취소",
+};
+
+const INITIAL_SEARCH = {
+  page: 1,
+  size: 10,
+  searchType: "ordererName", // 기본값 주문자명으로 변경
+  keyword: "",
+  datePreset: "",
+  startDate: "",
+  endDate: "",
+  orderStatus: "",
 };
 
 const formatPrice = (price) => {
@@ -34,7 +47,9 @@ const formatDateTime = (value) => {
 
 const AdminOrderListPage = () => {
   const nav = useNavigate();
+
   const [orders, setOrders] = useState([]);
+  const [search, setSearch] = useState(INITIAL_SEARCH);
   const [pageInfo, setPageInfo] = useState({
     currentPage: 1,
     size: 10,
@@ -46,26 +61,98 @@ const AdminOrderListPage = () => {
     hasNext: false,
   });
 
-  const fetchOrders = async (page = 1) => {
+  const fetchOrders = async (customParams = {}) => {
     try {
-      const data = await getOrderList(page, 10);
-      setOrders(data.content);
-      setPageInfo(data.pageInfo);
+      const params = {
+        ...search,
+        ...customParams,
+      };
+
+      const data = await getOrderList(params);
+      setOrders(data.content || []);
+      setPageInfo(
+        data.pageInfo || {
+          currentPage: 1,
+          size: 10,
+          totalCount: 0,
+          totalPage: 0,
+          startPage: 1,
+          endPage: 1,
+          hasPrev: false,
+          hasNext: false,
+        }
+      );
+
+      if (customParams.page != null) {
+        setSearch((prev) => ({ ...prev, page: customParams.page }));
+      }
     } catch (error) {
       console.error("주문 목록 조회 실패:", error);
     }
   };
 
   useEffect(() => {
-    fetchOrders(1);
+    fetchOrders({ page: 1 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const clickOneOrder = (id) => {
-    nav(`/admin/order/detail/${id}`);
+  const clickOneOrder = (orderNo) => {
+    nav(`/admin/order/detail/${orderNo}`);
   };
 
   const handlePageClick = (page) => {
-    fetchOrders(page);
+    fetchOrders({ page });
+  };
+
+  const handleSearchChange = (e) => {
+    const { name, value } = e.target;
+
+    setSearch((prev) => {
+      const next = {
+        ...prev,
+        [name]: value,
+      };
+
+      if (name === "datePreset") {
+        if (value === "recentWeek" || value === "") {
+          next.startDate = "";
+          next.endDate = "";
+        }
+      }
+
+      return next;
+    });
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+
+    if (search.datePreset === "custom") {
+      if (!search.startDate || !search.endDate) {
+        alert("시작일과 종료일을 모두 선택해주세요.");
+        return;
+      }
+
+      if (search.startDate > search.endDate) {
+        alert("시작일은 종료일보다 늦을 수 없습니다.");
+        return;
+      }
+    }
+
+    fetchOrders({ page: 1 });
+  };
+
+  // 검색어 input에서 엔터 눌렀을 때도 검색
+  const handleKeywordKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearchSubmit(e);
+    }
+  };
+
+  const handleReset = () => {
+    setSearch(INITIAL_SEARCH);
+    fetchOrders(INITIAL_SEARCH);
   };
 
   const renderPageButtons = () => {
@@ -77,14 +164,12 @@ const AdminOrderListPage = () => {
       buttons.push(
         <button
           key={i}
+          type="button"
           onClick={() => handlePageClick(i)}
-          style={{
-            ...styles.pageButton,
-            ...(isActive ? styles.pageButtonActive : {}),
-          }}
+          className={`admin-order-page-btn ${isActive ? "active" : ""}`}
         >
           {i}
-        </button>,
+        </button>
       );
     }
 
@@ -93,43 +178,129 @@ const AdminOrderListPage = () => {
 
   return (
     <>
-      <AdminLayout pageTitle="주문 관리">
-        <h2>주문 관리</h2>
-        <div style={styles.page}>
-          <div style={styles.summaryRow}>
-            <div style={styles.summaryCard}>
-              <p style={styles.summaryLabel}>전체 주문 수</p>
-              <p style={styles.summaryValue}>{pageInfo.totalCount}</p>
+      <AdminHeader />
+      <AdminLayout>
+        <div className="admin-order-page">
+          
+
+
+          <div className="admin-order-search-section">
+            <div className="admin-order-section-head">
+              <h3>검색 및 필터</h3>
+              <span>조건을 선택해서 주문을 조회하세요.</span>
             </div>
-            <div style={styles.summaryCard}>
-              <p style={styles.summaryLabel}>현재 페이지</p>
-              <p style={styles.summaryValue}>{pageInfo.currentPage}</p>
-            </div>
-            <div style={styles.summaryCard}>
-              <p style={styles.summaryLabel}>페이지 크기</p>
-              <p style={styles.summaryValue}>{pageInfo.size}</p>
-            </div>
-            <div style={styles.summaryCard}>
-              <p style={styles.summaryLabel}>전체 페이지</p>
-              <p style={styles.summaryValue}>{pageInfo.totalPage}</p>
-            </div>
+
+            <form className="admin-order-search-form" onSubmit={handleSearchSubmit}>
+              <div className="admin-order-search-grid">
+                <div className="admin-order-form-group small">
+                  <label>검색조건</label>
+                  <select
+                    name="searchType"
+                    value={search.searchType}
+                    onChange={handleSearchChange}
+                  >
+                    <option value="orderNo">주문번호</option>
+                    <option value="ordererName">주문자명</option>
+                  </select>
+                </div>
+
+                <div className="admin-order-form-group large keyword-group">
+                  <label>검색어</label>
+                  <input
+                    type="text"
+                    name="keyword"
+                    value={search.keyword}
+                    onChange={handleSearchChange}
+                    onKeyDown={handleKeywordKeyDown}
+                    placeholder="주문번호 또는 주문자명을 입력하세요"
+                  />
+                </div>
+
+                <div className="admin-order-form-group medium">
+                  <label>주문상태</label>
+                  <select
+                    name="orderStatus"
+                    value={search.orderStatus}
+                    onChange={handleSearchChange}
+                  >
+                    <option value="">전체</option>
+                    <option value="PENDING_PAYMENT">결제대기</option>
+                    <option value="PAYMENT_COMPLETED">결제완료</option>
+                    <option value="PREPARING">상품준비중</option>
+                    <option value="SHIPPING">배송중</option>
+                    <option value="DELIVERED">배송완료</option>
+                    <option value="CANCELED">주문취소</option>
+                  </select>
+                </div>
+
+                <div className="admin-order-form-group medium">
+                  <label>기간 필터</label>
+                  <select
+                    name="datePreset"
+                    value={search.datePreset}
+                    onChange={handleSearchChange}
+                  >
+                    <option value="">전체</option>
+                    <option value="recentWeek">최근 일주일</option>
+                    <option value="custom">직접 선택</option>
+                  </select>
+                </div>
+
+                <div className="admin-order-form-group date-group">
+                  <label>시작일</label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    value={search.startDate}
+                    onChange={handleSearchChange}
+                    disabled={search.datePreset !== "custom"}
+                  />
+                </div>
+
+                <div className="admin-order-date-divider">~</div>
+
+                <div className="admin-order-form-group date-group">
+                  <label>종료일</label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    value={search.endDate}
+                    onChange={handleSearchChange}
+                    disabled={search.datePreset !== "custom"}
+                  />
+                </div>
+              </div>
+
+              <div className="admin-order-search-actions">
+                <button type="submit" className="admin-order-search-btn primary">
+                  검색
+                </button>
+                <button
+                  type="button"
+                  className="admin-order-search-btn secondary"
+                  onClick={handleReset}
+                >
+                  초기화
+                </button>
+              </div>
+            </form>
           </div>
 
-          <div style={styles.tableSection}>
-            <div style={styles.tableHeader}>
-              <h3 style={styles.tableTitle}>주문 리스트</h3>
-              <span style={styles.tableCount}>총 {pageInfo.totalCount}건</span>
+          <div className="admin-order-table-section">
+            <div className="admin-order-section-head table-head">
+              <h3>주문 리스트</h3>
+              <span>행을 클릭하면 주문 상세페이지로 이동합니다.</span>
             </div>
 
-            <div style={styles.tableWrap}>
-              <table style={styles.table}>
+            <div className="admin-order-table-wrap">
+              <table className="admin-order-table">
                 <thead>
                   <tr>
-                    <th style={styles.th}>주문번호</th>
-                    <th style={styles.th}>주문자명</th>
-                    <th style={styles.th}>주문상태</th>
-                    <th style={styles.th}>총금액</th>
-                    <th style={styles.th}>주문일시</th>
+                    <th>주문번호</th>
+                    <th>주문자명</th>
+                    <th>주문상태</th>
+                    <th>총금액</th>
+                    <th>주문일시</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -138,27 +309,22 @@ const AdminOrderListPage = () => {
                       <tr
                         key={order.orderNo}
                         onClick={() => clickOneOrder(order.orderNo)}
-                        style={styles.tr}
+                        className="admin-order-row"
                       >
-                        <td style={styles.tdStrong}>{order.orderNo}</td>
-                        <td style={styles.td}>{order.ordererName}</td>
-                        <td style={styles.td}>
-                          <span style={styles.statusBadge}>
-                            {ORDER_STATUS_LABEL[order.orderStatus] ||
-                              order.orderStatus}
+                        <td className="strong">{order.orderNo}</td>
+                        <td>{order.ordererName}</td>
+                        <td>
+                          <span className="admin-order-status-badge">
+                            {ORDER_STATUS_LABEL[order.orderStatus] || order.orderStatus}
                           </span>
                         </td>
-                        <td style={styles.td}>
-                          {formatPrice(order.totalPrice)}
-                        </td>
-                        <td style={styles.td}>
-                          {formatDateTime(order.createdAt)}
-                        </td>
+                        <td>{formatPrice(order.totalPrice)}</td>
+                        <td>{formatDateTime(order.createdAt)}</td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="5" style={styles.emptyTd}>
+                      <td colSpan="5" className="admin-order-empty">
                         주문 내역이 없습니다.
                       </td>
                     </tr>
@@ -167,13 +333,14 @@ const AdminOrderListPage = () => {
               </table>
             </div>
 
-            <div style={styles.pagination}>
+            <div className="admin-order-pagination">
               {pageInfo.hasPrev && (
                 <button
+                  type="button"
                   onClick={() => handlePageClick(pageInfo.startPage - 1)}
-                  style={styles.pageButton}
+                  className="admin-order-page-btn"
                 >
-                  {"<"}
+                  이전
                 </button>
               )}
 
@@ -181,10 +348,11 @@ const AdminOrderListPage = () => {
 
               {pageInfo.hasNext && (
                 <button
+                  type="button"
                   onClick={() => handlePageClick(pageInfo.endPage + 1)}
-                  style={styles.pageButton}
+                  className="admin-order-page-btn"
                 >
-                  {">"}
+                  다음
                 </button>
               )}
             </div>
@@ -193,176 +361,6 @@ const AdminOrderListPage = () => {
       </AdminLayout>
     </>
   );
-};
-
-const styles = {
-  page: {
-    backgroundColor: "#ffffff",
-    color: "#111111",
-    minHeight: "100%",
-    padding: "24px",
-  },
-  topBox: {
-    backgroundColor: "#111111",
-    color: "#ffffff",
-    borderRadius: "16px",
-    padding: "28px",
-    marginBottom: "20px",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-  },
-  topSubTitle: {
-    margin: 0,
-    fontSize: "12px",
-    letterSpacing: "1.6px",
-    opacity: 0.75,
-  },
-  topTitle: {
-    margin: "10px 0 8px 0",
-    fontSize: "30px",
-    fontWeight: 800,
-  },
-  topDesc: {
-    margin: 0,
-    fontSize: "14px",
-    color: "#d0d0d0",
-  },
-  summaryRow: {
-    display: "flex",
-    gap: "14px",
-    marginBottom: "20px",
-    flexWrap: "nowrap",
-    overflowX: "auto",
-  },
-  summaryCard: {
-    flex: "1 1 0",
-    minWidth: "200px",
-    backgroundColor: "#ffffff",
-    border: "1px solid #e5e5e5",
-    borderRadius: "14px",
-    padding: "18px",
-    boxShadow: "0 6px 20px rgba(0,0,0,0.04)",
-  },
-  summaryLabel: {
-    margin: 0,
-    fontSize: "12px",
-    color: "#666666",
-  },
-  summaryValue: {
-    margin: "10px 0 0 0",
-    fontSize: "22px",
-    fontWeight: 800,
-    color: "#111111",
-  },
-  tableSection: {
-    backgroundColor: "#ffffff",
-    border: "1px solid #e8e8e8",
-    borderRadius: "16px",
-    padding: "20px",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
-  },
-  tableHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "16px",
-    gap: "12px",
-    flexWrap: "wrap",
-  },
-  tableTitle: {
-    margin: 0,
-    fontSize: "22px",
-    fontWeight: 800,
-    color: "#111111",
-  },
-  tableCount: {
-    fontSize: "13px",
-    color: "#666666",
-    backgroundColor: "#f5f5f5",
-    borderRadius: "999px",
-    padding: "8px 12px",
-  },
-  tableWrap: {
-    width: "100%",
-    overflowX: "auto",
-    border: "1px solid #ededed",
-    borderRadius: "14px",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    minWidth: "900px",
-    backgroundColor: "#ffffff",
-  },
-  th: {
-    backgroundColor: "#111111",
-    color: "#ffffff",
-    padding: "14px 16px",
-    fontSize: "14px",
-    fontWeight: 700,
-    textAlign: "center",
-    borderBottom: "1px solid #222222",
-  },
-  tr: {
-    cursor: "pointer",
-    borderBottom: "1px solid #efefef",
-  },
-  td: {
-    padding: "16px",
-    textAlign: "center",
-    fontSize: "14px",
-    color: "#222222",
-    backgroundColor: "#ffffff",
-  },
-  tdStrong: {
-    padding: "16px",
-    textAlign: "center",
-    fontSize: "14px",
-    fontWeight: 700,
-    color: "#111111",
-    backgroundColor: "#ffffff",
-  },
-  emptyTd: {
-    padding: "40px 20px",
-    textAlign: "center",
-    color: "#666666",
-    backgroundColor: "#fafafa",
-    fontSize: "14px",
-  },
-  statusBadge: {
-    display: "inline-block",
-    backgroundColor: "#f2f2f2",
-    color: "#111111",
-    border: "1px solid #dddddd",
-    borderRadius: "999px",
-    padding: "6px 10px",
-    fontSize: "12px",
-    fontWeight: 700,
-  },
-  pagination: {
-    marginTop: "20px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: "6px",
-    flexWrap: "wrap",
-  },
-  pageButton: {
-    minWidth: "40px",
-    height: "40px",
-    padding: "0 12px",
-    border: "1px solid #d6d6d6",
-    backgroundColor: "#ffffff",
-    color: "#111111",
-    borderRadius: "10px",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: 600,
-  },
-  pageButtonActive: {
-    backgroundColor: "#111111",
-    color: "#ffffff",
-    border: "1px solid #111111",
-  },
 };
 
 export default AdminOrderListPage;
