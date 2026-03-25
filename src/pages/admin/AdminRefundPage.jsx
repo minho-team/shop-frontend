@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
-import AdminHeader from "../../components/admin/AdminHeader";
 import "../../css/admin/AdminRefundPage.css";
 import { getAdminRefundList } from "../../api/admin/adminRefundApi";
 const statusLabelMap = {
@@ -109,7 +108,7 @@ const AdminRefundPage = () => {
           onClick={() => handleMovePage(i)}
         >
           {i}
-        </button>
+        </button>,
       );
     }
     return pages;
@@ -117,8 +116,7 @@ const AdminRefundPage = () => {
 
   return (
     <>
-      <AdminHeader />
-      <AdminLayout>
+      <AdminLayout pageTitle="환불 관리">
         <div className="admin-refund-page">
           <div className="admin-refund-top">
             <h2>환불 관리</h2>
@@ -197,18 +195,26 @@ const AdminRefundPage = () => {
                           <div key={item.refundItemNo} className="item-line">
                             <div className="item-name">{item.itemName}</div>
                             <div className="sub-text">
-                              {item.itemColor} / {item.itemSize} / {item.refundQuantity}개
+                              {item.itemColor} / {item.itemSize} /{" "}
+                              {item.refundQuantity}개
                             </div>
                           </div>
                         ))}
                       </td>
-                      <td>{Number(refund.totalRefundAmount).toLocaleString()}원</td>
                       <td>
-                        <span className={`status-badge status-${refund.refundStatus?.toLowerCase()}`}>
-                          {statusLabelMap[refund.refundStatus] || refund.refundStatus}
+                        {Number(refund.totalRefundAmount).toLocaleString()}원
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge status-${refund.refundStatus?.toLowerCase()}`}
+                        >
+                          {statusLabelMap[refund.refundStatus] ||
+                            refund.refundStatus}
                         </span>
                       </td>
-                      <td>{refund.requestedAt?.replace("T", " ").slice(0, 16)}</td>
+                      <td>
+                        {refund.requestedAt?.replace("T", " ").slice(0, 16)}
+                      </td>
                     </tr>
                   ))
                 )}

@@ -2,7 +2,6 @@ import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { postAdminProductAdd } from "../../api/admin/adminProductApi";
 import AdminLayout from "../../components/admin/AdminLayout";
-import AdminHeader from "../../components/admin/AdminHeader";
 import "../../css/admin/AdminProductAddPage.css";
 
 const categoryMap = {
@@ -526,9 +525,7 @@ const AdminProductAddPage = () => {
 
   return (
     <>
-      <AdminHeader />
-
-      <AdminLayout>
+      <AdminLayout pageTitle="상품 등록">
         <div className="admin-product-add-page">
           <h1>상품 등록</h1>
 

@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
-import AdminHeader from "../../components/admin/AdminHeader";
 import "../../css/admin/AdminDashboardPage.css";
 
 const AdminDashboardPage = () => {
@@ -136,9 +135,7 @@ const AdminDashboardPage = () => {
 
   return (
     <>
-      <AdminHeader />
-
-      <AdminLayout>
+      <AdminLayout pageTitle="대시보드">
         <div className="admin-dashboard-page">
           {/* 제목 */}
           <div className="admin-dashboard-header">

@@ -1,5 +1,4 @@
 import AdminLayout from "../../components/admin/AdminLayout";
-import AdminHeader from "../../components/admin/AdminHeader";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -85,8 +84,7 @@ const AdminRefundDetailPage = () => {
   if (loading) {
     return (
       <>
-        <AdminHeader />
-        <AdminLayout>
+        <AdminLayout pageTitle="환불 상세">
           <div className="admin-refund-detail-page">불러오는 중...</div>
         </AdminLayout>
       </>
@@ -96,9 +94,10 @@ const AdminRefundDetailPage = () => {
   if (!refundDetail) {
     return (
       <>
-        <AdminHeader />
-        <AdminLayout>
-          <div className="admin-refund-detail-page">환불 정보를 찾을 수 없습니다.</div>
+        <AdminLayout pageTitle="환불 상세">
+          <div className="admin-refund-detail-page">
+            환불 정보를 찾을 수 없습니다.
+          </div>
         </AdminLayout>
       </>
     );
@@ -106,19 +105,23 @@ const AdminRefundDetailPage = () => {
 
   return (
     <>
-      <AdminHeader />
-      <AdminLayout>
+      <AdminLayout pageTitle="환불 상세">
         <div className="admin-refund-detail-page">
           <div className="detail-top">
             <div>
               <h2>환불 상세</h2>
+              <p>환불번호 {refundDetail.refundNo}</p>
             </div>
-            <button className="back-btn" onClick={() => navigate("/admin/orders/refunds")}>
+            <button
+              className="back-btn"
+              onClick={() => navigate("/admin/orders/refunds")}
+            >
               목록으로
             </button>
           </div>
 
           <div className="detail-card">
+            <h3>기본 정보</h3>
             <div className="detail-grid">
               <div>
                 <span className="label">환불번호</span>
@@ -132,15 +135,6 @@ const AdminRefundDetailPage = () => {
                 <span className="label">회원ID</span>
                 <strong>{refundDetail.memberId}</strong>
               </div>
-              <div>
-                <span className="label">은행명</span>
-                <strong>{refundDetail.bankName}</strong>
-              </div>
-              <div>
-                <span className="label">계좌번호</span>
-                <strong>{refundDetail.bankCode}</strong>
-              </div>
-
               <div>
                 <span className="label">회원명</span>
                 <strong>{refundDetail.name}</strong>
@@ -191,7 +185,8 @@ const AdminRefundDetailPage = () => {
                     <td>{item.refundQuantity}</td>
                     <td>{Number(item.refundAmount).toLocaleString()}원</td>
                     <td>
-                      {statusLabelMap[item.refundItemStatus] || item.refundItemStatus}
+                      {statusLabelMap[item.refundItemStatus] ||
+                        item.refundItemStatus}
                     </td>
                   </tr>
                 ))}
@@ -220,7 +215,8 @@ const AdminRefundDetailPage = () => {
             <p className="status-guide">
               현재 헤더 상태:{" "}
               <strong>
-                {statusLabelMap[refundDetail.refundStatus] || refundDetail.refundStatus}
+                {statusLabelMap[refundDetail.refundStatus] ||
+                  refundDetail.refundStatus}
               </strong>
             </p>
           </div>

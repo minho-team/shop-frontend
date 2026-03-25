@@ -19,7 +19,7 @@ const AdminNavbar = () => {
           </li>
 
           <li
-            className={`admin-menu-item dropdown ${isActive("/admin/members") ? "active" : ""}`}
+            className={`admin-menu-item dropdown ${isActive("/admin/member") ? "active" : ""}`}
           >
             <button type="button" className="admin-menu-button">
               회원 관리
@@ -41,12 +41,6 @@ const AdminNavbar = () => {
               <li>
                 <Link to="/admin/categories">카테고리 목록</Link>
               </li>
-              <li>
-                <Link to="/admin/categories/add">카테고리 추가</Link>
-              </li>
-              <li>
-                <Link to="/admin/categories/edit">카테고리 수정</Link>
-              </li>
             </ul>
           </li>
 
@@ -58,7 +52,7 @@ const AdminNavbar = () => {
             </button>
             <ul className="admin-dropdown-menu">
               <li>
-                <Link to="/admin/products">상품 상세조회/수정</Link>
+                <Link to="/admin/products">상품 목록</Link>
               </li>
               <li>
                 <Link to="/admin/products/add">상품 등록</Link>
@@ -67,7 +61,7 @@ const AdminNavbar = () => {
           </li>
 
           <li
-            className={`admin-menu-item dropdown ${isActive("/admin/orders") ? "active" : ""}`}
+            className={`admin-menu-item dropdown ${isActive("/admin/order") ? "active" : ""}`}
           >
             <button type="button" className="admin-menu-button">
               주문 관리
