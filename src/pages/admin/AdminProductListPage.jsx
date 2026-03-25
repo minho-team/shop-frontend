@@ -1,5 +1,4 @@
 import AdminLayout from "../../components/admin/AdminLayout";
-import AdminHeader from "../../components/admin/AdminHeader";
 import { useEffect, useState } from "react";
 import { getAdminProductList } from "../../api/admin/adminProductApi";
 import { useNavigate } from "react-router-dom";
@@ -195,8 +194,6 @@ const AdminProductListPage = () => {
 
   return (
     <>
-      <AdminHeader />
-
       <AdminLayout pageTitle="상품 관리">
         <div className="admin-product-list-page">
           <h2>상품 목록</h2>

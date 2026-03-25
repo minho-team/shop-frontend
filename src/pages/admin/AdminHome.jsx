@@ -1,14 +1,10 @@
-import AdminHeader from "../../components/admin/AdminHeader";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../css/admin/AdminHome.css";
-
-
 
 const AdminHome = () => {
   return (
     <>
-      <AdminHeader />
-      <AdminLayout pageTitle="관리자 대시보드">
+      <AdminLayout pageTitle="관리자 홈">
         <div className="admin-home-wrap">
           <section className="admin-home-card">
             <h3 className="admin-home-card-title">관리자 홈</h3>

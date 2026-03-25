@@ -1,5 +1,4 @@
 import AdminLayout from "../../components/admin/AdminLayout";
-import AdminHeader from "../../components/admin/AdminHeader";
 import { useEffect, useState } from "react";
 import { getOrderList } from "../../api/admin/adminOrdersApi";
 import { useNavigate } from "react-router-dom";
@@ -94,10 +93,9 @@ const AdminOrderListPage = () => {
 
   return (
     <>
-      <AdminHeader />
-      <AdminLayout>
+      <AdminLayout pageTitle="주문 관리">
+        <h2>주문 관리</h2>
         <div style={styles.page}>
-
           <div style={styles.summaryRow}>
             <div style={styles.summaryCard}>
               <p style={styles.summaryLabel}>전체 주문 수</p>
@@ -146,11 +144,16 @@ const AdminOrderListPage = () => {
                         <td style={styles.td}>{order.ordererName}</td>
                         <td style={styles.td}>
                           <span style={styles.statusBadge}>
-                            {ORDER_STATUS_LABEL[order.orderStatus] || order.orderStatus}
+                            {ORDER_STATUS_LABEL[order.orderStatus] ||
+                              order.orderStatus}
                           </span>
                         </td>
-                        <td style={styles.td}>{formatPrice(order.totalPrice)}</td>
-                        <td style={styles.td}>{formatDateTime(order.createdAt)}</td>
+                        <td style={styles.td}>
+                          {formatPrice(order.totalPrice)}
+                        </td>
+                        <td style={styles.td}>
+                          {formatDateTime(order.createdAt)}
+                        </td>
                       </tr>
                     ))
                   ) : (

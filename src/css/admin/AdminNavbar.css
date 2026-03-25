@@ -28,27 +28,37 @@
 .admin-menu-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   height: 56px;
   padding: 0 20px;
   border: none;
   background: transparent;
   color: #ffffff;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 600; /* 기본은 살짝 얇게 */
   text-decoration: none;
   cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    font-weight 0.2s ease;
 }
 
+/* hover */
 .admin-menu-item > a:hover,
 .admin-menu-button:hover {
-  background-color: #374151;
+  background-color: #314158;
 }
 
 .admin-menu-item.active > a,
 .admin-menu-item.active .admin-menu-button {
-  background-color: #111827;
+  background-color: #3b4d68;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800; /* 활성화된 메뉴는 굵게 */
 }
 
+/* 드롭다운 */
 .admin-dropdown-menu {
   display: none;
   position: absolute;
@@ -71,6 +81,7 @@
   font-size: 14px;
   text-decoration: none;
   white-space: nowrap;
+  transition: background-color 0.2s ease;
 }
 
 .admin-dropdown-menu li a:hover {
@@ -81,6 +92,32 @@
   display: block;
 }
 
+/* 사용자 페이지 버튼 */
+.admin-user-page-link {
+  margin-left: auto;
+}
+
+.admin-user-page-link > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  margin-left: 12px;
+  padding: 0 16px;
+  background-color: #4b5563;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.admin-user-page-link > a:hover {
+  background-color: #6b7280;
+}
+
+/* 반응형 */
 @media (max-width: 768px) {
   .admin-navbar-inner {
     padding: 0 10px;
@@ -97,50 +134,10 @@
     top: 50px;
     min-width: 160px;
   }
-}
-.admin-menu-list {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
 
-.admin-user-page-link {
-  margin-left: auto;
-}
-
-.admin-user-page-link > a {
-  display: inline-flex;
-  align-items: center;
-  height: 56px;
-  padding: 0 20px;
-  border: none;
-  background: transparent;
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-
-.admin-user-page-link > a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 40px;
-  padding: 0 16px;
-  background-color: #4b5563;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
-}
-
-.admin-user-page-link > a:hover {
-  background-color: #6b7280;
+  .admin-user-page-link > a {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
 }

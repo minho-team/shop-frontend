@@ -1,5 +1,4 @@
 import AdminLayout from "../../components/admin/AdminLayout";
-import AdminHeader from "../../components/admin/AdminHeader";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -609,8 +608,7 @@ const AdminProductDetailPage = () => {
   if (loading) {
     return (
       <>
-        <AdminHeader />
-        <AdminLayout>
+        <AdminLayout pageTitle="상품 상세">
           <p>상품 정보를 불러오는 중입니다...</p>
         </AdminLayout>
       </>
@@ -619,8 +617,7 @@ const AdminProductDetailPage = () => {
 
   return (
     <>
-      <AdminHeader />
-      <AdminLayout>
+      <AdminLayout pageTitle="상품 상세">
         <div className="admin-product-detail-page">
           <div className="admin-detail-top">
             <div>

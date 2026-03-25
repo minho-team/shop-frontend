@@ -1,8 +1,10 @@
 import AdminLayout from "../../components/admin/AdminLayout";
 import { useParams } from "react-router-dom";
-import { getAdminOrderItemList, updateAdminOrderItemStatus } from "../../api/admin/adminOrdersItemApi";
+import {
+  getAdminOrderItemList,
+  updateAdminOrderItemStatus,
+} from "../../api/admin/adminOrdersItemApi";
 import { useEffect, useMemo, useState } from "react";
-import AdminHeader from "../../components/admin/AdminHeader";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
 
 const ORDER_STATUS_OPTIONS = [
@@ -78,19 +80,19 @@ const AdminOrderDetailPage = () => {
       prev.map((item) =>
         item.orderItemNo === orderItemNo
           ? { ...item, orderItemStatus: newStatus }
-          : item
-      )
+          : item,
+      ),
     );
   };
-const handleSave = async (item) => {
-  try {
-    await updateAdminOrderItemStatus(item.orderItemNo, item.orderItemStatus);
-    alert("상태가 저장되었습니다.");
-  } catch (error) {
-    console.error("상태 저장 실패:", error);
-    alert("상태 저장에 실패했습니다.");
-  }
-};
+  const handleSave = async (item) => {
+    try {
+      await updateAdminOrderItemStatus(item.orderItemNo, item.orderItemStatus);
+      alert("상태가 저장되었습니다.");
+    } catch (error) {
+      console.error("상태 저장 실패:", error);
+      alert("상태 저장에 실패했습니다.");
+    }
+  };
 
   const orderSummary = useMemo(() => {
     if (orderItems.length === 0) {
@@ -110,130 +112,132 @@ const handleSave = async (item) => {
 
   return (
     <>
-    
-    <AdminHeader/>
-    <AdminLayout>
-      <div style={styles.page}>
-        <div style={styles.summaryRow}>
-          <div style={styles.summaryCard}>
-            <p style={styles.summaryLabel}>주문번호</p>
-            <p style={styles.summaryValue}>{orderNo}</p>
-          </div>
-
-          <div style={styles.summaryCard}>
-            <p style={styles.summaryLabel}>주문자명</p>
-            <p style={styles.summaryValue}>{orderSummary.ordererName}</p>
-          </div>
-
-          <div style={styles.summaryCard}>
-            <p style={styles.summaryLabel}>주문일시</p>
-            <p style={styles.summaryValue}>{orderSummary.createdAt}</p>
-          </div>
-
-          <div style={styles.summaryCard}>
-            <p style={styles.summaryLabel}>총 주문금액</p>
-            <p style={styles.summaryValue}>{orderSummary.totalPrice}</p>
-          </div>
-        </div>
-
-        <div style={styles.sectionBox}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>주문 상품 목록</h2>
-            <span style={styles.itemCount}>총 {orderItems.length}개 상품</span>
-          </div>
-
-          {loading ? (
-            <div style={styles.emptyBox}>불러오는 중...</div>
-          ) : orderItems.length === 0 ? (
-            <div style={styles.emptyBox}>주문 상품이 없습니다.</div>
-          ) : (
-            <div style={styles.cardList}>
-              {orderItems.map((item) => (
-                <div key={item.orderItemNo} style={styles.itemCard}>
-                  <div style={styles.imageWrap}>
-                    {item.imageUrl ? (
-                      <img
-                        src={getImageSrc(item.imageUrl)}
-                        alt={item.itemName}
-                        style={styles.image}
-                      />
-                    ) : (
-                      <div style={styles.noImage}>NO IMAGE</div>
-                    )}
-                  </div>
-
-                  <div style={styles.itemInfo}>
-                    <div style={styles.badgeRow}>
-                      <span style={styles.itemNoBadge}>
-                        주문상품 #{item.orderItemNo}
-                      </span>
-                      <span style={styles.statusBadge}>
-                        {getStatusLabel(item.orderItemStatus)}
-                      </span>
-                    </div>
-
-                    <h3 style={styles.itemName}>{item.itemName}</h3>
-
-                    <div style={styles.infoGrid}>
-                      <div style={styles.infoItem}>
-                        <span style={styles.infoLabel}>옵션번호</span>
-                        <span style={styles.infoValue}>
-                          {item.productOptionNo ?? "-"}
-                        </span>
-                      </div>
-
-                      <div style={styles.infoItem}>
-                        <span style={styles.infoLabel}>옵션</span>
-                        <span style={styles.infoValue}>
-                          {item.optionColor || "-"} / {item.optionSize || "-"}
-                        </span>
-                      </div>
-
-                      <div style={styles.infoItem}>
-                        <span style={styles.infoLabel}>수량</span>
-                        <span style={styles.infoValue}>{item.quantity}개</span>
-                      </div>
-
-                      <div style={styles.infoItem}>
-                        <span style={styles.infoLabel}>단가</span>
-                        <span style={styles.infoValue}>
-                          {formatPrice(item.unitPrice)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={styles.actionArea}>
-                    <label style={styles.selectLabel}>상태 변경</label>
-                    <select
-                      value={item.orderItemStatus}
-                      onChange={(e) =>
-                        handleStatusChange(item.orderItemNo, e.target.value)
-                      }
-                      style={styles.selectBox}
-                    >
-                      {ORDER_STATUS_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-
-                    <button
-                      type="button"
-                      onClick={() => handleSave(item)}
-                      style={styles.saveButton}
-                    >
-                      저장
-                    </button>
-                  </div>
-                </div>
-              ))}
+      <AdminLayout pageTitle="주문 상세">
+        <div style={styles.page}>
+          <div style={styles.summaryRow}>
+            <div style={styles.summaryCard}>
+              <p style={styles.summaryLabel}>주문번호</p>
+              <p style={styles.summaryValue}>{orderNo}</p>
             </div>
-          )}
+
+            <div style={styles.summaryCard}>
+              <p style={styles.summaryLabel}>주문자명</p>
+              <p style={styles.summaryValue}>{orderSummary.ordererName}</p>
+            </div>
+
+            <div style={styles.summaryCard}>
+              <p style={styles.summaryLabel}>주문일시</p>
+              <p style={styles.summaryValue}>{orderSummary.createdAt}</p>
+            </div>
+
+            <div style={styles.summaryCard}>
+              <p style={styles.summaryLabel}>총 주문금액</p>
+              <p style={styles.summaryValue}>{orderSummary.totalPrice}</p>
+            </div>
+          </div>
+
+          <div style={styles.sectionBox}>
+            <div style={styles.sectionHeader}>
+              <h2 style={styles.sectionTitle}>주문 상품 목록</h2>
+              <span style={styles.itemCount}>
+                총 {orderItems.length}개 상품
+              </span>
+            </div>
+
+            {loading ? (
+              <div style={styles.emptyBox}>불러오는 중...</div>
+            ) : orderItems.length === 0 ? (
+              <div style={styles.emptyBox}>주문 상품이 없습니다.</div>
+            ) : (
+              <div style={styles.cardList}>
+                {orderItems.map((item) => (
+                  <div key={item.orderItemNo} style={styles.itemCard}>
+                    <div style={styles.imageWrap}>
+                      {item.imageUrl ? (
+                        <img
+                          src={getImageSrc(item.imageUrl)}
+                          alt={item.itemName}
+                          style={styles.image}
+                        />
+                      ) : (
+                        <div style={styles.noImage}>NO IMAGE</div>
+                      )}
+                    </div>
+
+                    <div style={styles.itemInfo}>
+                      <div style={styles.badgeRow}>
+                        <span style={styles.itemNoBadge}>
+                          주문상품 #{item.orderItemNo}
+                        </span>
+                        <span style={styles.statusBadge}>
+                          {getStatusLabel(item.orderItemStatus)}
+                        </span>
+                      </div>
+
+                      <h3 style={styles.itemName}>{item.itemName}</h3>
+
+                      <div style={styles.infoGrid}>
+                        <div style={styles.infoItem}>
+                          <span style={styles.infoLabel}>옵션번호</span>
+                          <span style={styles.infoValue}>
+                            {item.productOptionNo ?? "-"}
+                          </span>
+                        </div>
+
+                        <div style={styles.infoItem}>
+                          <span style={styles.infoLabel}>옵션</span>
+                          <span style={styles.infoValue}>
+                            {item.optionColor || "-"} / {item.optionSize || "-"}
+                          </span>
+                        </div>
+
+                        <div style={styles.infoItem}>
+                          <span style={styles.infoLabel}>수량</span>
+                          <span style={styles.infoValue}>
+                            {item.quantity}개
+                          </span>
+                        </div>
+
+                        <div style={styles.infoItem}>
+                          <span style={styles.infoLabel}>단가</span>
+                          <span style={styles.infoValue}>
+                            {formatPrice(item.unitPrice)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={styles.actionArea}>
+                      <label style={styles.selectLabel}>상태 변경</label>
+                      <select
+                        value={item.orderItemStatus}
+                        onChange={(e) =>
+                          handleStatusChange(item.orderItemNo, e.target.value)
+                        }
+                        style={styles.selectBox}
+                      >
+                        {ORDER_STATUS_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSave(item)}
+                        style={styles.saveButton}
+                      >
+                        저장
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </AdminLayout>
+      </AdminLayout>
     </>
   );
 };
