@@ -67,7 +67,9 @@ const MainHome = () => {
   useEffect(() => {
     if (!user) return; // 비로그인이면 팝업 안 띄움
 
-    const lastSpun = localStorage.getItem("roulette_last_spun");
+    // ★ 계정별 키로 확인 (RouletteModal과 동일한 키 형식 사용)
+    const storageKey = `roulette_last_spun_${user.memberId}`;
+    const lastSpun = localStorage.getItem(storageKey);
     const today = new Date().toISOString().slice(0, 10);
 
     // 오늘 아직 안 돌렸으면 팝업 표시

@@ -87,7 +87,15 @@ const RouletteModal = ({ onClose }) => {
       // 서버에서 "이미 오늘 돌렸습니다" 등 에러 응답 처리
       setError(e.response?.data || "오류가 발생했습니다.");
       setSpinning(false);
-      if (e.response?.data?.includes("이미")) setAlreadySpun(true);
+      // 서버에서 "이미 돌렸다" 응답 시 localStorage에도 저장 → 다음 페이지 로드 때 팝업 안 뜨게
+      if (e.response?.data?.includes("이미")) {
+        setAlreadySpun(true);
+        const key = getStorageKey();
+        if (key) {
+          const today = new Date().toISOString().slice(0, 10);
+          localStorage.setItem(key, today);
+        }
+      }
     }
   };
 
