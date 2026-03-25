@@ -5,6 +5,7 @@
   border-top: none;
 }
 
+/* ===================== 상단 메뉴 ===================== */
 .footer-top-menu {
   display: flex;
   justify-content: center;
@@ -27,9 +28,33 @@
   word-break: keep-all;
 }
 
-.footer-top-link:hover  { color: var(--color-bg); }
-.footer-top-link.strong { font-weight: 600; color: var(--color-bg); }
+/* 활성 링크 (홈) */
+.footer-top-link:hover {
+  color: var(--color-bg);
+}
 
+/* 강조 텍스트 */
+.footer-top-link.strong {
+  font-weight: 600;
+  color: var(--color-bg);
+}
+
+/* ===================== 비활성 처리 ===================== */
+.footer-top-link.disabled,
+.footer-inline-link.disabled {
+  cursor: default;
+  pointer-events: none;
+  text-decoration: none;
+  opacity: 0.5;
+}
+
+/* hover 제거 */
+.footer-top-link.disabled:hover,
+.footer-inline-link.disabled:hover {
+  color: inherit;
+}
+
+/* ===================== 메인 영역 ===================== */
 .footer-main {
   max-width: 1400px;
   margin: 0 auto;
@@ -39,7 +64,9 @@
   gap: 48px;
 }
 
-.footer-col { min-width: 0; }
+.footer-col {
+  min-width: 0;
+}
 
 .footer-company {
   padding-right: 48px;
@@ -68,6 +95,7 @@
   word-break: keep-all;
 }
 
+/* 사업자 링크 */
 .footer-inline-link {
   color: var(--color-bg);
   text-decoration: none;
@@ -75,9 +103,14 @@
   transition: color 0.2s;
 }
 
-.footer-inline-link:hover { color: var(--color-warm); }
+.footer-inline-link:hover {
+  color: var(--color-warm);
+}
 
-.footer-center { padding: 0 10px; }
+/* ===================== 중앙 영역 ===================== */
+.footer-center {
+  padding: 0 10px;
+}
 
 .footer-block h3,
 .footer-bank h3 {
@@ -106,7 +139,10 @@
   border-top: 1px solid rgba(242, 240, 237, 0.12);
 }
 
-.footer-bank { padding-left: 20px; }
+/* ===================== 계좌 영역 ===================== */
+.footer-bank {
+  padding-left: 20px;
+}
 
 .footer-bank-line {
   margin-top: 32px;
@@ -114,17 +150,52 @@
   border-top: 1px solid rgba(242, 240, 237, 0.12);
 }
 
+/* ===================== 반응형 ===================== */
 @media (max-width: 1024px) {
-  .footer-main { grid-template-columns: 1fr; gap: 28px; padding: 38px 28px 34px; }
-  .footer-company { padding-right: 0; border-right: none; border-bottom: 1px solid rgba(242,240,237,0.12); padding-bottom: 26px; }
-  .footer-bank { padding-left: 0; }
-  .footer-bank-line { width: 100%; }
+  .footer-main {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 38px 28px 34px;
+  }
+
+  .footer-company {
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(242,240,237,0.12);
+    padding-bottom: 26px;
+  }
+
+  .footer-bank {
+    padding-left: 0;
+  }
+
+  .footer-bank-line {
+    width: 100%;
+  }
 }
 
 @media (max-width: 600px) {
-  .footer-top-menu { gap: 16px; padding: 14px 12px; }
-  .footer-logo { font-size: 22px; }
-  .footer-block h3, .footer-bank h3 { font-size: 11px; }
-  .footer-phone { font-size: 28px; }
-  .footer-company p, .footer-center p, .footer-bank p { font-size: 12px; }
+  .footer-top-menu {
+    gap: 16px;
+    padding: 14px 12px;
+  }
+
+  .footer-logo {
+    font-size: 22px;
+  }
+
+  .footer-block h3,
+  .footer-bank h3 {
+    font-size: 11px;
+  }
+
+  .footer-phone {
+    font-size: 28px;
+  }
+
+  .footer-company p,
+  .footer-center p,
+  .footer-bank p {
+    font-size: 12px;
+  }
 }
