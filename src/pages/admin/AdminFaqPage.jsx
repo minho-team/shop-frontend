@@ -4,7 +4,8 @@
 // =========================================
 import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
-import { getFaqPage, createFaq, deleteFaq } from "../../api/user/faqApi";
+import { getFaqPage } from "../../api/user/faqApi";
+import { adminCreateFaq, adminDeleteFaq } from "../../api/admin/adminFaqApi";
 
 const CATEGORY_LABELS = [
   "전체",
@@ -120,7 +121,7 @@ const AdminFaqPage = () => {
   const handleDelete = async (faqNo) => {
     if (!window.confirm("FAQ를 삭제하시겠습니까?")) return; // 확인 대화상자
     try {
-      await deleteFaq(faqNo); // FAQ 삭제 API 호출
+      await adminDeleteFaq(faqNo); // FAQ 삭제 API 호출
       alert("삭제되었습니다.");
       fetchList(); // 목록 재조회
     } catch (e) {
@@ -145,7 +146,7 @@ const AdminFaqPage = () => {
       return;
     }
     try {
-      await createFaq({ ...addForm, sortOrder: Number(addForm.sortOrder) }); // FAQ 등록 API 호출
+      await adminCreateFaq({ ...addForm, sortOrder: Number(addForm.sortOrder) }); // FAQ 등록 API 호출
       alert("FAQ가 등록되었습니다.");
       setShowAddModal(false); // 모달 닫기
       setAddForm({ category: "배송", question: "", answer: "", sortOrder: 0 }); // 폼 초기화
@@ -317,7 +318,7 @@ const AdminFaqPage = () => {
             </div>
 
             {/* FAQ 아코디언 목록 */}
-            {faqList.map((faq) => (
+            {faqList.map((faq, idx) => (
               <div
                 key={faq.faqNo}
                 style={{ borderBottom: "1px solid #f0f0f0" }}
@@ -346,7 +347,7 @@ const AdminFaqPage = () => {
                       color: "#999",
                     }}
                   >
-                    {faq.faqNo}
+                    {(currentPage - 1) * PAGE_SIZE + idx + 1}
                   </span>
                   <span style={{ fontSize: "13px" }}>
                     <span
