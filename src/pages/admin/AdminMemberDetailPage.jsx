@@ -17,6 +17,7 @@ import {
   issueAdminMemberCoupon,
   deleteAdminMemberCoupon,
   deleteAdminMasterCoupon,
+  getAdminMemberCouponHistory,
 } from "../../api/admin/adminMemberApi";
 
 // 상태 한글 / 뱃지
@@ -90,6 +91,9 @@ const AdminMemberDetailPage = () => {
   const [showCreateCoupon, setShowCreateCoupon] = useState(false);
   const [newCoupon, setNewCoupon] = useState({ couponName: "", discountType: "FIXED", discountValue: "" });
 
+  // ── 쿠폰 사용 내역 상태 ──
+  const [couponHistory, setCouponHistory] = useState([]);
+
   // ── 페이징 상태 (5개씩) ──
   const [allCouponPage, setAllCouponPage] = useState(1);
   const [memberCouponPage, setMemberCouponPage] = useState(1);
@@ -105,6 +109,7 @@ const AdminMemberDetailPage = () => {
     fetchMemos();
     fetchMemberCouponsData();
     fetchAllCouponsData();
+    fetchCouponHistory();
   }, [memberNo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 주문 페이지 변경 시 재조회
@@ -204,6 +209,15 @@ const AdminMemberDetailPage = () => {
       if (data.length > 0) setSelectedCouponNo(data[0].couponNo);
     } catch (e) {
       console.error("쿠폰 목록 조회 실패:", e);
+    }
+  };
+
+  const fetchCouponHistory = async () => {
+    try {
+      const data = await getAdminMemberCouponHistory(memberNo);
+      setCouponHistory(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("쿠폰 사용 내역 조회 실패:", e);
     }
   };
 
@@ -1362,6 +1376,39 @@ const AdminMemberDetailPage = () => {
               </>
             )}
           </div>
+        </div>
+
+        {/* ── 쿠폰 사용 내역 ── */}
+        <div style={card}>
+          <h3 style={cardTitle}>쿠폰 사용 내역</h3>
+          {couponHistory.length === 0 ? (
+            <p style={{ fontSize: "13px", color: "#aaa", padding: "8px 0" }}>쿠폰 사용 내역이 없습니다.</p>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+              <thead>
+                <tr style={{ background: "#f5f5f5" }}>
+                  <th style={{ padding: "8px 12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>쿠폰명</th>
+                  <th style={{ padding: "8px 12px", textAlign: "center", borderBottom: "1px solid #ddd" }}>할인 내용</th>
+                  <th style={{ padding: "8px 12px", textAlign: "center", borderBottom: "1px solid #ddd" }}>사용일시</th>
+                </tr>
+              </thead>
+              <tbody>
+                {couponHistory.map((h, idx) => (
+                  <tr key={idx}>
+                    <td style={{ padding: "8px 12px", borderBottom: "1px solid #f0f0f0" }}>{h.couponName}</td>
+                    <td style={{ padding: "8px 12px", textAlign: "center", borderBottom: "1px solid #f0f0f0" }}>
+                      {h.discountType === "FIXED"
+                        ? `${Number(h.discountValue).toLocaleString()}원 할인`
+                        : `${h.discountValue}% 할인`}
+                    </td>
+                    <td style={{ padding: "8px 12px", textAlign: "center", borderBottom: "1px solid #f0f0f0", color: "#888" }}>
+                      {h.usedAt || "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* ── 메모 ── */}
