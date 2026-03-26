@@ -178,7 +178,6 @@ const AdminOrderListPage = () => {
 
   return (
     <>
-      <AdminHeader />
       <AdminLayout>
         <div className="admin-order-page">
           
