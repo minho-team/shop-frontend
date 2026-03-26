@@ -256,9 +256,9 @@ const AdminProductListPage = () => {
               value={search.useYn}
               onChange={handleChangeSearch}
             >
-              <option value="">전체 사용여부</option>
-              <option value="Y">사용</option>
-              <option value="N">미사용</option>
+              <option value="">전체 판매여부</option>
+              <option value="Y">판매중</option>
+              <option value="N">판매중지</option>
             </select>
 
             <select
@@ -305,7 +305,7 @@ const AdminProductListPage = () => {
                       <th>정가</th>
                       <th>할인율</th>
                       <th>판매가</th>
-                      <th>사용여부</th>
+                      <th>판매여부</th>
                       <th>조회수</th>
                       <th>당일배송</th>
                       <th>등록일</th>
@@ -337,17 +337,27 @@ const AdminProductListPage = () => {
                             }
                           >
                             <td>
-                              {product.thumbnailUrl ? (
-                                <img
-                                  src={imageSrc}
-                                  alt={product.name}
-                                  className="admin-product-thumbnail"
-                                />
-                              ) : (
-                                <div className="admin-product-no-image">
-                                  이미지 없음
-                                </div>
-                              )}
+                              <div className="thumbnail-wrapper">
+                                {product.thumbnailUrl ? (
+                                  <img
+                                    src={imageSrc}
+                                    alt={product.name}
+                                    className="admin-product-thumbnail"
+                                  />
+                                ) : (
+                                  <div className="admin-product-no-image">
+                                    이미지 없음
+                                  </div>
+                                )}
+
+                                {product.useYn === "N" && (
+                                  <div className="thumbnail-overlay">
+                                    <span className="soldout-badge">
+                                      판매중지
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
                             </td>
 
                             <td>{product.productNo}</td>
@@ -374,7 +384,7 @@ const AdminProductListPage = () => {
                                     : "admin-badge-not-use"
                                 }`}
                               >
-                                {product.useYn === "Y" ? "사용" : "미사용"}
+                                {product.useYn === "Y" ? "판매중" : "판매중지"}
                               </span>
                             </td>
 
