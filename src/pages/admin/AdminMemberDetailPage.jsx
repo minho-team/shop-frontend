@@ -8,6 +8,15 @@ import {
   getAdminMemberCartItems,
   updateAdminMemberStatus,
   deleteAdminMember,
+  getAdminMemberMemos,
+  addAdminMemberMemo,
+  deleteAdminMemberMemo,
+  getAdminMemberCoupons,
+  getAdminAllCouponList,
+  createAdminCoupon,
+  issueAdminMemberCoupon,
+  deleteAdminMemberCoupon,
+  deleteAdminMasterCoupon,
 } from "../../api/admin/adminMemberApi";
 
 // 상태 한글 / 뱃지
@@ -67,13 +76,36 @@ const AdminMemberDetailPage = () => {
   const [inqLoading, setInqLoading] = useState(false);
   const [inqExpandedMap, setInqExpandedMap] = useState({});
 
+  // ── 메모 섹션 상태 ──
+  const [memos, setMemos] = useState([]);
+  const [memoLoading, setMemoLoading] = useState(false);
+  const [newMemoContent, setNewMemoContent] = useState("");
+
+  // ── 쿠폰 섹션 상태 ──
+  const [memberCoupons, setMemberCoupons] = useState([]);
+  const [allCoupons, setAllCoupons] = useState([]);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [selectedCouponNo, setSelectedCouponNo] = useState("");
+  const [validDays, setValidDays] = useState(30);
+  const [showCreateCoupon, setShowCreateCoupon] = useState(false);
+  const [newCoupon, setNewCoupon] = useState({ couponName: "", discountType: "FIXED", discountValue: "" });
+
+  // ── 페이징 상태 (5개씩) ──
+  const [allCouponPage, setAllCouponPage] = useState(1);
+  const [memberCouponPage, setMemberCouponPage] = useState(1);
+  const [memoPage, setMemoPage] = useState(1);
+  const COUPON_PAGE_SIZE = 5;
+
   // ================================================
-  // 페이지 진입 시 회원 상세 + 장바구니 조회
+  // 페이지 진입 시 회원 상세 + 장바구니 + 메모 + 쿠폰 조회
   // ================================================
   useEffect(() => {
     fetchDetail();
     fetchCartItems();
-  }, [memberNo]);
+    fetchMemos();
+    fetchMemberCouponsData();
+    fetchAllCouponsData();
+  }, [memberNo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 주문 페이지 변경 시 재조회
   useEffect(() => {
@@ -138,6 +170,114 @@ const AdminMemberDetailPage = () => {
       console.error("문의 목록 조회 실패:", e);
     } finally {
       setInqLoading(false);
+    }
+  };
+
+  const fetchMemos = async () => {
+    setMemoLoading(true);
+    try {
+      const data = await getAdminMemberMemos(memberNo);
+      setMemos(data);
+    } catch (e) {
+      console.error("메모 조회 실패:", e);
+    } finally {
+      setMemoLoading(false);
+    }
+  };
+
+  const fetchMemberCouponsData = async () => {
+    setCouponLoading(true);
+    try {
+      const data = await getAdminMemberCoupons(memberNo);
+      setMemberCoupons(data);
+    } catch (e) {
+      console.error("회원 쿠폰 조회 실패:", e);
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const fetchAllCouponsData = async () => {
+    try {
+      const data = await getAdminAllCouponList();
+      setAllCoupons(data);
+      if (data.length > 0) setSelectedCouponNo(data[0].couponNo);
+    } catch (e) {
+      console.error("쿠폰 목록 조회 실패:", e);
+    }
+  };
+
+  const handleAddMemo = async () => {
+    if (!newMemoContent.trim()) return;
+    try {
+      await addAdminMemberMemo({ memberNo: Number(memberNo), content: newMemoContent.trim() });
+      setNewMemoContent("");
+      fetchMemos();
+    } catch (e) {
+      alert("메모 추가에 실패했습니다.");
+    }
+  };
+
+  const handleDeleteMemo = async (memoNo) => {
+    if (!window.confirm("이 메모를 삭제하시겠습니까?")) return;
+    try {
+      await deleteAdminMemberMemo(memoNo);
+      fetchMemos();
+    } catch (e) {
+      alert("메모 삭제에 실패했습니다.");
+    }
+  };
+
+  const handleCreateCoupon = async () => {
+    if (!newCoupon.couponName.trim() || !newCoupon.discountValue) {
+      alert("쿠폰명과 할인값을 입력하세요.");
+      return;
+    }
+    try {
+      await createAdminCoupon({
+        couponName: newCoupon.couponName.trim(),
+        discountType: newCoupon.discountType,
+        discountValue: Number(newCoupon.discountValue),
+        minOrderAmount: 0,
+      });
+      alert("쿠폰이 생성되었습니다.");
+      setNewCoupon({ couponName: "", discountType: "FIXED", discountValue: "" });
+      setShowCreateCoupon(false);
+      fetchAllCouponsData();
+    } catch (e) {
+      alert("쿠폰 생성에 실패했습니다.");
+    }
+  };
+
+  const handleDeleteMemberCoupon = async (memberCouponNo) => {
+    if (!window.confirm("이 쿠폰을 삭제하시겠습니까?")) return;
+    try {
+      await deleteAdminMemberCoupon(memberCouponNo);
+      fetchMemberCouponsData();
+    } catch (e) {
+      alert("쿠폰 삭제에 실패했습니다.");
+    }
+  };
+
+  const handleDeleteMasterCoupon = async (couponNo) => {
+    if (!window.confirm("이 쿠폰을 삭제하시겠습니까?\n이미 발급된 쿠폰에는 영향이 없습니다.")) return;
+    try {
+      await deleteAdminMasterCoupon(couponNo);
+      fetchAllCouponsData();
+    } catch (e) {
+      alert("쿠폰 삭제에 실패했습니다.");
+    }
+  };
+
+  const handleIssueCoupon = async () => {
+    if (!selectedCouponNo) { alert("쿠폰을 선택하세요."); return; }
+    if (!window.confirm("선택한 쿠폰을 이 회원에게 지급하시겠습니까?")) return;
+    try {
+      await issueAdminMemberCoupon(memberNo, selectedCouponNo, validDays);
+      alert("쿠폰이 지급되었습니다.");
+      fetchMemberCouponsData();
+    } catch (e) {
+      alert("쿠폰 지급에 실패했습니다.");
     }
   };
 
@@ -245,9 +385,6 @@ const AdminMemberDetailPage = () => {
               style={btnDark}
             >
               수정하기
-            </button>
-            <button onClick={handleDelete} style={btnRed}>
-              삭제하기
             </button>
           </div>
         </div>
@@ -1042,6 +1179,236 @@ const AdminMemberDetailPage = () => {
             </>
           )}
         </div>
+
+        {/* ── 쿠폰 관리 ── */}
+        <div style={card}>
+          <h3 style={cardTitle}>쿠폰 관리</h3>
+
+          {/* 쿠폰 지급 */}
+          <div style={{ marginBottom: "20px" }}>
+            <p style={{ fontSize: "13px", fontWeight: "bold", color: "#555", marginBottom: "8px" }}>쿠폰 지급</p>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+              <select
+                value={selectedCouponNo}
+                onChange={(e) => setSelectedCouponNo(e.target.value)}
+                style={{ padding: "7px 12px", border: "1px solid #ddd", borderRadius: "4px", fontSize: "13px", flex: 1, minWidth: "200px" }}
+              >
+                {allCoupons.length === 0 ? (
+                  <option value="">생성된 쿠폰 없음</option>
+                ) : (
+                  allCoupons.map((c) => (
+                    <option key={c.couponNo} value={c.couponNo}>
+                      {c.couponName} ({c.discountType === "FIXED" ? `${Number(c.discountValue).toLocaleString()}원` : `${c.discountValue}%`} 할인)
+                    </option>
+                  ))
+                )}
+              </select>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ fontSize: "13px", color: "#666" }}>유효일수</span>
+                <input
+                  type="number"
+                  value={validDays}
+                  min={1}
+                  onChange={(e) => setValidDays(Number(e.target.value))}
+                  style={{ width: "70px", padding: "7px 10px", border: "1px solid #ddd", borderRadius: "4px", fontSize: "13px" }}
+                />
+                <span style={{ fontSize: "13px", color: "#666" }}>일</span>
+              </div>
+              <button onClick={handleIssueCoupon} style={btnDark} disabled={allCoupons.length === 0}>지급하기</button>
+            </div>
+          </div>
+
+          {/* 쿠폰 생성 */}
+          <div style={{ marginBottom: "20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+              <p style={{ fontSize: "13px", fontWeight: "bold", color: "#555", margin: 0 }}>쿠폰 생성</p>
+              <button
+                onClick={() => setShowCreateCoupon((v) => !v)}
+                style={{ ...btnGray, fontSize: "12px", padding: "5px 12px" }}
+              >
+                {showCreateCoupon ? "닫기" : "+ 새 쿠폰 만들기"}
+              </button>
+            </div>
+            {showCreateCoupon && (
+              <div style={{ background: "#f9f9f9", border: "1px solid #eee", borderRadius: "6px", padding: "16px", display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "flex-end" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <label style={{ fontSize: "12px", color: "#888" }}>쿠폰명</label>
+                  <input
+                    type="text"
+                    value={newCoupon.couponName}
+                    onChange={(e) => setNewCoupon((p) => ({ ...p, couponName: e.target.value }))}
+                    placeholder="쿠폰명 입력"
+                    style={{ padding: "7px 10px", border: "1px solid #ddd", borderRadius: "4px", fontSize: "13px", width: "160px" }}
+                  />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <label style={{ fontSize: "12px", color: "#888" }}>할인 유형</label>
+                  <select
+                    value={newCoupon.discountType}
+                    onChange={(e) => setNewCoupon((p) => ({ ...p, discountType: e.target.value }))}
+                    style={{ padding: "7px 10px", border: "1px solid #ddd", borderRadius: "4px", fontSize: "13px" }}
+                  >
+                    <option value="FIXED">정액 (원)</option>
+                    <option value="RATE">정률 (%)</option>
+                  </select>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <label style={{ fontSize: "12px", color: "#888" }}>할인값</label>
+                  <input
+                    type="number"
+                    value={newCoupon.discountValue}
+                    onChange={(e) => setNewCoupon((p) => ({ ...p, discountValue: e.target.value }))}
+                    placeholder={newCoupon.discountType === "FIXED" ? "원" : "%"}
+                    style={{ padding: "7px 10px", border: "1px solid #ddd", borderRadius: "4px", fontSize: "13px", width: "100px" }}
+                  />
+                </div>
+                <button onClick={handleCreateCoupon} style={btnDark}>생성</button>
+              </div>
+            )}
+          </div>
+
+          {/* 생성된 쿠폰 목록 (마스터) */}
+          <div style={{ marginBottom: "20px" }}>
+            <p style={{ fontSize: "13px", fontWeight: "bold", color: "#555", marginBottom: "8px" }}>
+              생성된 쿠폰 목록 <span style={{ color: "#888", fontWeight: "normal" }}>총 {allCoupons.length}개</span>
+            </p>
+            {allCoupons.length === 0 ? (
+              <p style={{ fontSize: "13px", color: "#aaa", padding: "8px 0" }}>생성된 쿠폰이 없습니다.</p>
+            ) : (
+              <>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                  <thead>
+                    <tr style={{ background: "#f5f5f5" }}>
+                      <th style={{ padding: "8px 12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>쿠폰명</th>
+                      <th style={{ padding: "8px 12px", textAlign: "center", borderBottom: "1px solid #ddd" }}>할인</th>
+                      <th style={{ padding: "8px 12px", textAlign: "center", borderBottom: "1px solid #ddd" }}>삭제</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allCoupons.slice((allCouponPage - 1) * COUPON_PAGE_SIZE, allCouponPage * COUPON_PAGE_SIZE).map((c) => (
+                      <tr key={c.couponNo}>
+                        <td style={{ padding: "8px 12px", borderBottom: "1px solid #f0f0f0" }}>{c.couponName}</td>
+                        <td style={{ padding: "8px 12px", textAlign: "center", borderBottom: "1px solid #f0f0f0" }}>
+                          {c.discountType === "FIXED" ? `${Number(c.discountValue).toLocaleString()}원` : `${c.discountValue}%`}
+                        </td>
+                        <td style={{ padding: "8px 12px", textAlign: "center", borderBottom: "1px solid #f0f0f0" }}>
+                          <button onClick={() => handleDeleteMasterCoupon(c.couponNo)} style={{ padding: "3px 10px", border: "1px solid #eee", borderRadius: "4px", background: "#fff", color: "#c62828", fontSize: "12px", cursor: "pointer" }}>삭제</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {Math.ceil(allCoupons.length / COUPON_PAGE_SIZE) > 1 && (
+                  <div style={{ display: "flex", justifyContent: "center", gap: "4px", marginTop: "10px" }}>
+                    {Array.from({ length: Math.ceil(allCoupons.length / COUPON_PAGE_SIZE) }, (_, i) => i + 1).map((p) => (
+                      <button key={p} onClick={() => setAllCouponPage(p)} style={{ padding: "4px 10px", border: "1px solid #ddd", borderRadius: "4px", background: allCouponPage === p ? "#222" : "#fff", color: allCouponPage === p ? "#fff" : "#333", fontSize: "12px", cursor: "pointer" }}>{p}</button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* 보유 쿠폰 목록 */}
+          <div>
+            <p style={{ fontSize: "13px", fontWeight: "bold", color: "#555", marginBottom: "8px" }}>
+              보유 쿠폰 <span style={{ color: "#888", fontWeight: "normal" }}>총 {memberCoupons.length}개</span>
+            </p>
+            {couponLoading ? (
+              <p style={{ fontSize: "13px", color: "#aaa" }}>로딩 중...</p>
+            ) : memberCoupons.length === 0 ? (
+              <p style={{ fontSize: "13px", color: "#aaa", padding: "12px 0" }}>보유한 쿠폰이 없습니다.</p>
+            ) : (
+              <>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                  <thead>
+                    <tr style={{ background: "#f5f5f5" }}>
+                      <th style={{ padding: "10px 12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>쿠폰명</th>
+                      <th style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #ddd" }}>할인</th>
+                      <th style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #ddd" }}>상태</th>
+                      <th style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #ddd" }}>만료일</th>
+                      <th style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #ddd" }}>삭제</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {memberCoupons.slice((memberCouponPage - 1) * COUPON_PAGE_SIZE, memberCouponPage * COUPON_PAGE_SIZE).map((c) => (
+                      <tr key={c.memberCouponNo}>
+                        <td style={{ padding: "10px 12px", borderBottom: "1px solid #f0f0f0" }}>{c.couponName}</td>
+                        <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #f0f0f0" }}>
+                          {c.discountType === "FIXED" ? `${Number(c.discountValue).toLocaleString()}원` : `${c.discountValue}%`}
+                        </td>
+                        <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #f0f0f0" }}>
+                          <span style={{ padding: "2px 10px", borderRadius: "10px", fontSize: "12px", background: c.usedYn === "Y" ? "#f0f0f0" : "#e8f5e9", color: c.usedYn === "Y" ? "#999" : "#2e7d32" }}>
+                            {c.usedYn === "Y" ? "사용완료" : "미사용"}
+                          </span>
+                        </td>
+                        <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #f0f0f0", color: "#888" }}>
+                          {c.endAt ? new Date(c.endAt).toLocaleDateString("ko-KR") : "-"}
+                        </td>
+                        <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid #f0f0f0" }}>
+                          <button onClick={() => handleDeleteMemberCoupon(c.memberCouponNo)} style={{ padding: "3px 10px", border: "1px solid #eee", borderRadius: "4px", background: "#fff", color: "#c62828", fontSize: "12px", cursor: "pointer" }}>삭제</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {Math.ceil(memberCoupons.length / COUPON_PAGE_SIZE) > 1 && (
+                  <div style={{ display: "flex", justifyContent: "center", gap: "4px", marginTop: "10px" }}>
+                    {Array.from({ length: Math.ceil(memberCoupons.length / COUPON_PAGE_SIZE) }, (_, i) => i + 1).map((p) => (
+                      <button key={p} onClick={() => setMemberCouponPage(p)} style={{ padding: "4px 10px", border: "1px solid #ddd", borderRadius: "4px", background: memberCouponPage === p ? "#222" : "#fff", color: memberCouponPage === p ? "#fff" : "#333", fontSize: "12px", cursor: "pointer" }}>{p}</button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* ── 메모 ── */}
+        <div style={card}>
+          <h3 style={cardTitle}>관리자 메모</h3>
+
+          {/* 메모 입력 */}
+          <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+            <textarea
+              value={newMemoContent}
+              onChange={(e) => setNewMemoContent(e.target.value)}
+              placeholder="메모 내용을 입력하세요"
+              rows={3}
+              style={{ flex: 1, padding: "10px", border: "1px solid #ddd", borderRadius: "4px", fontSize: "13px", resize: "vertical" }}
+            />
+            <button onClick={handleAddMemo} style={{ ...btnDark, alignSelf: "flex-end", whiteSpace: "nowrap" }}>추가</button>
+          </div>
+
+          {/* 메모 목록 */}
+          {memoLoading ? (
+            <p style={{ fontSize: "13px", color: "#aaa" }}>로딩 중...</p>
+          ) : memos.length === 0 ? (
+            <p style={{ fontSize: "13px", color: "#aaa", padding: "12px 0" }}>등록된 메모가 없습니다.</p>
+          ) : (
+            <>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {memos.slice((memoPage - 1) * COUPON_PAGE_SIZE, memoPage * COUPON_PAGE_SIZE).map((m) => (
+                  <div key={m.memoNo} style={{ background: "#fffde7", border: "1px solid #fff9c4", borderRadius: "6px", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: "14px", color: "#333", margin: "0 0 6px", whiteSpace: "pre-wrap" }}>{m.content}</p>
+                      <span style={{ fontSize: "12px", color: "#aaa" }}>{m.createdAt ? new Date(m.createdAt).toLocaleString("ko-KR") : ""}</span>
+                    </div>
+                    <button onClick={() => handleDeleteMemo(m.memoNo)} style={{ padding: "4px 10px", border: "1px solid #eee", borderRadius: "4px", background: "#fff", color: "#c62828", fontSize: "12px", cursor: "pointer", whiteSpace: "nowrap" }}>삭제</button>
+                  </div>
+                ))}
+              </div>
+              {Math.ceil(memos.length / COUPON_PAGE_SIZE) > 1 && (
+                <div style={{ display: "flex", justifyContent: "center", gap: "4px", marginTop: "10px" }}>
+                  {Array.from({ length: Math.ceil(memos.length / COUPON_PAGE_SIZE) }, (_, i) => i + 1).map((p) => (
+                    <button key={p} onClick={() => setMemoPage(p)} style={{ padding: "4px 10px", border: "1px solid #ddd", borderRadius: "4px", background: memoPage === p ? "#222" : "#fff", color: memoPage === p ? "#fff" : "#333", fontSize: "12px", cursor: "pointer" }}>{p}</button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
       </AdminLayout>
     </>
   );

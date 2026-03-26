@@ -4,11 +4,8 @@
 // =========================================
 import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
-import {
-  getInquiryPage,
-  getOneInquiry,
-  adminDeleteInquiry,
-} from "../../api/user/inquiryApi";
+import { getOneInquiry } from "../../api/user/inquiryApi";
+import { getInquiryPage, adminDeleteInquiry } from "../../api/admin/adminInquiryApi";
 import { createComment, deleteComment } from "../../api/user/commentApi";
 // [수정] 첨부파일 이미지 미리보기를 위해 API_SERVER_HOST import 추가
 import { API_SERVER_HOST } from "../../api/common/apiClient";

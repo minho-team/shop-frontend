@@ -76,6 +76,18 @@ export const createAdminCoupon = async (couponData) => {
   return res.data;
 };
 
+// 쿠폰 마스터 삭제
+export const deleteAdminMasterCoupon = async (couponNo) => {
+  const res = await apiClient.delete(`${prefix}/coupons/master/${couponNo}`);
+  return res.data;
+};
+
+// 회원 보유 쿠폰 삭제
+export const deleteAdminMemberCoupon = async (memberCouponNo) => {
+  const res = await apiClient.delete(`${prefix}/coupons/${memberCouponNo}`);
+  return res.data;
+};
+
 // 회원에게 쿠폰 발급
 export const issueAdminMemberCoupon = async (memberNo, couponNo, validDays = 30) => {
   const res = await apiClient.post(`${prefix}/${memberNo}/coupons/issue`, null, {
