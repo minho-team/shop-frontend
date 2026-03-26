@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '../../components/user/Header';
 import { useUser } from "../../context/UserContext";
 import '../../css/user/MyPage.css';
 import { getMyOrderList } from '../../api/user/ordersApi';
-import apiClient from '../../api/common/apiClient';
+import apiClient, { API_SERVER_HOST } from '../../api/common/apiClient';
 import Footer from '../../components/user/Footer';
 
 // ================================================
@@ -163,54 +163,188 @@ const OrderHistory = ({ user }) => {
 const ReviewHistory = ({ user }) => {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchReviews = async () => {
-            if (!user) return;
-            try {
-                const response = await apiClient.get('/api/reviews/my');
-                setReviews(response.data);
-            } catch (err) {
-                console.error("리뷰 로드 실패:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchReviews();
+    const fetchReviews = useCallback(async () => {
+        if (!user) return;
+        try {
+            const response = await apiClient.get('/api/reviews/my');
+            setReviews(response.data);
+        } catch (err) { console.error(err); }
+        finally { setLoading(false); }
     }, [user]);
+
+    useEffect(() => { fetchReviews(); }, [fetchReviews]);
+
+    // 수정 페이지로 이동
+    const handleEditNavigate = (review) => {
+        navigate(`/my/review/edit/${review.reviewNo}`, { state: review });
+    };
+
+    const handleEdit = (review) => {
+        navigate(`/my/review/edit/${review.reviewNo}`, { state: review });
+    };
+
+    const handleDelete = async (reviewNo) => {
+        if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+        try {
+            await apiClient.delete(`/api/reviews/${reviewNo}`);
+
+            alert("삭제되었습니다.");
+            window.location.reload();
+        } catch (err) {
+            console.error("삭제 실패:", err.response?.data);
+            alert(err.response?.data || "삭제에 실패했습니다.");
+        }
+    };
 
     if (loading) return <div className="loading-container">리뷰 로딩 중...</div>;
 
     return (
         <div className="table-responsive">
-            <table className="custom-table">
+            <table className="custom-table" style={{ tableLayout: 'fixed' }}>
                 <thead>
                     <tr>
-                        <th>작성일</th>
-                        <th>상품정보</th>
-                        <th>내용</th>
-                        <th>별점</th>
+                        <th style={{ width: '15%' }}>작성일</th>
+                        <th style={{ width: '25%' }}>상품정보</th>
+                        <th style={{ width: '35%' }}>내용</th>
+                        <th style={{ width: '15%' }}>별점</th>
+                        <th style={{ width: '10%' }}>관리</th>
                     </tr>
                 </thead>
                 <tbody>
                     {reviews.length > 0 ? (
                         reviews.map(r => (
-                            <tr key={r.reviewNo || r.id}>
-                                <td>{new Date(r.createdAt).toLocaleDateString()}</td>
-                                <td>
-                                    <Link to={`/product/detail/${r.productNo}?tab=review`} className="table-cell-link">
-                                        {r.itemName || '등록된 상품'}
+                            <tr key={r.reviewNo} className="order-row-hover">
+                                <td className="text-center">{new Date(r.createdAt).toLocaleDateString()}</td>
+                                <td className="text-center">
+                                    {/* color: inherit이 적용되어 파란색이 뜨지 않습니다 */}
+                                    <Link to={`/product/detail/${r.productNo}`} className="product-link">
+                                        {r.itemName}
                                     </Link>
                                 </td>
-                                <td style={{ textAlign: 'left' }}>{r.content}</td>
-                                <td>{'⭐'.repeat(r.rating)}</td>
+                                <td className="text-center">
+                                    <div className="review-title-text">{r.title}</div>
+                                    <div className="review-content-text">{r.content}</div>
+                                </td>
+                                <td className="text-center">{'⭐'.repeat(r.rating)}</td>
+                                <td className="text-center">
+                                    <div className="review-action-btns">
+                                        <button className="btn-mini" onClick={() => handleEdit(r)}>수정</button>
+                                        <button className="btn-mini btn-del" onClick={() => handleDelete(r.reviewNo)}>삭제</button>
+                                    </div>
+                                </td>
                             </tr>
                         ))
                     ) : (
-                        <tr><td colSpan="4" className="empty-row">작성한 리뷰가 없습니다.</td></tr>
+                        <tr><td colSpan="5" className="empty-row">작성한 리뷰가 없습니다.</td></tr>
                     )}
                 </tbody>
             </table>
+        </div>
+    );
+};
+// ================================================
+// [컴포넌트] 리뷰 수정 모달 (ReviewEditModal)
+// ================================================
+const ReviewEditModal = ({ review, onClose, onUpdateSuccess }) => {
+    const [editData, setEditData] = useState({
+        title: review.title || '',
+        content: review.content || '',
+        rating: review.rating || 5,
+        userHeight: review.userHeight || '',
+        userWeight: review.userWeight || '',
+        sizeRating: review.sizeRating || 'NORMAL'
+    });
+
+    const [imageFile, setImageFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(review.imageUrl ? `/upload/${review.imageUrl}` : null);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setEditData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append("title", editData.title);
+        formData.append("content", editData.content);
+        formData.append("rating", editData.rating);
+        formData.append("userHeight", editData.userHeight);
+        formData.append("userWeight", editData.userWeight);
+        formData.append("sizeRating", editData.sizeRating);
+
+        if (imageFile) {
+            formData.append("uploadFile", imageFile);
+        }
+
+        try {
+            await apiClient.put(`/api/reviews/${review.reviewNo}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+            alert("리뷰가 수정되었습니다.");
+            onUpdateSuccess();
+            onClose();
+        } catch (err) {
+            alert("수정 실패: " + err.message);
+        }
+    };
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content" style={{ width: '450px', maxHeight: '80vh', overflowY: 'auto' }}>
+                <h4>리뷰 수정하기</h4>
+                <form onSubmit={handleUpdate}>
+                    <div className="edit-form-group">
+                        <label>별점</label>
+                        <select name="rating" value={editData.rating} onChange={handleChange}>
+                            {[5, 4, 3, 2, 1].map(num => <option key={num} value={num}>{'⭐'.repeat(num)}</option>)}
+                        </select>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <div className="edit-form-group" style={{ flex: 1 }}>
+                            <label>키 (cm)</label>
+                            <input type="number" name="userHeight" value={editData.userHeight} onChange={handleChange} />
+                        </div>
+                        <div className="edit-form-group" style={{ flex: 1 }}>
+                            <label>몸무게 (kg)</label>
+                            <input type="number" name="userWeight" value={editData.userWeight} onChange={handleChange} />
+                        </div>
+                    </div>
+
+                    <div className="edit-form-group">
+                        <label>리뷰 제목</label>
+                        <input type="text" name="title" value={editData.title} onChange={handleChange} required />
+                    </div>
+
+                    <div className="edit-form-group">
+                        <label>상세 내용</label>
+                        <textarea name="content" value={editData.content} onChange={handleChange} rows="5" required />
+                    </div>
+
+                    <div className="edit-form-group">
+                        <label>사진 변경</label>
+                        <input type="file" onChange={handleImageChange} accept="image/*" />
+                        {previewUrl && <img src={previewUrl} alt="Preview" style={{ width: '80px', marginTop: '10px', display: 'block' }} />}
+                    </div>
+
+                    <div className="modal-btns">
+                        <button type="submit" className="btn-submit">수정 완료</button>
+                        <button type="button" className="btn-cancel" onClick={onClose}>취소</button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };
@@ -330,8 +464,22 @@ const MyPage = () => {
     const [activeMenu, setActiveMenu] = useState('주문내역조회');
     const navigate = useNavigate();
 
+    // MyPage 컴포넌트 내부
     const purchaseCount = Number(user?.purchaseCount) || 0;
-    const currentGrade = getGrade(purchaseCount);
+    const currentGrade = user?.status || getGrade(purchaseCount);
+
+    const getProgress = () => {
+        if (purchaseCount >= 30) return 100;
+        const targets = [5, 10, 20, 30];
+        const nextTarget = targets.find(t => t > purchaseCount) || 30;
+
+        // 이전 단계의 목표치 (예: 5회면 0, 10회면 5)
+        const prevTarget = targets[targets.indexOf(nextTarget) - 1] || 0;
+
+        // 해당 구간에서의 진행도 계산
+        const segmentProgress = ((purchaseCount - prevTarget) / (nextTarget - prevTarget)) * 100;
+        return Math.min(segmentProgress, 100);
+    };
 
     // 다음 등급까지 남은 횟수 계산
     const getNextGradeInfo = () => {
@@ -348,7 +496,6 @@ const MyPage = () => {
         <div className="mypage-container">
             <Header />
 
-            {/* 상단 회원 요약 영역 */}
             <div className="user-summary-bg">
                 <section className="user-summary">
                     <div className="user-info">
@@ -358,6 +505,7 @@ const MyPage = () => {
                             멤버쉽 등급확인 {'>'}
                         </button>
                     </div>
+
                     <div className="grade-badge">
                         <span className="label">Grade (등급)</span>
                         <div className="grade-display-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -368,10 +516,17 @@ const MyPage = () => {
                                 <strong className={`grade-text-${currentGrade.toLowerCase()}`}>
                                     {currentGrade}
                                 </strong>
+
                                 {currentGrade !== 'VVIP' && (
-                                    <span className="next-grade-info" style={{ display: 'block', fontSize: '11px', color: '#ff4d4f', marginTop: '4px' }}>
-                                        다음 등급까지 {getNextGradeInfo()}회 남음
-                                    </span>
+                                    <>
+                                        <span className="next-grade-info" style={{ display: 'block', fontSize: '11px', color: '#ff4d4f', marginTop: '4px' }}>
+                                            다음 등급까지 {getNextGradeInfo()}회 남음
+                                        </span>
+                                        {/* [여기가 게이지 바가 들어갈 위치입니다] */}
+                                        <div className="progress-bar-container" style={{ width: '120px', height: '6px', background: '#eee', borderRadius: '3px', marginTop: '6px', overflow: 'hidden' }}>
+                                            <div className="progress-fill" style={{ width: `${getProgress()}%`, height: '100%', background: '#111', transition: 'width 0.5s ease-in-out' }}></div>
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         </div>

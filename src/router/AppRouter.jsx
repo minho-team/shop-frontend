@@ -25,6 +25,7 @@ const OrderWritePage = lazy(() => import("../pages/user/OrderWritePage"));
 const OrderResultPage = lazy(() => import("../pages/user/OrderResultPage"));
 const MyOrderDetailPage = lazy(() => import("../pages/user/MyOrderDetailPage"));
 const ReviewWritePage = lazy(() => import("../pages/user/ReviewWritePage"));
+const ReviewEditPage = lazy(() => import("../pages/user/ReviewEditPage"));
 const KakaoRedirectPage = lazy(() => import("../pages/user/KakaoRedirectPage"));
 const RefundWritePage = lazy(() => import("../pages/user/RefundWritePage"));
 const PaymentSuccessPage = lazy(() => import("../pages/user/PaymentSuccessPage"));
@@ -131,6 +132,7 @@ const AppRouterContent = () => {
         { path: "/order/result", element: <ProtectedRouteWrapper Component={OrderResultPage} /> },
         { path: "/my/order/detail/:orderNo", element: <ProtectedRouteWrapper Component={MyOrderDetailPage} /> },
         { path: "/my/review/write/:orderItemNo", element: <ProtectedRouteWrapper Component={ReviewWritePage} /> },
+        { path: "/my/review/edit/:reviewNo", element: <ProtectedRouteWrapper Component={ReviewEditPage} /> },
         { path: "/refund/write", element: <ProtectedRouteWrapper Component={RefundWritePage} /> },
         { path: "/payment/success", element: <ProtectedRouteWrapper Component={PaymentSuccessPage} /> },
         { path: "/payment/fail", element: <ProtectedRouteWrapper Component={PaymentFailPage} /> },
