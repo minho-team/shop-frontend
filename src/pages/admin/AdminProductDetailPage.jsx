@@ -52,6 +52,7 @@ const AdminProductDetailPage = () => {
     viewCount: 0,
     createdAt: "",
     updatedAt: "",
+    description: "",
   });
 
   // =========================
@@ -121,6 +122,7 @@ const AdminProductDetailPage = () => {
         viewCount: data?.viewCount || 0,
         createdAt: data?.createdAt || "",
         updatedAt: data?.updatedAt || "",
+        description: data.description || "",
       });
     } catch (error) {
       console.error("기본정보 조회 실패:", error);
@@ -230,6 +232,7 @@ const AdminProductDetailPage = () => {
         discountRate: basicInfo.discountRate,
         useYn: basicInfo.saleStatus,
         sameDayDeliveryYn: basicInfo.sameDayDelivery,
+        description: basicInfo.description,
       };
 
       await putAdminProductBasic(productNo, requestData);
@@ -800,6 +803,16 @@ const ProductBasicSection = ({
             type="text"
             value={formatDateTime(basicInfo.updatedAt)}
             readOnly
+          />
+        </div>
+
+        <div className="admin-detail-description-row">
+          <label>상세설명</label>
+          <textarea
+            name="description"
+            value={basicInfo.description || ""}
+            onChange={handleBasicInfoChange}
+            rows={6}
           />
         </div>
       </div>
