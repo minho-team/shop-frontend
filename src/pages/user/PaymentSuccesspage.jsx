@@ -24,16 +24,22 @@ const PaymentSuccessPage = () => {
         ? JSON.parse(savedCartItemNos)
         : [];
 
+      // 결제 전 저장해둔 쿠폰 번호 복원
+      const savedCouponNo = sessionStorage.getItem(`couponOrder:${orderId}`);
+      const memberCouponNo = savedCouponNo ? Number(savedCouponNo) : null;
+
       try {
         const result = await confirmPayment({
           paymentKey,
           orderId,
           amount: Number(amount),
           orderedCartItemNos,
+          memberCouponNo,
         });
 
         // 결제 승인 후 더 이상 필요 없는 임시 저장 데이터 삭제
         sessionStorage.removeItem(`cartOrder:${orderId}`);
+        sessionStorage.removeItem(`couponOrder:${orderId}`);
 
         navigate("/order/result", {
           state: {

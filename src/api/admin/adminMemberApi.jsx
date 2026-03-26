@@ -95,3 +95,9 @@ export const issueAdminMemberCoupon = async (memberNo, couponNo, validDays = 30)
   });
   return res.data;
 };
+
+// 쿠폰 사용 내역 조회
+export const getAdminMemberCouponHistory = async (memberNo) => {
+  const res = await apiClient.get(`${prefix}/${memberNo}/coupons/history`);
+  return res.data;
+};

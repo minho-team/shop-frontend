@@ -162,6 +162,7 @@ const MyOrderDetailPage = () => {
                         <div className="summary-item"><span>주문번호</span> <strong>{orderInfo.orderNo}</strong></div>
                         <div className="summary-item"><span>주문일자</span> <strong>{new Date(orderInfo.createdAt).toLocaleDateString()}</strong></div>
                         <div className="summary-item"><span>주문 상품 개수</span> <strong>{itemCount}개</strong></div>
+                        <div className="summary-item"><span>결제 금액</span> <strong>{Number(orderInfo.totalPrice).toLocaleString()}원</strong></div>
                     </div>
 
                     <div

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { createOrder, preparePayment } from "../../api/user/ordersApi";
+import { createOrder, preparePayment, getMyCoupons } from "../../api/user/ordersApi";
 import "../../css/user/OrderWritePage.css";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
@@ -30,6 +30,8 @@ const OrderWritePage = () => {
   const [message, setMessage] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
+  const [myCoupons, setMyCoupons] = useState([]);
+  const [selectedMemberCouponNo, setSelectedMemberCouponNo] = useState(null);
 
   const orderData = location.state;
   const orderedCartItemNos = location.state?.orderedCartItemNos || [];
@@ -60,6 +62,12 @@ const OrderWritePage = () => {
       navigate(-1);
     }
   }, [orderData, navigate]);
+
+  useEffect(() => {
+    getMyCoupons()
+      .then((data) => setMyCoupons(Array.isArray(data) ? data : []))
+      .catch(() => setMyCoupons([]));
+  }, []);
 
   useEffect(() => {
     if (window.kakao?.Postcode) return;
@@ -131,6 +139,30 @@ const OrderWritePage = () => {
       return sum + Number(item.unitPrice ?? 0) * Number(item.quantity ?? 0);
     }, 0);
   }, [orderItems]);
+
+  const availableCoupons = useMemo(() => {
+    const now = new Date();
+    return myCoupons.filter(
+      (c) =>
+        c.usedYn === "N" &&
+        (!c.endAt || new Date(c.endAt) >= now) &&
+        (!c.startAt || new Date(c.startAt) <= now)
+    );
+  }, [myCoupons]);
+
+  const discountAmount = useMemo(() => {
+    if (!selectedMemberCouponNo) return 0;
+    const coupon = availableCoupons.find(
+      (c) => Number(c.memberCouponNo) === Number(selectedMemberCouponNo)
+    );
+    if (!coupon) return 0;
+    if (coupon.discountType === "FIXED") return Number(coupon.discountValue);
+    if (coupon.discountType === "RATE")
+      return Math.floor((totalPrice * Number(coupon.discountValue)) / 100);
+    return 0;
+  }, [selectedMemberCouponNo, availableCoupons, totalPrice]);
+
+  const finalPrice = Math.max(0, totalPrice - discountAmount);
 
   const resultItems = useMemo(() => {
     return orderItems.map((item) => ({
@@ -211,7 +243,8 @@ const OrderWritePage = () => {
         receiverBaseAddress: baseAddress,
         receiverDetailAddress: detailAddress,
         message,
-        totalPrice,
+        totalPrice: finalPrice,
+        memberCouponNo: selectedMemberCouponNo || null,
         items: resultItems,
       };
 
@@ -223,6 +256,14 @@ const OrderWritePage = () => {
         sessionStorage.setItem(
           `cartOrder:${prepared.orderId}`,
           JSON.stringify(orderedCartItemNos),
+        );
+      }
+
+      // 쿠폰 사용 시 orderId 기준으로 memberCouponNo 저장 (결제 확정 시 사용처리)
+      if (selectedMemberCouponNo) {
+        sessionStorage.setItem(
+          `couponOrder:${prepared.orderId}`,
+          String(selectedMemberCouponNo),
         );
       }
 
@@ -495,6 +536,49 @@ const OrderWritePage = () => {
             <div className="summary-box">
               <h2>결제정보</h2>
 
+              {/* 쿠폰 섹션 */}
+              <div className="coupon-section">
+                <div className="coupon-section-header">
+                  <span className="coupon-section-title">쿠폰 적용</span>
+                  <span className={`coupon-count-badge${availableCoupons.length === 0 ? " empty" : ""}`}>
+                    {availableCoupons.length > 0 ? `${availableCoupons.length}장 보유` : "보유 없음"}
+                  </span>
+                </div>
+
+                <select
+                  className="coupon-select"
+                  value={selectedMemberCouponNo || ""}
+                  onChange={(e) => setSelectedMemberCouponNo(e.target.value ? Number(e.target.value) : null)}
+                  disabled={availableCoupons.length === 0}
+                >
+                  <option value="">
+                    {availableCoupons.length === 0 ? "사용 가능한 쿠폰 없음" : "쿠폰을 선택하세요"}
+                  </option>
+                  {availableCoupons.map((c) => (
+                    <option key={c.memberCouponNo} value={c.memberCouponNo}>
+                      {c.couponName} —{" "}
+                      {c.discountType === "FIXED"
+                        ? `${Number(c.discountValue).toLocaleString()}원 할인`
+                        : `${c.discountValue}% 할인`}
+                    </option>
+                  ))}
+                </select>
+
+                {discountAmount > 0 && (() => {
+                  const applied = availableCoupons.find(
+                    (c) => Number(c.memberCouponNo) === Number(selectedMemberCouponNo)
+                  );
+                  return (
+                    <div className="coupon-applied-info">
+                      <span className="coupon-applied-name">{applied?.couponName}</span>
+                      <span className="coupon-applied-discount">
+                        -{discountAmount.toLocaleString()}원
+                      </span>
+                    </div>
+                  );
+                })()}
+              </div>
+
               <div className="summary-detail">
                 <div className="summary-row">
                   <span>구매상품</span>
@@ -506,17 +590,21 @@ const OrderWritePage = () => {
                   <strong>0원</strong>
                 </div>
 
-                <div className="summary-row">
-                  <span>할인/부가결제</span>
-                  <strong>-0원</strong>
-                </div>
+                {discountAmount > 0 && (
+                  <div className="summary-row">
+                    <span>쿠폰 할인</span>
+                    <strong style={{ color: "#c62828" }}>
+                      -{discountAmount.toLocaleString()}원
+                    </strong>
+                  </div>
+                )}
               </div>
 
               <div className="summary-divider"></div>
 
               <div className="summary-row grand-total">
                 <span>총 결제 금액</span>
-                <strong>{totalPrice.toLocaleString()}원</strong>
+                <strong>{finalPrice.toLocaleString()}원</strong>
               </div>
 
               <button

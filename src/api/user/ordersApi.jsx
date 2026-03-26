@@ -37,3 +37,9 @@ export const confirmPayment = async (payload) => {
   const res = await apiClient.post(`${API_SERVER_HOST}/api/payments/confirm`, payload);
   return res.data;
 };
+
+// 내 쿠폰 목록 조회
+export const getMyCoupons = async () => {
+  const res = await apiClient.get("/api/member/coupons");
+  return res.data;
+};
