@@ -84,20 +84,19 @@
   font-weight: 500;
 }
 
-/* 드로우핏 스타일의 미니멀 사각 배지 */
 .badge-box {
   display: inline-block;
   padding: 3px 10px;
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 1.5px; /* 자간을 넓혀 고급스러운 느낌 */
-  border-radius: 0; /* 드로우핏은 둥근 모서리보다 직각을 선호합니다 */
+  letter-spacing: 1.5px;
+  border-radius: 0;
   text-transform: uppercase;
   min-width: 60px;
   text-align: center;
 }
 
-/* 등급별 배경 및 글자색 (Draw-fit 컬러감 적용) */
+/* 등급별 배경 및 글자색 */
 .badge-basic {
   background: #f0f0f0;
   color: #aaa;
@@ -128,6 +127,43 @@
   font-size: 22px;
   font-weight: 700;
   color: #111;
+}
+
+/* 등급별 텍스트 컬러 보완 (VIP, VVIP) */
+.grade-text-basic {
+  color: #888;
+}
+.grade-text-silver {
+  color: #555;
+}
+.grade-text-gold {
+  color: #d4af37;
+}
+.grade-text-vip {
+  color: #111;
+}
+.grade-text-vvip {
+  color: #ff4d4f;
+  font-weight: 800;
+}
+
+/* 게이지 바(Progress Bar) 디자인 */
+.progress-bar-container {
+  background: #f0f0f0;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  background: #111; /* 기본 검정 */
+  height: 100%;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 골드 등급 이상일 때 게이지 바 색상 포인트 (선택 사항) */
+.grade-text-gold + .progress-bar-container .progress-fill {
+  background: #d4af37;
 }
 
 /* ==========================================================================
@@ -249,11 +285,29 @@
 
 .custom-table th,
 .custom-table td {
-  padding: 15px 10px;
+  padding: 12px 8px;
   border-bottom: 1px solid #f4f4f4;
   vertical-align: middle;
   text-align: center;
+  overflow: hidden;
 }
+
+/* 각 열의 너비 비중 재설정 (합계 100%) */
+.custom-table th:nth-child(1) {
+  width: 12%;
+} /* 작성일 */
+.custom-table th:nth-child(2) {
+  width: 23%;
+} /* 상품정보 */
+.custom-table th:nth-child(3) {
+  width: 40%;
+} /* 내용 */
+.custom-table th:nth-child(4) {
+  width: 12%;
+} /* 별점 */
+.custom-table th:nth-child(5) {
+  width: 13%;
+} /* 관리 */
 
 .custom-table th {
   border-bottom: 1px solid #111;
@@ -262,26 +316,8 @@
   background-color: #fff;
 }
 
-/* 각 열의 너비 배분 (합계 100%) */
-.custom-table th:nth-child(1),
-.custom-table td:nth-child(1) {
-  width: 20%;
-}
-.custom-table th:nth-child(2),
-.custom-table td:nth-child(2) {
-  width: 35%;
-}
-.custom-table th:nth-child(3),
-.custom-table td:nth-child(3) {
-  width: 25%;
-}
-.custom-table th:nth-child(4),
-.custom-table td:nth-child(4) {
-  width: 20%;
-}
-
 .custom-table td {
-  padding: 0 !important;
+  padding: 12px 10px !important;
 }
 
 .order-row-hover:hover {
@@ -289,7 +325,8 @@
   transition: background-color 0.2s ease;
 }
 
-.table-cell-link {
+.table-cell-link,
+.product-link {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -299,6 +336,11 @@
   color: inherit;
   text-decoration: none;
   box-sizing: border-box;
+}
+
+.custom-table td a {
+  color: inherit;
+  text-decoration: none;
 }
 
 /* ==========================================================================
@@ -353,8 +395,119 @@
 .loading-container,
 .empty-row,
 .empty-content {
-  padding: 80px 0;
+  padding: 100px 0;
   text-align: center;
+  color: #bbb;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.empty-content p {
+  margin-top: 10px;
   color: #999;
+}
+
+/* ==========================================================================
+   10. 리뷰 전용 스타일 (Review Custom Styles)
+   ========================================================================== */
+
+.text-center {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+.product-link {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: inherit !important;
+}
+
+.product-link:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+.review-title-text {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.review-content-text {
+  color: #666;
+  font-size: 12px;
+  line-height: 1.4;
+  word-break: break-all;
+  white-space: normal;
+  text-align: center;
+}
+
+.review-action-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+}
+
+.star-text {
+  color: #ffb400;
+  font-size: 14px;
+}
+
+.review-action-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-mini {
+  padding: 5px 8px;
   font-size: 13px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  box-shadow: none;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.btn-mini:hover {
+  color: #111;
+  background: none;
+}
+
+.btn-mini.btn-del {
+  color: #888;
+}
+
+.btn-mini.btn-del:hover {
+  color: #ff4d4f;
+  background: none;
+}
+
+.btn-mini::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition:
+    width 0.2s,
+    left 0.2s;
+}
+
+.btn-mini:hover::after {
+  width: 80%;
+  left: 10%;
 }
