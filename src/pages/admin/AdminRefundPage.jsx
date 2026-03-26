@@ -187,7 +187,7 @@ const AdminRefundPage = () => {
                       <td>{refund.refundNo}</td>
                       <td>{refund.orderNo}</td>
                       <td>
-                        <div>{refund.memberName}</div>
+                        <div>{refund.name}</div>
                         <div className="sub-text">{refund.memberId}</div>
                       </td>
                       <td className="item-cell">
