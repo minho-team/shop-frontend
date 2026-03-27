@@ -23,13 +23,16 @@ const getGrade = (count) => {
 // 주문 상태 한글 변환
 const getStatusLabel = (status) => {
     switch (status) {
+        case 'PENDING_PAYMENT': return '결제대기';
         case 'PAYMENT_COMPLETED': return '결제완료';
         case 'PREPARING': return '배송준비중';
         case 'SHIPPING': return '배송중';
         case 'DELIVERED': return '배송완료';
+        case 'CANCEL_REQUESTED': return '취소요청';
         case 'CANCELED': return '주문취소';
-        case 'REQUESTED': return '반품신청';
-        case 'COMPLETED': return '환불완료';
+        case 'REJECTED': return '환불 거절됨';
+        case 'REFUND_REQUESTED': return '환불요청중';
+        case 'REFUNDED': return '환불완료';
         default: return status || '상태미정';
     }
 };
@@ -130,9 +133,15 @@ const OrderHistory = ({ user }) => {
                                         {o.orderNo}
                                     </Link>
                                 </td>
-                                <td>₩{o.totalPrice?.toLocaleString()}</td>
+                                <td>
+                                    <Link to={`/my/order/detail/${o.orderNo}`} className="table-cell-link">
+                                        ₩{o.totalPrice?.toLocaleString()}
+                                    </Link>
+                                </td>
                                 <td className={`status-${o.orderStatus?.toLowerCase()}`}>
-                                    {getStatusLabel(o.orderStatus)}
+                                    <Link to={`/my/order/detail/${o.orderNo}`} className="table-cell-link">
+                                        {getStatusLabel(o.orderStatus)}
+                                    </Link>
                                 </td>
                             </tr>
                         ))
@@ -541,7 +550,7 @@ const MyPage = () => {
                     {/* 사이드바 메뉴 */}
                     <aside className="sidebar">
                         <MenuSection title="나의 쇼핑 정보"
-                            items={['주문내역조회', '상품리뷰', '찜목록 조회']}
+                            items={['주문내역조회', '상품리뷰']}
                             activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
                         <MenuSection title="나의 혜택 정보"
                             items={['쿠폰내역조회', '등급 혜택 안내']}
