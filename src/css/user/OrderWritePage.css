@@ -128,6 +128,28 @@
   color: #666;
 }
 
+.section-header.with-description {
+  align-items: flex-start;
+}
+
+.section-header.with-description > div:first-child {
+  min-width: 0;
+}
+
+.section-description {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #666;
+}
+
+.section-button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .order-item-list {
   display: flex;
   flex-direction: column;
@@ -245,8 +267,21 @@
   border-color: #111;
 }
 
+.form-row input.input-error {
+  border-color: #dc3545;
+}
+
+.field-error-message {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #dc3545;
+}
+
 .copy-button,
 .address-button {
+  white-space: nowrap;
   height: 42px;
   padding: 0 16px;
   border: 1px solid #dcdcdc;
@@ -498,4 +533,18 @@
   .summary-row.total strong {
     font-size: 24px;
   }
+
+  .section-header.with-description {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.section-button-group {
+  justify-content: flex-start;
+}
+
+.copy-button,
+.address-button {
+  width: 100%;
+}
 }
