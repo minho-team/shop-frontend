@@ -289,6 +289,15 @@
   letter-spacing: -0.03em;
 }
 
+.payment-card .summary-row.discount-row strong {
+  color: #d93c3c;
+}
+
+.payment-card .summary-row.grand-total strong {
+  color: #111;
+  font-weight: 800;
+}
+
 @media (max-width: 767px) {
   .order-result-container {
     padding: 36px 16px 72px;
