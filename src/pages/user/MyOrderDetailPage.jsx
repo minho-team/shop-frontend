@@ -15,6 +15,7 @@ const getStatusLabel = (status) => {
         case 'DELIVERED': return '배송완료';
         case 'CANCEL_REQUESTED': return '취소요청';
         case 'CANCELED': return '주문취소';
+        case 'REJECTED': return '환불 거절됨';
         case 'REFUND_REQUESTED': return '환불요청중';
         case 'REFUNDED': return '환불완료';
         default: return status || '상태미정';
