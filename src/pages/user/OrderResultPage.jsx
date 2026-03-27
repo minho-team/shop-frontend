@@ -55,6 +55,12 @@ const OrderResultPage = () => {
     items = [],
   } = orderResult;
 
+  const productPrice = items.reduce((sum, item) => {
+    return sum + Number(item.unitPrice ?? 0) * Number(item.quantity ?? 0);
+  }, 0);
+
+  const discountPrice = Math.max(0, productPrice - Number(totalPrice ?? 0));
+
   return (
     <div className="order-result-page">
       <div className="order-result-container">
@@ -165,7 +171,7 @@ const OrderResultPage = () => {
           <div className="summary-detail">
             <div className="summary-row">
               <span>상품금액</span>
-              <strong>{formatPrice(totalPrice)}원</strong>
+              <strong>{formatPrice(productPrice)}원</strong>
             </div>
 
             <div className="summary-row">
@@ -173,9 +179,11 @@ const OrderResultPage = () => {
               <strong>0원</strong>
             </div>
 
-            <div className="summary-row">
+            <div className="summary-row discount-row">
               <span>할인/부가결제</span>
-              <strong>-0원</strong>
+              <strong>
+                {discountPrice > 0 ? `-${formatPrice(discountPrice)}원` : "0원"}
+              </strong>
             </div>
           </div>
 

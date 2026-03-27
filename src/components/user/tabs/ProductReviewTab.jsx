@@ -66,8 +66,10 @@ export default function ProductReviewTab({ productId }) {
             </div>
 
             <div className="review-body">
-              <h4 className="review-title">{rev.title}</h4>
-              <p className="review-text">{rev.content}</p>
+              <div className="review-body-text">
+                <h4 className="review-title">{rev.title}</h4>
+                <p className="review-text">{rev.content}</p>
+              </div>
 
               {rev.imageUrl && (
                 <div className="review-image">
