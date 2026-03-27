@@ -49,7 +49,7 @@ const GradeInfo = ({ purchaseCount, currentGrade, memberName }) => {
         { name: 'VIP', condition: '20회 이상', benefit: '7% 할인 쿠폰 + 무료배송' },
         { name: 'GOLD', condition: '10회 이상', benefit: '5% 할인 쿠폰' },
         { name: 'SILVER', condition: '5회 이상', benefit: '3% 할인 쿠폰' },
-        { name: 'BASIC', condition: '기본 등급', benefit: '신규회원! 3,000원 할인쿠폰 즉시 사용가능!' },
+        { name: 'BASIC', condition: '기본 등급', benefit: '신규가입 혜택 제공' },
     ];
 
     return (
@@ -475,14 +475,12 @@ const MyPage = () => {
 
     // MyPage 컴포넌트 내부
     const purchaseCount = Number(user?.purchaseCount) || 0;
-    const currentGrade = user?.status || getGrade(purchaseCount);
+    const currentGrade = user?.grade || getGrade(purchaseCount);
 
     const getProgress = () => {
         if (purchaseCount >= 30) return 100;
         const targets = [5, 10, 20, 30];
         const nextTarget = targets.find(t => t > purchaseCount) || 30;
-
-        // 이전 단계의 목표치 (예: 5회면 0, 10회면 5)
         const prevTarget = targets[targets.indexOf(nextTarget) - 1] || 0;
 
         // 해당 구간에서의 진행도 계산
@@ -492,10 +490,10 @@ const MyPage = () => {
 
     // 다음 등급까지 남은 횟수 계산
     const getNextGradeInfo = () => {
-        if (purchaseCount < 5) return 5 - purchaseCount;
-        if (purchaseCount < 10) return 10 - purchaseCount;
-        if (purchaseCount < 20) return 20 - purchaseCount;
-        if (purchaseCount < 30) return 30 - purchaseCount;
+        if (purchaseCount < 5) return 5 - purchaseCount;   // BASIC -> SILVER
+        if (purchaseCount < 10) return 10 - purchaseCount; // SILVER -> GOLD
+        if (purchaseCount < 20) return 20 - purchaseCount; // GOLD -> VIP
+        if (purchaseCount < 30) return 30 - purchaseCount; // VIP -> VVIP
         return 0;
     };
 
