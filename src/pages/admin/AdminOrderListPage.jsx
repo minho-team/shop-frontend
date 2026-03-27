@@ -113,7 +113,6 @@ const AdminOrderListPage = () => {
     const paramsFromUrl = parseSearchParamsToState(searchParams);
     setSearch(paramsFromUrl);
     fetchOrders(paramsFromUrl);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const updateUrlAndFetch = (nextSearch) => {
