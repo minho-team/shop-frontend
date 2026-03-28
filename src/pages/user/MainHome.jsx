@@ -12,6 +12,7 @@ import { getHomeMainData } from "../../api/user/productApi";
 import { useUser } from "../../context/UserContext";
 // ★ 룰렛 모달 import 추가
 import RouletteModal from "../../components/user/RouletteModal";
+import TestNoticeBanner from "../../components/user/TestNoticeBanner";
 
 const MainHome = () => {
   const location = useLocation();
@@ -96,6 +97,8 @@ const MainHome = () => {
           <MainCarousel />
 
           <PopularKeywords keywords={homeData.popularKeywords} />
+
+        <TestNoticeBanner/>
 
           <HomeProductSection
             label="NEW ARRIVAL"

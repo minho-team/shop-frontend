@@ -30,7 +30,7 @@ const KakaoRedirectPage = lazy(() => import("../pages/user/KakaoRedirectPage"));
 const RefundWritePage = lazy(() => import("../pages/user/RefundWritePage"));
 const PaymentSuccessPage = lazy(() => import("../pages/user/PaymentSuccessPage"));
 const PaymentFailPage = lazy(() => import("../pages/user/PaymentFailPage"));
-// ★ 룰렛 페이지 추가
+const PrivacyPolicyPage = lazy(() => import("../pages/user/PrivacyPolicyPage"));
 const RoulettePage = lazy(() => import("../pages/user/RoulettePage"));
 
 // ================================================
@@ -100,6 +100,7 @@ const AppRouterContent = () => {
         { path: "/product/detail/:id", element: <ProductDetailPage /> },
         { path: "/faq/detail/:id", element: <FaqDetailPage /> },
         { path: "/member/kakao", element: <KakaoRedirectPage /> },
+        { path: "/privacy", element: <PrivacyPolicyPage /> },
 
         // ── 관리자 전용 ───────────────────────────────
         { path: "/admin/home", element: <AdminRouteWrapper Component={AdminHome} /> },
