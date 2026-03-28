@@ -271,14 +271,6 @@ const AdminProductListPage = () => {
               <option value="N">일반배송</option>
             </select>
 
-            <button
-              type="button"
-              className="admin-btn admin-btn-dark"
-              onClick={handleSearch}
-            >
-              검색
-            </button>
-
             <button type="button" className="admin-btn" onClick={handleReset}>
               초기화
             </button>
