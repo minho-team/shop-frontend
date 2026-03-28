@@ -6,6 +6,77 @@
   background-color: #f7f8fa;
   min-height: 100%;
   box-sizing: border-box;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.admin-dashboard-section {
+  margin-bottom: 32px;
+}
+
+.admin-dashboard-section-title {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.admin-dashboard-card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.admin-dashboard-card {
+  flex: 1 1 calc(33.333% - 16px);
+  min-width: 220px;
+}
+
+/* 기존 summary 카드 스타일 재사용 */
+.admin-dashboard-card,
+.admin-dashboard-summary-card {
+  background-color: #ffffff;
+  border: 1px solid #e7ebf0;
+  border-radius: 16px;
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+}
+
+.admin-dashboard-card-label,
+.admin-dashboard-summary-label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.admin-dashboard-card-value,
+.admin-dashboard-summary-value {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+.admin-dashboard-message {
+  font-size: 16px;
+  color: #555;
+}
+
+.admin-dashboard-error {
+  font-size: 16px;
+  color: #d32f2f;
 }
 
 /* =========================
@@ -136,6 +207,7 @@
   padding: 20px;
   box-sizing: border-box;
   box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  min-height: 280px;
 }
 
 .admin-dashboard-panel-header {
@@ -172,11 +244,11 @@
    매출 그래프
 ========================= */
 .admin-dashboard-chart-panel {
-  min-height: 360px;
+  min-height: 420px;
 }
 
 .admin-dashboard-chart-box {
-  height: 280px;
+  height: 320px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -276,7 +348,7 @@
   flex-shrink: 0;
   font-size: 14px;
   font-weight: 700;
-  color: #4b5563;
+  color: #2563eb;
 }
 
 /* =========================
