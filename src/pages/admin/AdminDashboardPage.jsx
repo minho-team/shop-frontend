@@ -2,6 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { getAdminDashboard } from "../../api/admin/adminDashboardApi";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
 import "../../css/admin/AdminDashboardPage.css";
 
 const AdminDashboardPage = () => {
@@ -70,7 +80,6 @@ const AdminDashboardPage = () => {
 
   const formatNumber = (v) => Number(v || 0).toLocaleString();
   const formatPrice = (v) => `${Number(v || 0).toLocaleString()}원`;
-
   const formatDateTime = (dateTime) => {
     if (!dateTime) return "-";
 
@@ -89,6 +98,26 @@ const AdminDashboardPage = () => {
     return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
   };
 
+  const getCardClassName = (label) => {
+    if (label.includes("총환불") || label.includes("환불 요청")) {
+      return "admin-dashboard-card is-danger";
+    }
+
+    if (label.includes("재고 부족")) {
+      return "admin-dashboard-card is-warning";
+    }
+
+    if (
+      label.includes("최종매출") ||
+      label.includes("총매출") ||
+      label.includes("오늘 매출")
+    ) {
+      return "admin-dashboard-card is-primary";
+    }
+
+    return "admin-dashboard-card";
+  };
+
   const getStockBadgeClass = (stock) => {
     return stock <= 2
       ? "admin-dashboard-stock-badge is-danger"
@@ -97,27 +126,6 @@ const AdminDashboardPage = () => {
 
   const getStockStatusText = (stock) => {
     return stock <= 2 ? "위험" : "주의";
-  };
-
-  const getMaxChartSales = () => {
-    if (!dashboard.salesChartList || dashboard.salesChartList.length === 0) {
-      return 0;
-    }
-
-    return Math.max(
-      ...dashboard.salesChartList.map((item) => Number(item.sales || 0)),
-    );
-  };
-
-  const getChartBarHeight = (sales, maxSales) => {
-    if (!maxSales || maxSales <= 0) {
-      return "12px";
-    }
-
-    const ratio = Number(sales || 0) / maxSales;
-    const height = Math.max(ratio * 100, 8);
-
-    return `${height}%`;
   };
 
   const moveToOrderList = () => {
@@ -159,8 +167,6 @@ const AdminDashboardPage = () => {
     [dashboard],
   );
 
-  const maxChartSales = getMaxChartSales();
-
   if (loading) {
     return (
       <AdminLayout pageTitle="대시보드">
@@ -189,8 +195,49 @@ const AdminDashboardPage = () => {
     );
   }
 
+  const getOrderStatusClass = (status) => {
+    switch (status) {
+      case "PAYMENT_COMPLETED":
+        return "admin-dashboard-status-badge is-completed";
+      case "PENDING_PAYMENT":
+        return "admin-dashboard-status-badge is-pending";
+      case "PREPARING":
+        return "admin-dashboard-status-badge is-preparing";
+      case "SHIPPING":
+        return "admin-dashboard-status-badge is-shipping";
+      case "DELIVERED":
+        return "admin-dashboard-status-badge is-delivered";
+      case "CANCELED":
+        return "admin-dashboard-status-badge is-canceled";
+      default:
+        return "admin-dashboard-status-badge";
+    }
+  };
+
+  const getOrderStatusText = (status) => {
+    switch (status) {
+      case "PAYMENT_COMPLETED":
+        return "결제완료";
+      case "PENDING_PAYMENT":
+        return "결제대기";
+      case "PREPARING":
+        return "배송준비중";
+      case "SHIPPING":
+        return "배송중";
+      case "DELIVERED":
+        return "배송완료";
+      case "CANCELED":
+        return "취소완료";
+      default:
+        return status || "-";
+    }
+  };
+
   return (
-    <AdminLayout pageTitle="대시보드">
+    <AdminLayout
+      pageTitle="대시보드"
+      contentClassName="admin-page-content-wide"
+    >
       <div className="admin-dashboard-page">
         <div className="admin-dashboard-header">
           <h2 className="admin-dashboard-title">대시보드</h2>
@@ -200,9 +247,9 @@ const AdminDashboardPage = () => {
         <section className="admin-dashboard-section">
           <h3 className="admin-dashboard-section-title">상단 요약</h3>
 
-          <div className="admin-dashboard-card-grid">
+          <div className="admin-dashboard-card-grid admin-dashboard-card-grid-6">
             {summaryCards.map(([label, value]) => (
-              <div className="admin-dashboard-card" key={label}>
+              <div className={getCardClassName(label)} key={label}>
                 <p className="admin-dashboard-card-label">{label}</p>
                 <p className="admin-dashboard-card-value">{value}</p>
               </div>
@@ -214,9 +261,9 @@ const AdminDashboardPage = () => {
         <section className="admin-dashboard-section">
           <h3 className="admin-dashboard-section-title">오늘 현황</h3>
 
-          <div className="admin-dashboard-card-grid">
+          <div className="admin-dashboard-card-grid admin-dashboard-card-grid-5">
             {todayCards.map(([label, value]) => (
-              <div className="admin-dashboard-card" key={label}>
+              <div className={getCardClassName(label)} key={label}>
                 <p className="admin-dashboard-card-label">{label}</p>
                 <p className="admin-dashboard-card-value">{value}</p>
               </div>
@@ -224,7 +271,131 @@ const AdminDashboardPage = () => {
           </div>
         </section>
 
-        {/* 3. 최근 주문 / 재고 부족 */}
+        {/* 3. 최근 7일 매출 / 인기상품 TOP 5 */}
+        <div className="admin-dashboard-grid-row">
+          <section className="admin-dashboard-panel admin-dashboard-chart-panel">
+            <div className="admin-dashboard-panel-header">
+              <h3 className="admin-dashboard-panel-title">최근 7일 매출</h3>
+            </div>
+
+            <div className="admin-dashboard-recharts-wrap">
+              {dashboard.salesChartList.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={dashboard.salesChartList}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#e5e7eb"
+                    />
+
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 12, fill: "#6b7280" }}
+                      axisLine={{ stroke: "#d1d5db" }}
+                      tickLine={false}
+                    />
+
+                    <YAxis
+                      tickFormatter={(value) =>
+                        `${Number(value).toLocaleString()}`
+                      }
+                      tick={{ fontSize: 12, fill: "#6b7280" }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={55}
+                    />
+
+                    <Tooltip
+                      formatter={(value) => [
+                        `${Number(value).toLocaleString()}원`,
+                        "매출",
+                      ]}
+                      labelFormatter={(label) => `${label}`}
+                      contentStyle={{
+                        borderRadius: "10px",
+                        border: "1px solid #e5e7eb",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+                      }}
+                    />
+
+                    {/* 막대 */}
+                    <Bar
+                      dataKey="sales"
+                      fill="#2563eb"
+                      radius={[8, 8, 0, 0]}
+                      maxBarSize={40}
+                    />
+
+                    {/* 추세선 */}
+                    <Line
+                      type="monotone"
+                      dataKey="sales"
+                      stroke="#f97316"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="admin-dashboard-empty">
+                  최근 7일 매출 데이터가 없습니다.
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="admin-dashboard-panel">
+            <div className="admin-dashboard-panel-header">
+              <h3 className="admin-dashboard-panel-title">인기상품 TOP 5</h3>
+              <button
+                type="button"
+                className="admin-dashboard-more-btn"
+                onClick={moveToProductList}
+              >
+                더보기
+              </button>
+            </div>
+
+            <div className="admin-dashboard-top-list">
+              {dashboard.topProductList.length > 0 ? (
+                dashboard.topProductList.map((product, index) => (
+                  <div
+                    className="admin-dashboard-top-item"
+                    key={product.productNo}
+                  >
+                    <div className="admin-dashboard-top-rank">{index + 1}</div>
+
+                    <div className="admin-dashboard-top-name">
+                      {product.name}
+                    </div>
+
+                    <div className="admin-dashboard-top-sales">
+                      {formatNumber(product.totalSalesCount)}개 판매
+                    </div>
+
+                    <button
+                      type="button"
+                      className="admin-dashboard-action-btn"
+                      onClick={() => moveToProductDetail(product.productNo)}
+                    >
+                      상세보기
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="admin-dashboard-empty">
+                  인기상품 데이터가 없습니다.
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+
+        {/* 4. 최근 주문 / 재고 부족 */}
         <div className="admin-dashboard-grid-row">
           <section className="admin-dashboard-panel">
             <div className="admin-dashboard-panel-header">
@@ -256,7 +427,13 @@ const AdminDashboardPage = () => {
                       <tr key={order.orderNo}>
                         <td>{order.orderNo}</td>
                         <td>{order.ordererName}</td>
-                        <td>{order.orderStatus}</td>
+                        <td>
+                          <span
+                            className={getOrderStatusClass(order.orderStatus)}
+                          >
+                            {getOrderStatusText(order.orderStatus)}
+                          </span>
+                        </td>
                         <td>{formatPrice(order.totalPrice)}</td>
                         <td>{formatDateTime(order.createdAt)}</td>
                         <td>
@@ -345,90 +522,6 @@ const AdminDashboardPage = () => {
                   )}
                 </tbody>
               </table>
-            </div>
-          </section>
-        </div>
-
-        {/* 4. 최근 7일 매출 / 인기상품 TOP 5 */}
-        <div className="admin-dashboard-grid-row">
-          <section className="admin-dashboard-panel admin-dashboard-chart-panel">
-            <div className="admin-dashboard-panel-header">
-              <h3 className="admin-dashboard-panel-title">최근 7일 매출</h3>
-            </div>
-
-            <div className="admin-dashboard-chart-box">
-              {dashboard.salesChartList.length > 0 ? (
-                dashboard.salesChartList.map((item) => (
-                  <div className="admin-dashboard-chart-item" key={item.label}>
-                    <div className="admin-dashboard-chart-value">
-                      {formatPrice(item.sales)}
-                    </div>
-
-                    <div className="admin-dashboard-chart-bar-wrap">
-                      <div
-                        className="admin-dashboard-chart-bar"
-                        style={{
-                          height: getChartBarHeight(item.sales, maxChartSales),
-                        }}
-                      ></div>
-                    </div>
-
-                    <div className="admin-dashboard-chart-label">
-                      {item.label}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="admin-dashboard-empty">
-                  최근 7일 매출 데이터가 없습니다.
-                </div>
-              )}
-            </div>
-          </section>
-
-          <section className="admin-dashboard-panel">
-            <div className="admin-dashboard-panel-header">
-              <h3 className="admin-dashboard-panel-title">인기상품 TOP 5</h3>
-              <button
-                type="button"
-                className="admin-dashboard-more-btn"
-                onClick={moveToProductList}
-              >
-                더보기
-              </button>
-            </div>
-
-            <div className="admin-dashboard-top-list">
-              {dashboard.topProductList.length > 0 ? (
-                dashboard.topProductList.map((product, index) => (
-                  <div
-                    className="admin-dashboard-top-item"
-                    key={product.productNo}
-                  >
-                    <div className="admin-dashboard-top-rank">{index + 1}</div>
-
-                    <div className="admin-dashboard-top-name">
-                      {product.name}
-                    </div>
-
-                    <div className="admin-dashboard-top-sales">
-                      {formatNumber(product.totalSalesCount)}개 판매
-                    </div>
-
-                    <button
-                      type="button"
-                      className="admin-dashboard-action-btn"
-                      onClick={() => moveToProductDetail(product.productNo)}
-                    >
-                      상세보기
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div className="admin-dashboard-empty">
-                  인기상품 데이터가 없습니다.
-                </div>
-              )}
             </div>
           </section>
         </div>
