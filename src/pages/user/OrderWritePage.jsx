@@ -697,7 +697,9 @@ const OrderWritePage = () => {
                   <div className="coupon-section-header">
                     <span className="coupon-section-title">쿠폰 적용</span>
                     <span
-                      className={`coupon-count-badge${availableCoupons.length === 0 ? " empty" : ""}`}
+                      className={`coupon-count-badge${
+                        availableCoupons.length === 0 ? " empty" : ""
+                      }`}
                     >
                       {availableCoupons.length > 0
                         ? `${availableCoupons.length}장 보유`
@@ -776,6 +778,23 @@ const OrderWritePage = () => {
                 <div className="summary-row grand-total">
                   <span>총 결제 금액</span>
                   <strong>{finalPrice.toLocaleString()}원</strong>
+                </div>
+
+                <div
+                  style={{
+                    marginBottom: "16px",
+                    marginLeft :"25px",
+                    marginRight :"25px",
+                    padding: "12px 14px",
+                    backgroundColor: "#f3f3f3",
+                    borderRadius: "8px",
+                    color: "#555",
+                    fontSize: "14px",
+                    lineHeight: "1.6",
+                  }}
+                >
+                  실제 결제가 되지 않는 테스트 결제입니다.<br/>
+                  배송도 이루어지지 않습니다.
                 </div>
 
                 <button

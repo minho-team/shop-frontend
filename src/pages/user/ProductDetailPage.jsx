@@ -16,6 +16,7 @@ import "../../css/user/ProductDetailPage.css";
 import "../../css/common/MainProductList.css";
 import PopularKeywords from "../../components/user/PopularKeywords";
 import Footer from "../../components/user/Footer";
+import TestNoticeBanner from "../../components/user/TestNoticeBanner";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -475,12 +476,15 @@ const ProductDetailPage = () => {
                   type="button"
                   className="buy-button"
                   onClick={handleOrder}
+                  style={{marginBottom:"20px"}}
                 >
                   구매하기
                 </button>
               </div>
             </div>
           </section>
+
+          <TestNoticeBanner/>
           <section className="product-bottom-section">
             <ProductDetailTabs
               product={product}

@@ -17,19 +17,18 @@ const Footer = () => {
 
       <div className="footer-main">
         <div className="footer-col footer-company">
-          <h2 className="footer-logo">ERDIN SELECT SHOP</h2>
+          <h2 className="footer-logo">쇼핑몰 팀프로젝트</h2>
 
-          <p>COMPANY : 에르딘(주) / CEO : 강민호</p>
+          <p>포트폴리오 용 테스트 페이지입니다.</p>
           <p>CALL CENTER : 1111-2222</p>
           <p>
-            ADDRESS : 서울특별시 강남구 테헤란로14길 6 남도빌딩 2F, 3F,
-            4F, 5F, 6F
+            ADDRESS : 포트폴리오 용 테스트 페이지입니다.
           </p>
           <p>개인정보관리책임자 : 강민호</p>
           <p>
-            사업자등록번호 : 333-33-33333{" "}
+            포트폴리오 용 테스트 페이지입니다.{" "}
           </p>
-          <p>통신판매업 신고번호 : 제3333-서울-0333호</p>
+          <p>포트폴리오 용 테스트 페이지입니다.</p>
         </div>
 
         <div className="footer-col footer-center">
@@ -46,16 +45,15 @@ const Footer = () => {
           <div className="footer-block">
             <h3>RETURN / EXCHANGE</h3>
             <p>
-              서울특별시 강남구 테헤란로14길 6 남도빌딩 2F, 3F, 4F,
-              5F, 6F (에르딘)
+              포트폴리오 용 테스트 페이지입니다.
             </p>
           </div>
         </div>
 
         <div className="footer-col footer-bank">
-          <h3>BANK ACCOUNT</h3>
-          <p>신한 111-222-333333</p>
-          <p>예금주: 에르딘</p>
+          <h3>프로젝트명: 에르딘(쇼핑몰)</h3>
+          <p>운영주체: kh국비 교육과정 팀프로젝트</p>
+          <p>문의 이메일: busster@naver.com (팀장 강민호)</p>
           <div className="footer-bank-line" />
         </div>
       </div>
