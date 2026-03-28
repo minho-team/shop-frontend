@@ -3,6 +3,16 @@
   background-color: #f6f7f9;
 }
 
+.admin-content-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.admin-content-inner.admin-page-content-wide {
+  max-width: 1800px;
+}
+
 .admin-content-wrap {
   width: 100%;
   min-height: 600px;
