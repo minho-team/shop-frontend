@@ -1,13 +1,12 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../css/user/OrderResultPage.css";
-
-const API_BASE_URL = "http://localhost:8080";
+import { API_SERVER_HOST } from "../../api/common/apiClient";
 
 const getImageSrc = (imageUrl) => {
   if (!imageUrl) return "";
   if (imageUrl.startsWith("http")) return imageUrl;
-  return `${API_BASE_URL}${imageUrl}`;
+  return `${API_SERVER_HOST}${imageUrl}`;
 };
 
 const formatPrice = (value) => Number(value ?? 0).toLocaleString();

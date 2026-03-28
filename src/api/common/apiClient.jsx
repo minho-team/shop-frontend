@@ -1,5 +1,6 @@
 import axios from "axios";
 
+//export const API_SERVER_HOST = "http://54.252.87.180:8080";
 export const API_SERVER_HOST = "http://localhost:8080";
 
 const apiClient = axios.create({

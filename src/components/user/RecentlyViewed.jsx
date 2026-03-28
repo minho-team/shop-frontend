@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../css/common/RecentlyViewed.css";
+import { API_SERVER_HOST } from "../../api/common/apiClient";
 
-const API_BASE_URL = "http://localhost:8080";
 const STORAGE_KEY = "recentlyViewed";
 const MAX_ITEMS = 6;
 
@@ -45,7 +45,7 @@ const RecentlyViewed = () => {
               const imageSrc = item.imageUrl
               ? item.imageUrl.startsWith("http")
                 ? item.imageUrl
-                : `${API_BASE_URL}${item.imageUrl}`
+                : `${API_SERVER_HOST}${item.imageUrl}`
               : null;
 
             return (
