@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
-import AdminHeader from "../../components/admin/AdminHeader";
 import { getOrderList } from "../../api/admin/adminOrdersApi";
 import "../../css/admin/AdminOrderListPage.css";
 
@@ -17,12 +16,23 @@ const ORDER_STATUS_LABEL = {
 const INITIAL_SEARCH = {
   page: 1,
   size: 10,
-  searchType: "ordererName", // 기본값 주문자명으로 변경
+  searchType: "ordererName",
   keyword: "",
   datePreset: "",
   startDate: "",
   endDate: "",
   orderStatus: "",
+};
+
+const DEFAULT_PAGE_INFO = {
+  currentPage: 1,
+  size: 10,
+  totalCount: 0,
+  totalPage: 0,
+  startPage: 1,
+  endPage: 1,
+  hasPrev: false,
+  hasNext: false,
 };
 
 const formatPrice = (price) => {
@@ -45,63 +55,82 @@ const formatDateTime = (value) => {
   return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
 };
 
+const parseSearchParamsToState = (searchParams) => {
+  const parsedPage = Number(searchParams.get("page")) || 1;
+  const parsedSize = Number(searchParams.get("size")) || 10;
+
+  return {
+    page: parsedPage,
+    size: parsedSize,
+    searchType: searchParams.get("searchType") || "ordererName",
+    keyword: searchParams.get("keyword") || "",
+    datePreset: searchParams.get("datePreset") || "",
+    startDate: searchParams.get("startDate") || "",
+    endDate: searchParams.get("endDate") || "",
+    orderStatus: searchParams.get("orderStatus") || "",
+  };
+};
+
+const buildSearchParams = (params) => {
+  const nextParams = new URLSearchParams();
+
+  nextParams.set("page", String(params.page ?? 1));
+  nextParams.set("size", String(params.size ?? 10));
+
+  if (params.searchType) nextParams.set("searchType", params.searchType);
+  if (params.keyword) nextParams.set("keyword", params.keyword);
+  if (params.datePreset) nextParams.set("datePreset", params.datePreset);
+  if (params.startDate) nextParams.set("startDate", params.startDate);
+  if (params.endDate) nextParams.set("endDate", params.endDate);
+  if (params.orderStatus) nextParams.set("orderStatus", params.orderStatus);
+
+  return nextParams;
+};
+
 const AdminOrderListPage = () => {
   const nav = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [orders, setOrders] = useState([]);
-  const [search, setSearch] = useState(INITIAL_SEARCH);
-  const [pageInfo, setPageInfo] = useState({
-    currentPage: 1,
-    size: 10,
-    totalCount: 0,
-    totalPage: 0,
-    startPage: 1,
-    endPage: 1,
-    hasPrev: false,
-    hasNext: false,
-  });
+  const [search, setSearch] = useState(() =>
+    parseSearchParamsToState(searchParams)
+  );
+  const [pageInfo, setPageInfo] = useState(DEFAULT_PAGE_INFO);
 
-  const fetchOrders = async (customParams = {}) => {
+  const fetchOrders = async (params) => {
     try {
-      const params = {
-        ...search,
-        ...customParams,
-      };
-
       const data = await getOrderList(params);
       setOrders(data.content || []);
-      setPageInfo(
-        data.pageInfo || {
-          currentPage: 1,
-          size: 10,
-          totalCount: 0,
-          totalPage: 0,
-          startPage: 1,
-          endPage: 1,
-          hasPrev: false,
-          hasNext: false,
-        }
-      );
-
-      if (customParams.page != null) {
-        setSearch((prev) => ({ ...prev, page: customParams.page }));
-      }
+      setPageInfo(data.pageInfo || DEFAULT_PAGE_INFO);
     } catch (error) {
       console.error("주문 목록 조회 실패:", error);
+      setOrders([]);
+      setPageInfo(DEFAULT_PAGE_INFO);
     }
   };
 
   useEffect(() => {
-    fetchOrders({ page: 1 });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const paramsFromUrl = parseSearchParamsToState(searchParams);
+    setSearch(paramsFromUrl);
+    fetchOrders(paramsFromUrl);
+  }, [searchParams]);
+
+  const updateUrlAndFetch = (nextSearch) => {
+    const nextParams = buildSearchParams(nextSearch);
+    setSearchParams(nextParams);
+  };
 
   const clickOneOrder = (orderNo) => {
-    nav(`/admin/order/detail/${orderNo}`);
+    const queryString = searchParams.toString();
+    nav(`/admin/order/detail/${orderNo}${queryString ? `?${queryString}` : ""}`);
   };
 
   const handlePageClick = (page) => {
-    fetchOrders({ page });
+    const nextSearch = {
+      ...search,
+      page,
+    };
+    updateUrlAndFetch(nextSearch);
   };
 
   const handleSearchChange = (e) => {
@@ -139,10 +168,14 @@ const AdminOrderListPage = () => {
       }
     }
 
-    fetchOrders({ page: 1 });
+    const nextSearch = {
+      ...search,
+      page: 1,
+    };
+
+    updateUrlAndFetch(nextSearch);
   };
 
-  // 검색어 input에서 엔터 눌렀을 때도 검색
   const handleKeywordKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -152,7 +185,7 @@ const AdminOrderListPage = () => {
 
   const handleReset = () => {
     setSearch(INITIAL_SEARCH);
-    fetchOrders(INITIAL_SEARCH);
+    updateUrlAndFetch(INITIAL_SEARCH);
   };
 
   const renderPageButtons = () => {
@@ -177,189 +210,183 @@ const AdminOrderListPage = () => {
   };
 
   return (
-    <>
-      <AdminHeader />
-      <AdminLayout>
-        <div className="admin-order-page">
-          
-
-
-          <div className="admin-order-search-section">
-            <div className="admin-order-section-head">
-              <h3>검색 및 필터</h3>
-              <span>조건을 선택해서 주문을 조회하세요.</span>
-            </div>
-
-            <form className="admin-order-search-form" onSubmit={handleSearchSubmit}>
-              <div className="admin-order-search-grid">
-                <div className="admin-order-form-group small">
-                  <label>검색조건</label>
-                  <select
-                    name="searchType"
-                    value={search.searchType}
-                    onChange={handleSearchChange}
-                  >
-                    <option value="orderNo">주문번호</option>
-                    <option value="ordererName">주문자명</option>
-                  </select>
-                </div>
-
-                <div className="admin-order-form-group large keyword-group">
-                  <label>검색어</label>
-                  <input
-                    type="text"
-                    name="keyword"
-                    value={search.keyword}
-                    onChange={handleSearchChange}
-                    onKeyDown={handleKeywordKeyDown}
-                    placeholder="주문번호 또는 주문자명을 입력하세요"
-                  />
-                </div>
-
-                <div className="admin-order-form-group medium">
-                  <label>주문상태</label>
-                  <select
-                    name="orderStatus"
-                    value={search.orderStatus}
-                    onChange={handleSearchChange}
-                  >
-                    <option value="">전체</option>
-                    <option value="PENDING_PAYMENT">결제대기</option>
-                    <option value="PAYMENT_COMPLETED">결제완료</option>
-                    <option value="PREPARING">상품준비중</option>
-                    <option value="SHIPPING">배송중</option>
-                    <option value="DELIVERED">배송완료</option>
-                    <option value="CANCELED">주문취소</option>
-                  </select>
-                </div>
-
-                <div className="admin-order-form-group medium">
-                  <label>기간 필터</label>
-                  <select
-                    name="datePreset"
-                    value={search.datePreset}
-                    onChange={handleSearchChange}
-                  >
-                    <option value="">전체</option>
-                    <option value="recentWeek">최근 일주일</option>
-                    <option value="custom">직접 선택</option>
-                  </select>
-                </div>
-
-                <div className="admin-order-form-group date-group">
-                  <label>시작일</label>
-                  <input
-                    type="date"
-                    name="startDate"
-                    value={search.startDate}
-                    onChange={handleSearchChange}
-                    disabled={search.datePreset !== "custom"}
-                  />
-                </div>
-
-                <div className="admin-order-date-divider">~</div>
-
-                <div className="admin-order-form-group date-group">
-                  <label>종료일</label>
-                  <input
-                    type="date"
-                    name="endDate"
-                    value={search.endDate}
-                    onChange={handleSearchChange}
-                    disabled={search.datePreset !== "custom"}
-                  />
-                </div>
-              </div>
-
-              <div className="admin-order-search-actions">
-                <button type="submit" className="admin-order-search-btn primary">
-                  검색
-                </button>
-                <button
-                  type="button"
-                  className="admin-order-search-btn secondary"
-                  onClick={handleReset}
-                >
-                  초기화
-                </button>
-              </div>
-            </form>
+    <AdminLayout>
+      <div className="admin-order-page">
+        <div className="admin-order-search-section">
+          <div className="admin-order-section-head">
+            <h3>검색 및 필터</h3>
+            <span>조건을 선택해서 주문을 조회하세요.</span>
           </div>
 
-          <div className="admin-order-table-section">
-            <div className="admin-order-section-head table-head">
-              <h3>주문 리스트</h3>
-              <span>행을 클릭하면 주문 상세페이지로 이동합니다.</span>
+          <form className="admin-order-search-form" onSubmit={handleSearchSubmit}>
+            <div className="admin-order-search-grid">
+              <div className="admin-order-form-group small">
+                <label>검색조건</label>
+                <select
+                  name="searchType"
+                  value={search.searchType}
+                  onChange={handleSearchChange}
+                >
+                  <option value="orderNo">주문번호</option>
+                  <option value="ordererName">주문자명</option>
+                </select>
+              </div>
+
+              <div className="admin-order-form-group large keyword-group">
+                <label>검색어</label>
+                <input
+                  type="text"
+                  name="keyword"
+                  value={search.keyword}
+                  onChange={handleSearchChange}
+                  onKeyDown={handleKeywordKeyDown}
+                  placeholder="주문번호 또는 주문자명을 입력하세요"
+                />
+              </div>
+
+              <div className="admin-order-form-group medium">
+                <label>주문상태</label>
+                <select
+                  name="orderStatus"
+                  value={search.orderStatus}
+                  onChange={handleSearchChange}
+                >
+                  <option value="">전체</option>
+                  <option value="PENDING_PAYMENT">결제대기</option>
+                  <option value="PAYMENT_COMPLETED">결제완료</option>
+                  <option value="PREPARING">상품준비중</option>
+                  <option value="SHIPPING">배송중</option>
+                  <option value="DELIVERED">배송완료</option>
+                  <option value="CANCELED">주문취소</option>
+                </select>
+              </div>
+
+              <div className="admin-order-form-group medium">
+                <label>기간 필터</label>
+                <select
+                  name="datePreset"
+                  value={search.datePreset}
+                  onChange={handleSearchChange}
+                >
+                  <option value="">전체</option>
+                  <option value="recentWeek">최근 일주일</option>
+                  <option value="custom">직접 선택</option>
+                </select>
+              </div>
+
+              <div className="admin-order-form-group date-group">
+                <label>시작일</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={search.startDate}
+                  onChange={handleSearchChange}
+                  disabled={search.datePreset !== "custom"}
+                />
+              </div>
+
+              <div className="admin-order-date-divider">~</div>
+
+              <div className="admin-order-form-group date-group">
+                <label>종료일</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={search.endDate}
+                  onChange={handleSearchChange}
+                  disabled={search.datePreset !== "custom"}
+                />
+              </div>
             </div>
 
-            <div className="admin-order-table-wrap">
-              <table className="admin-order-table">
-                <thead>
-                  <tr>
-                    <th>주문번호</th>
-                    <th>주문자명</th>
-                    <th>주문상태</th>
-                    <th>총금액</th>
-                    <th>주문일시</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders.length > 0 ? (
-                    orders.map((order) => (
-                      <tr
-                        key={order.orderNo}
-                        onClick={() => clickOneOrder(order.orderNo)}
-                        className="admin-order-row"
-                      >
-                        <td className="strong">{order.orderNo}</td>
-                        <td>{order.ordererName}</td>
-                        <td>
-                          <span className="admin-order-status-badge">
-                            {ORDER_STATUS_LABEL[order.orderStatus] || order.orderStatus}
-                          </span>
-                        </td>
-                        <td>{formatPrice(order.totalPrice)}</td>
-                        <td>{formatDateTime(order.createdAt)}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5" className="admin-order-empty">
-                        주문 내역이 없습니다.
+            <div className="admin-order-search-actions">
+              <button type="submit" className="admin-order-search-btn primary">
+                검색
+              </button>
+              <button
+                type="button"
+                className="admin-order-search-btn secondary"
+                onClick={handleReset}
+              >
+                초기화
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div className="admin-order-table-section">
+          <div className="admin-order-section-head table-head">
+            <h3>주문 리스트</h3>
+            <span>행을 클릭하면 주문 상세페이지로 이동합니다.</span>
+          </div>
+
+          <div className="admin-order-table-wrap">
+            <table className="admin-order-table">
+              <thead>
+                <tr>
+                  <th>주문번호</th>
+                  <th>주문자명</th>
+                  <th>주문상태</th>
+                  <th>총금액</th>
+                  <th>주문일시</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.length > 0 ? (
+                  orders.map((order) => (
+                    <tr
+                      key={order.orderNo}
+                      onClick={() => clickOneOrder(order.orderNo)}
+                      className="admin-order-row"
+                    >
+                      <td className="strong">{order.orderNo}</td>
+                      <td>{order.ordererName}</td>
+                      <td>
+                        <span className="admin-order-status-badge">
+                          {ORDER_STATUS_LABEL[order.orderStatus] || order.orderStatus}
+                        </span>
                       </td>
+                      <td>{formatPrice(order.totalPrice)}</td>
+                      <td>{formatDateTime(order.createdAt)}</td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="admin-order-empty">
+                      주문 내역이 없습니다.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-            <div className="admin-order-pagination">
-              {pageInfo.hasPrev && (
-                <button
-                  type="button"
-                  onClick={() => handlePageClick(pageInfo.startPage - 1)}
-                  className="admin-order-page-btn"
-                >
-                  이전
-                </button>
-              )}
+          <div className="admin-order-pagination">
+            {pageInfo.hasPrev && (
+              <button
+                type="button"
+                onClick={() => handlePageClick(pageInfo.startPage - 1)}
+                className="admin-order-page-btn"
+              >
+                이전
+              </button>
+            )}
 
-              {renderPageButtons()}
+            {renderPageButtons()}
 
-              {pageInfo.hasNext && (
-                <button
-                  type="button"
-                  onClick={() => handlePageClick(pageInfo.endPage + 1)}
-                  className="admin-order-page-btn"
-                >
-                  다음
-                </button>
-              )}
-            </div>
+            {pageInfo.hasNext && (
+              <button
+                type="button"
+                onClick={() => handlePageClick(pageInfo.endPage + 1)}
+                className="admin-order-page-btn"
+              >
+                다음
+              </button>
+            )}
           </div>
         </div>
-      </AdminLayout>
-    </>
+      </div>
+    </AdminLayout>
   );
 };
 

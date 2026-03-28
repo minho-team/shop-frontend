@@ -201,7 +201,6 @@ const AdminRefundDetailPage = () => {
                 onChange={(e) => setRefundStatus(e.target.value)}
               >
                 <option value="REQUESTED">환불요청</option>
-                <option value="APPROVED">승인완료</option>
                 <option value="REJECTED">거절</option>
                 <option value="COMPLETED">환불완료</option>
               </select>
