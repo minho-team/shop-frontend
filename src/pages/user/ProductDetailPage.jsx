@@ -7,14 +7,13 @@ import {
 } from "../../api/user/productApi";
 import { addCartItem } from "../../api/user/cartItemApi";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
-import ProductDetailTabs from "../../components/user/tabs/ProductDetailTabs";
+import ProductDetailTabs from "../../components/user/ProductDetailTabs";
 import Header from "../../components/user/Header";
 import RecentlyViewed, {
   addRecentlyViewed,
 } from "../../components/user/RecentlyViewed";
 import "../../css/user/ProductDetailPage.css";
 import "../../css/common/MainProductList.css";
-import PopularKeywords from "../../components/user/PopularKeywords";
 import Footer from "../../components/user/Footer";
 import TestNoticeBanner from "../../components/user/TestNoticeBanner";
 
