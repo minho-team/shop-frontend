@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { confirmPayment } from "../../api/user/ordersApi";
 
-const PaymentSuccessPage = () => {
+const TempPaymentSuccessPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -64,4 +64,4 @@ const PaymentSuccessPage = () => {
   return <div>결제 승인 처리 중...</div>;
 };
 
-export default PaymentSuccessPage;
+export default TempPaymentSuccessPage;
