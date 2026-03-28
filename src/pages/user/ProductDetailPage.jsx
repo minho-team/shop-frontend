@@ -7,7 +7,7 @@ import {
 } from "../../api/user/productApi";
 import { addCartItem } from "../../api/user/cartItemApi";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
-import ProductDetailTabs from "../../components/user/Productdetailtabs";
+import ProductDetailTabs from "../../components/user/tabs/ProductDetailTabs";
 import Header from "../../components/user/Header";
 import RecentlyViewed, {
   addRecentlyViewed,
