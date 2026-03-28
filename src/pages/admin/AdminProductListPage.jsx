@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { getAdminProductList } from "../../api/admin/adminProductApi";
 import { useNavigate } from "react-router-dom";
 import "../../css/admin/AdminProductListPage.css";
+import { API_SERVER_HOST } from "../../api/common/apiClient";
 
-const API_BASE_URL = "http://localhost:8080";
 
 // 카테고리 데이터
 const genderCategories = [
@@ -316,7 +316,7 @@ const AdminProductListPage = () => {
                     ) : (
                       productList.map((product) => {
                         const imageSrc = product.thumbnailUrl
-                          ? `${API_BASE_URL}${product.thumbnailUrl}`
+                          ? `${API_SERVER_HOST}${product.thumbnailUrl}`
                           : "";
 
                         return (

@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import "../../css/common/HomeProductSection.css";
+import { API_SERVER_HOST } from "../../api/common/apiClient";
 
-const API_BASE_URL = "http://localhost:8080";
+
 
 const getSalePrice = (price, discountRate) => {
   if (!discountRate || discountRate <= 0) return price;
@@ -39,7 +40,7 @@ const HomeProductSection = ({
           <div className="home-product-grid">
             {products.map((item) => {
               const imageSrc = item.imageUrl
-                ? `${API_BASE_URL}${item.imageUrl}`
+                ? `${API_SERVER_HOST}${item.imageUrl}`
                 : "";
 
               const isSale = item.discountRate && item.discountRate > 0;

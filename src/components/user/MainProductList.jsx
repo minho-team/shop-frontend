@@ -2,8 +2,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import "../../css/common/MainProductList.css";
 import { useEffect, useState } from "react";
 import { getProductList } from "../../api/user/categoryApi";
+import { API_SERVER_HOST } from "../../api/common/apiClient";
 
-const API_BASE_URL = "http://localhost:8080";
 
 const getSalePrice = (price, discountRate) => {
   if (!discountRate || discountRate <= 0) return price;
@@ -74,7 +74,7 @@ const MainProductList = () => {
           {productList.map((item, index) => {
             const productName = item.name || "상품명 없음";
             const imageSrc = item.imageUrl
-              ? `${API_BASE_URL}${item.imageUrl}`
+              ? `${API_SERVER_HOST}${item.imageUrl}`
               : "";
 
             const isSale = item.discountRate && item.discountRate > 0;
