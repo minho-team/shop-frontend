@@ -1,265 +1,439 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
+import { getAdminDashboard } from "../../api/admin/adminDashboardApi";
 import "../../css/admin/AdminDashboardPage.css";
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
 
-  // =========================
-  // 1. 월간 요약
-  // =========================
-  const monthlySummary = useMemo(() => {
-    return {
-      monthSales: 12850000,
-      monthOrderCount: 342,
-      totalMemberCount: 1280,
-      sellingProductCount: 186,
+  const [dashboard, setDashboard] = useState({
+    monthSales: 0,
+    monthGrossSales: 0,
+    monthRefundAmount: 0,
+    monthOrderCount: 0,
+    totalMemberCount: 0,
+    sellingProductCount: 0,
+
+    todayOrderCount: 0,
+    todaySales: 0,
+    newMemberCount: 0,
+    lowStockCount: 0,
+    refundRequestCount: 0,
+
+    salesChartList: [],
+    topProductList: [],
+    recentOrderList: [],
+    lowStockProductList: [],
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await getAdminDashboard();
+
+        setDashboard({
+          monthSales: data?.monthSales ?? 0,
+          monthGrossSales: data?.monthGrossSales ?? 0,
+          monthRefundAmount: data?.monthRefundAmount ?? 0,
+          monthOrderCount: data?.monthOrderCount ?? 0,
+          totalMemberCount: data?.totalMemberCount ?? 0,
+          sellingProductCount: data?.sellingProductCount ?? 0,
+
+          todayOrderCount: data?.todayOrderCount ?? 0,
+          todaySales: data?.todaySales ?? 0,
+          newMemberCount: data?.newMemberCount ?? 0,
+          lowStockCount: data?.lowStockCount ?? 0,
+          refundRequestCount: data?.refundRequestCount ?? 0,
+
+          salesChartList: data?.salesChartList ?? [],
+          topProductList: data?.topProductList ?? [],
+          recentOrderList: data?.recentOrderList ?? [],
+          lowStockProductList: data?.lowStockProductList ?? [],
+        });
+      } catch (err) {
+        console.error("대시보드 조회 실패:", err);
+        setError("대시보드 데이터를 불러오지 못했습니다.");
+      } finally {
+        setLoading(false);
+      }
     };
+
+    fetchDashboard();
   }, []);
 
-  // =========================
-  // 2. 오늘 요약
-  // =========================
-  const todaySummary = useMemo(() => {
-    return {
-      todayOrderCount: 23,
-      todaySales: 845000,
-      newMemberCount: 4,
-      lowStockCount: 7,
-      refundRequestCount: 2,
-    };
-  }, []);
+  const formatNumber = (v) => Number(v || 0).toLocaleString();
+  const formatPrice = (v) => `${Number(v || 0).toLocaleString()}원`;
 
-  // =========================
-  // 3. 최근 주문
-  // =========================
-  const recentOrders = useMemo(() => {
-    return [
-      {
-        orderNo: 202603240001,
-        ordererName: "김민수",
-        orderStatus: "결제완료",
-        totalPrice: 59000,
-        orderDate: "2026-03-24 09:10",
-      },
-      {
-        orderNo: 202603240002,
-        ordererName: "이서연",
-        orderStatus: "배송준비중",
-        totalPrice: 128000,
-        orderDate: "2026-03-24 09:35",
-      },
-      {
-        orderNo: 202603240003,
-        ordererName: "박지훈",
-        orderStatus: "배송중",
-        totalPrice: 79000,
-        orderDate: "2026-03-24 10:02",
-      },
-      {
-        orderNo: 202603240004,
-        ordererName: "최유진",
-        orderStatus: "환불요청",
-        totalPrice: 39000,
-        orderDate: "2026-03-24 10:28",
-      },
-      {
-        orderNo: 202603240005,
-        ordererName: "정하늘",
-        orderStatus: "주문접수",
-        totalPrice: 149000,
-        orderDate: "2026-03-24 11:14",
-      },
-    ];
-  }, []);
+  const formatDateTime = (dateTime) => {
+    if (!dateTime) return "-";
 
-  // =========================
-  // 4. 재고 부족
-  // =========================
-  const lowStockProducts = useMemo(() => {
-    return [
-      {
-        productNo: 101,
-        productName: "남성 후드집업",
-        optionText: "블랙 / L",
-        stock: 2,
-        stockStatus: "위험",
-      },
-      {
-        productNo: 102,
-        productName: "여성 니트",
-        optionText: "아이보리 / FREE",
-        stock: 3,
-        stockStatus: "위험",
-      },
-      {
-        productNo: 103,
-        productName: "데님 팬츠",
-        optionText: "블루 / 30",
-        stock: 4,
-        stockStatus: "주의",
-      },
-      {
-        productNo: 104,
-        productName: "숄더백",
-        optionText: "베이지",
-        stock: 1,
-        stockStatus: "위험",
-      },
-      {
-        productNo: 105,
-        productName: "스니커즈",
-        optionText: "화이트 / 270",
-        stock: 5,
-        stockStatus: "주의",
-      },
-    ];
-  }, []);
+    const date = new Date(dateTime);
 
-  // =========================
-  // 공통 함수
-  // =========================
-  const formatNumber = (v) => Number(v).toLocaleString();
-  const formatPrice = (v) => `${Number(v).toLocaleString()}원`;
+    if (Number.isNaN(date.getTime())) {
+      return dateTime;
+    }
 
-  const moveToOrderList = () => navigate("/admin/orders");
-  const moveToOrderDetail = (orderNo) => {
-    navigate(`/admin/order/detail/${orderNo}`);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const hh = String(date.getHours()).padStart(2, "0");
+    const mi = String(date.getMinutes()).padStart(2, "0");
+
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
   };
 
-  const moveToProductList = () => navigate("/admin/products");
+  const getStockBadgeClass = (stock) => {
+    return stock <= 2
+      ? "admin-dashboard-stock-badge is-danger"
+      : "admin-dashboard-stock-badge is-warning";
+  };
+
+  const getStockStatusText = (stock) => {
+    return stock <= 2 ? "위험" : "주의";
+  };
+
+  const getMaxChartSales = () => {
+    if (!dashboard.salesChartList || dashboard.salesChartList.length === 0) {
+      return 0;
+    }
+
+    return Math.max(
+      ...dashboard.salesChartList.map((item) => Number(item.sales || 0)),
+    );
+  };
+
+  const getChartBarHeight = (sales, maxSales) => {
+    if (!maxSales || maxSales <= 0) {
+      return "12px";
+    }
+
+    const ratio = Number(sales || 0) / maxSales;
+    const height = Math.max(ratio * 100, 8);
+
+    return `${height}%`;
+  };
+
+  const moveToOrderList = () => {
+    navigate("/admin/orders");
+  };
+
+  const moveToOrderDetail = (orderNo) => {
+    navigate(`/admin/orders/detail/${orderNo}`);
+  };
+
+  const moveToProductList = () => {
+    navigate("/admin/products");
+  };
+
   const moveToProductDetail = (productNo) => {
     navigate(`/admin/products/detail/${productNo}`);
   };
 
-  return (
-    <>
+  const summaryCards = useMemo(
+    () => [
+      ["금월 최종매출", `${formatNumber(dashboard.monthSales)}원`],
+      ["금월 총매출", `${formatNumber(dashboard.monthGrossSales)}원`],
+      ["금월 총환불금액", `${formatNumber(dashboard.monthRefundAmount)}원`],
+      ["금월 주문 수", `${formatNumber(dashboard.monthOrderCount)}건`],
+      ["전체 회원 수", `${formatNumber(dashboard.totalMemberCount)}명`],
+      ["판매중 상품 수", `${formatNumber(dashboard.sellingProductCount)}개`],
+    ],
+    [dashboard],
+  );
+
+  const todayCards = useMemo(
+    () => [
+      ["오늘 주문 수", `${formatNumber(dashboard.todayOrderCount)}건`],
+      ["오늘 매출", `${formatNumber(dashboard.todaySales)}원`],
+      ["오늘 신규 회원 수", `${formatNumber(dashboard.newMemberCount)}명`],
+      ["재고 부족 상품 수", `${formatNumber(dashboard.lowStockCount)}개`],
+      ["환불 요청 건수", `${formatNumber(dashboard.refundRequestCount)}건`],
+    ],
+    [dashboard],
+  );
+
+  const maxChartSales = getMaxChartSales();
+
+  if (loading) {
+    return (
       <AdminLayout pageTitle="대시보드">
         <div className="admin-dashboard-page">
-          {/* 제목 */}
           <div className="admin-dashboard-header">
-            <h2>대시보드</h2>
+            <h2 className="admin-dashboard-title">대시보드</h2>
           </div>
-
-          {/* 1행 */}
-          <div className="admin-dashboard-card-row admin-dashboard-card-row-4">
-            <div className="admin-dashboard-summary-card">
-              <div>금월 매출</div>
-              <strong>{formatPrice(monthlySummary.monthSales)}</strong>
-            </div>
-
-            <div className="admin-dashboard-summary-card">
-              <div>금월 주문 수</div>
-              <strong>{formatNumber(monthlySummary.monthOrderCount)}건</strong>
-            </div>
-
-            <div className="admin-dashboard-summary-card">
-              <div>전체 회원 수</div>
-              <strong>{formatNumber(monthlySummary.totalMemberCount)}명</strong>
-            </div>
-
-            <div className="admin-dashboard-summary-card">
-              <div>판매중 상품 수</div>
-              <strong>
-                {formatNumber(monthlySummary.sellingProductCount)}개
-              </strong>
-            </div>
-          </div>
-
-          {/* 2행 */}
-          <div className="admin-dashboard-card-row admin-dashboard-card-row-5">
-            <div className="admin-dashboard-summary-card">
-              오늘 주문 {todaySummary.todayOrderCount}
-            </div>
-            <div className="admin-dashboard-summary-card">
-              오늘 매출 {formatPrice(todaySummary.todaySales)}
-            </div>
-            <div className="admin-dashboard-summary-card">
-              신규 회원 {todaySummary.newMemberCount}
-            </div>
-            <div className="admin-dashboard-summary-card">
-              재고 부족 {todaySummary.lowStockCount}
-            </div>
-            <div className="admin-dashboard-summary-card">
-              환불 요청 {todaySummary.refundRequestCount}
-            </div>
-          </div>
-
-          {/* 최근 주문 */}
-          <div className="admin-dashboard-panel">
-            <div className="admin-dashboard-panel-header">
-              <h3>최근 주문 (5건)</h3>
-              <button onClick={moveToOrderList}>더보기</button>
-            </div>
-
-            <table className="admin-dashboard-table">
-              <thead>
-                <tr>
-                  <th>주문번호</th>
-                  <th>주문자</th>
-                  <th>상태</th>
-                  <th>금액</th>
-                  <th>주문일</th>
-                  <th>상세</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentOrders.map((o) => (
-                  <tr key={o.orderNo}>
-                    <td>{o.orderNo}</td>
-                    <td>{o.ordererName}</td>
-                    <td>{o.orderStatus}</td>
-                    <td>{formatPrice(o.totalPrice)}</td>
-                    <td>{o.orderDate}</td>
-                    <td>
-                      <button onClick={() => moveToOrderDetail(o.orderNo)}>
-                        상세보기
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* 재고 부족 */}
-          <div className="admin-dashboard-panel">
-            <div className="admin-dashboard-panel-header">
-              <h3>재고 부족 상품 (5개)</h3>
-              <button onClick={moveToProductList}>더보기</button>
-            </div>
-
-            <table className="admin-dashboard-table">
-              <thead>
-                <tr>
-                  <th>상품명</th>
-                  <th>옵션</th>
-                  <th>재고</th>
-                  <th>상태</th>
-                  <th>상세</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lowStockProducts.map((p) => (
-                  <tr key={p.productNo}>
-                    <td>{p.productName}</td>
-                    <td>{p.optionText}</td>
-                    <td>{p.stock}</td>
-                    <td>{p.stockStatus}</td>
-                    <td>
-                      <button onClick={() => moveToProductDetail(p.productNo)}>
-                        상세보기
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <p className="admin-dashboard-message">
+            대시보드 데이터를 불러오는 중입니다...
+          </p>
         </div>
       </AdminLayout>
-    </>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout pageTitle="대시보드">
+        <div className="admin-dashboard-page">
+          <div className="admin-dashboard-header">
+            <h2 className="admin-dashboard-title">대시보드</h2>
+          </div>
+          <p className="admin-dashboard-error">{error}</p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  return (
+    <AdminLayout pageTitle="대시보드">
+      <div className="admin-dashboard-page">
+        <div className="admin-dashboard-header">
+          <h2 className="admin-dashboard-title">대시보드</h2>
+        </div>
+
+        {/* 1. 상단 요약 */}
+        <section className="admin-dashboard-section">
+          <h3 className="admin-dashboard-section-title">상단 요약</h3>
+
+          <div className="admin-dashboard-card-grid">
+            {summaryCards.map(([label, value]) => (
+              <div className="admin-dashboard-card" key={label}>
+                <p className="admin-dashboard-card-label">{label}</p>
+                <p className="admin-dashboard-card-value">{value}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 2. 오늘 현황 */}
+        <section className="admin-dashboard-section">
+          <h3 className="admin-dashboard-section-title">오늘 현황</h3>
+
+          <div className="admin-dashboard-card-grid">
+            {todayCards.map(([label, value]) => (
+              <div className="admin-dashboard-card" key={label}>
+                <p className="admin-dashboard-card-label">{label}</p>
+                <p className="admin-dashboard-card-value">{value}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 3. 최근 주문 / 재고 부족 */}
+        <div className="admin-dashboard-grid-row">
+          <section className="admin-dashboard-panel">
+            <div className="admin-dashboard-panel-header">
+              <h3 className="admin-dashboard-panel-title">최근 주문 5건</h3>
+              <button
+                type="button"
+                className="admin-dashboard-more-btn"
+                onClick={moveToOrderList}
+              >
+                더보기
+              </button>
+            </div>
+
+            <div className="admin-dashboard-table-wrap">
+              <table className="admin-dashboard-table">
+                <thead>
+                  <tr>
+                    <th>주문번호</th>
+                    <th>주문자</th>
+                    <th>주문상태</th>
+                    <th>총금액</th>
+                    <th>주문일시</th>
+                    <th>상세</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dashboard.recentOrderList.length > 0 ? (
+                    dashboard.recentOrderList.map((order) => (
+                      <tr key={order.orderNo}>
+                        <td>{order.orderNo}</td>
+                        <td>{order.ordererName}</td>
+                        <td>{order.orderStatus}</td>
+                        <td>{formatPrice(order.totalPrice)}</td>
+                        <td>{formatDateTime(order.createdAt)}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="admin-dashboard-action-btn"
+                            onClick={() => moveToOrderDetail(order.orderNo)}
+                          >
+                            상세보기
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="admin-dashboard-empty">
+                        최근 주문 내역이 없습니다.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="admin-dashboard-panel">
+            <div className="admin-dashboard-panel-header">
+              <h3 className="admin-dashboard-panel-title">재고 부족 상품</h3>
+              <button
+                type="button"
+                className="admin-dashboard-more-btn"
+                onClick={moveToProductList}
+              >
+                더보기
+              </button>
+            </div>
+
+            <div className="admin-dashboard-table-wrap">
+              <table className="admin-dashboard-table">
+                <thead>
+                  <tr>
+                    <th>상품번호</th>
+                    <th>상품명</th>
+                    <th>옵션</th>
+                    <th>재고</th>
+                    <th>상태</th>
+                    <th>상세</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dashboard.lowStockProductList.length > 0 ? (
+                    dashboard.lowStockProductList.map((product) => (
+                      <tr key={product.productOptionNo}>
+                        <td>{product.productNo}</td>
+                        <td>{product.productName}</td>
+                        <td>
+                          {product.optionColor || "-"} /{" "}
+                          {product.optionSize || "-"}
+                        </td>
+                        <td>{product.stock}</td>
+                        <td>
+                          <span className={getStockBadgeClass(product.stock)}>
+                            {product.stockStatus ||
+                              getStockStatusText(product.stock)}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className="admin-dashboard-action-btn"
+                            onClick={() =>
+                              moveToProductDetail(product.productNo)
+                            }
+                          >
+                            상세보기
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="admin-dashboard-empty">
+                        재고 부족 상품이 없습니다.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        {/* 4. 최근 7일 매출 / 인기상품 TOP 5 */}
+        <div className="admin-dashboard-grid-row">
+          <section className="admin-dashboard-panel admin-dashboard-chart-panel">
+            <div className="admin-dashboard-panel-header">
+              <h3 className="admin-dashboard-panel-title">최근 7일 매출</h3>
+            </div>
+
+            <div className="admin-dashboard-chart-box">
+              {dashboard.salesChartList.length > 0 ? (
+                dashboard.salesChartList.map((item) => (
+                  <div className="admin-dashboard-chart-item" key={item.label}>
+                    <div className="admin-dashboard-chart-value">
+                      {formatPrice(item.sales)}
+                    </div>
+
+                    <div className="admin-dashboard-chart-bar-wrap">
+                      <div
+                        className="admin-dashboard-chart-bar"
+                        style={{
+                          height: getChartBarHeight(item.sales, maxChartSales),
+                        }}
+                      ></div>
+                    </div>
+
+                    <div className="admin-dashboard-chart-label">
+                      {item.label}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="admin-dashboard-empty">
+                  최근 7일 매출 데이터가 없습니다.
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="admin-dashboard-panel">
+            <div className="admin-dashboard-panel-header">
+              <h3 className="admin-dashboard-panel-title">인기상품 TOP 5</h3>
+              <button
+                type="button"
+                className="admin-dashboard-more-btn"
+                onClick={moveToProductList}
+              >
+                더보기
+              </button>
+            </div>
+
+            <div className="admin-dashboard-top-list">
+              {dashboard.topProductList.length > 0 ? (
+                dashboard.topProductList.map((product, index) => (
+                  <div
+                    className="admin-dashboard-top-item"
+                    key={product.productNo}
+                  >
+                    <div className="admin-dashboard-top-rank">{index + 1}</div>
+
+                    <div className="admin-dashboard-top-name">
+                      {product.name}
+                    </div>
+
+                    <div className="admin-dashboard-top-sales">
+                      {formatNumber(product.totalSalesCount)}개 판매
+                    </div>
+
+                    <button
+                      type="button"
+                      className="admin-dashboard-action-btn"
+                      onClick={() => moveToProductDetail(product.productNo)}
+                    >
+                      상세보기
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="admin-dashboard-empty">
+                  인기상품 데이터가 없습니다.
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+    </AdminLayout>
   );
 };
 
