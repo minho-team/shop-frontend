@@ -373,6 +373,60 @@
   cursor: not-allowed;
 }
 
+/* 정렬 헤더 */
+.th-sort-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.th-sort-button:hover {
+  background-color: #f8f8f8;
+}
+
+.th-sort-button.active:hover {
+  background-color: #fff3e0;
+}
+
+.sort-text {
+  color: #222;
+  font-weight: 700;
+}
+
+.sort-text.active {
+  color: #ff6b00;
+}
+
+.sort-arrow-icon {
+  font-size: 11px;
+  line-height: 1;
+  color: #999;
+  position: relative;
+  top: 1px;
+}
+
+.sort-arrow-icon.active {
+  color: #ff6b00;
+}
+
+.sort-arrow-btn:hover {
+  color: #ff6b00;
+  background-color: #f5f5f5;
+}
+
+.sort-arrow-btn.active {
+  color: #222;
+}
+
 /* 반응형 */
 @media (max-width: 1024px) {
   .admin-product-list-search input[type="text"] {

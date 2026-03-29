@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import "../../css/admin/AdminProductListPage.css";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
 
-
 // 카테고리 데이터
 const genderCategories = [
   { categoryId: 1, name: "남성" },
@@ -89,6 +88,8 @@ const AdminProductListPage = () => {
     categoryId: "",
     useYn: "",
     sameDayDeliveryYn: "",
+    sortBy: "createdAt",
+    sortDirection: "desc",
   });
 
   // 상품 목록 상태
@@ -192,6 +193,28 @@ const AdminProductListPage = () => {
     return d.toLocaleDateString("ko-KR");
   };
 
+  // 정렬 클릭 함수
+  const handleSort = (column) => {
+    setSearch((prev) => {
+      // 같은 컬럼이면 방향 토글
+      if (prev.sortBy === column) {
+        return {
+          ...prev,
+          sortDirection: prev.sortDirection === "asc" ? "desc" : "asc",
+          page: 1,
+        };
+      }
+
+      // 다른 컬럼이면 DESC로 시작
+      return {
+        ...prev,
+        sortBy: column,
+        sortDirection: "desc",
+        page: 1,
+      };
+    });
+  };
+
   return (
     <>
       <AdminLayout pageTitle="상품 관리">
@@ -292,15 +315,222 @@ const AdminProductListPage = () => {
                     <tr>
                       <th>썸네일</th>
                       <th>상품번호</th>
-                      <th>상품명</th>
+
+                      <th>
+                        <button
+                          type="button"
+                          className={
+                            search.sortBy === "name"
+                              ? "th-sort-button active"
+                              : "th-sort-button"
+                          }
+                          onClick={() => handleSort("name")}
+                        >
+                          <span
+                            className={
+                              search.sortBy === "name"
+                                ? "sort-text active"
+                                : "sort-text"
+                            }
+                          >
+                            상품명
+                          </span>
+                          <span
+                            className={
+                              search.sortBy === "name"
+                                ? "sort-arrow-icon active"
+                                : "sort-arrow-icon"
+                            }
+                          >
+                            {search.sortBy === "name"
+                              ? search.sortDirection === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "▲"}
+                          </span>
+                        </button>
+                      </th>
+
                       <th>카테고리</th>
-                      <th>정가</th>
-                      <th>할인율</th>
-                      <th>판매가</th>
+
+                      <th>
+                        <button
+                          type="button"
+                          className={
+                            search.sortBy === "price"
+                              ? "th-sort-button active"
+                              : "th-sort-button"
+                          }
+                          onClick={() => handleSort("price")}
+                        >
+                          <span
+                            className={
+                              search.sortBy === "price"
+                                ? "sort-text active"
+                                : "sort-text"
+                            }
+                          >
+                            정가
+                          </span>
+                          <span
+                            className={
+                              search.sortBy === "price"
+                                ? "sort-arrow-icon active"
+                                : "sort-arrow-icon"
+                            }
+                          >
+                            {search.sortBy === "price"
+                              ? search.sortDirection === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "▲"}
+                          </span>
+                        </button>
+                      </th>
+
+                      <th>
+                        <button
+                          type="button"
+                          className={
+                            search.sortBy === "discountRate"
+                              ? "th-sort-button active"
+                              : "th-sort-button"
+                          }
+                          onClick={() => handleSort("discountRate")}
+                        >
+                          <span
+                            className={
+                              search.sortBy === "discountRate"
+                                ? "sort-text active"
+                                : "sort-text"
+                            }
+                          >
+                            할인율
+                          </span>
+                          <span
+                            className={
+                              search.sortBy === "discountRate"
+                                ? "sort-arrow-icon active"
+                                : "sort-arrow-icon"
+                            }
+                          >
+                            {search.sortBy === "discountRate"
+                              ? search.sortDirection === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "▲"}
+                          </span>
+                        </button>
+                      </th>
+
+                      <th>
+                        <button
+                          type="button"
+                          className={
+                            search.sortBy === "salePrice"
+                              ? "th-sort-button active"
+                              : "th-sort-button"
+                          }
+                          onClick={() => handleSort("salePrice")}
+                        >
+                          <span
+                            className={
+                              search.sortBy === "salePrice"
+                                ? "sort-text active"
+                                : "sort-text"
+                            }
+                          >
+                            판매가
+                          </span>
+                          <span
+                            className={
+                              search.sortBy === "salePrice"
+                                ? "sort-arrow-icon active"
+                                : "sort-arrow-icon"
+                            }
+                          >
+                            {search.sortBy === "salePrice"
+                              ? search.sortDirection === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "▲"}
+                          </span>
+                        </button>
+                      </th>
+
                       <th>판매여부</th>
-                      <th>조회수</th>
+
+                      <th>
+                        <button
+                          type="button"
+                          className={
+                            search.sortBy === "viewCount"
+                              ? "th-sort-button active"
+                              : "th-sort-button"
+                          }
+                          onClick={() => handleSort("viewCount")}
+                        >
+                          <span
+                            className={
+                              search.sortBy === "viewCount"
+                                ? "sort-text active"
+                                : "sort-text"
+                            }
+                          >
+                            조회수
+                          </span>
+                          <span
+                            className={
+                              search.sortBy === "viewCount"
+                                ? "sort-arrow-icon active"
+                                : "sort-arrow-icon"
+                            }
+                          >
+                            {search.sortBy === "viewCount"
+                              ? search.sortDirection === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "▲"}
+                          </span>
+                        </button>
+                      </th>
+
                       <th>당일배송</th>
-                      <th>등록일</th>
+
+                      <th>
+                        <button
+                          type="button"
+                          className={
+                            search.sortBy === "createdAt"
+                              ? "th-sort-button active"
+                              : "th-sort-button"
+                          }
+                          onClick={() => handleSort("createdAt")}
+                        >
+                          <span
+                            className={
+                              search.sortBy === "createdAt"
+                                ? "sort-text active"
+                                : "sort-text"
+                            }
+                          >
+                            등록일
+                          </span>
+                          <span
+                            className={
+                              search.sortBy === "createdAt"
+                                ? "sort-arrow-icon active"
+                                : "sort-arrow-icon"
+                            }
+                          >
+                            {search.sortBy === "createdAt"
+                              ? search.sortDirection === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "▲"}
+                          </span>
+                        </button>
+                      </th>
                     </tr>
                   </thead>
 
