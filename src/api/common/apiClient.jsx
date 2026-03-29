@@ -1,6 +1,7 @@
 import axios from "axios";
 
-export const API_SERVER_HOST = "https://15.164.146.60:8080";
+//api 도메인 서버 주소
+export const API_SERVER_HOST = "https://api.khshop.best";
 //export const API_SERVER_HOST = "http://localhost:8080";
 
 const apiClient = axios.create({
