@@ -1,7 +1,9 @@
 import axios from "axios";
 
-//api 도메인 서버 주소
+//클라우드 스프링 서버 주소
 export const API_SERVER_HOST = "https://api.khshop.best";
+
+//각자 로컬 스프링 서버 주소
 //export const API_SERVER_HOST = "http://localhost:8080";
 
 const apiClient = axios.create({
