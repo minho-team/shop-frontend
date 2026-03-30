@@ -45,7 +45,6 @@ const RegisterPage = () => {
     try {
       const data = await register(input);
       console.log(data);
-      localStorage.removeItem("roulette_last_spun");
       nav("/");
     } catch (err) {
       console.log(err);
