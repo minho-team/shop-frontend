@@ -133,16 +133,41 @@ const OrderWritePage = () => {
     }
   };
 
-  const toOrderItem = (item, isCartItem = false) => ({
-    cartItemNo: isCartItem ? item.cartItemNo : null,
-    productOptionNo: item.productOptionNo,
-    itemName: item.productName,
-    itemColor: isCartItem ? item.color : item.optionColor,
-    itemSize: isCartItem ? item.sizeName : item.optionSize,
-    quantity: item.quantity,
-    unitPrice: isCartItem ? item.price : item.productPrice,
-    imageUrl: item.imageUrl,
-  });
+  const getOriginalUnitPrice = (item, isCartItem = false) => {
+    if (isCartItem) {
+      return Number(item.price ?? 0);
+    }
+
+    return Number(item.originalPrice ?? item.price ?? item.productPrice ?? 0);
+  };
+
+  const getSaleUnitPrice = (item, isCartItem = false) => {
+    if (isCartItem) {
+      return Number(item.salePrice ?? item.price ?? 0);
+    }
+
+    return Number(item.salePrice ?? item.productPrice ?? item.price ?? 0);
+  };
+
+  const getDiscountRate = (item) => Number(item.discountRate ?? 0);
+
+  const toOrderItem = (item, isCartItem = false) => {
+    const originalUnitPrice = getOriginalUnitPrice(item, isCartItem);
+    const saleUnitPrice = getSaleUnitPrice(item, isCartItem);
+
+    return {
+      cartItemNo: isCartItem ? item.cartItemNo : null,
+      productOptionNo: item.productOptionNo,
+      itemName: item.productName,
+      itemColor: isCartItem ? item.color : item.optionColor,
+      itemSize: isCartItem ? item.sizeName : item.optionSize,
+      quantity: Number(item.quantity ?? 0),
+      originalUnitPrice,
+      unitPrice: saleUnitPrice,
+      discountRate: getDiscountRate(item),
+      imageUrl: item.imageUrl,
+    };
+  };
 
   const orderItems = useMemo(() => {
     if (!orderData) return [];
@@ -241,6 +266,28 @@ const OrderWritePage = () => {
     }).open();
   };
 
+  const totalOriginalPrice = useMemo(() => {
+    return orderItems.reduce((sum, item) => {
+      return (
+        sum +
+        Number(item.originalUnitPrice ?? item.unitPrice ?? 0) *
+          Number(item.quantity ?? 0)
+      );
+    }, 0);
+  }, [orderItems]);
+
+  const totalProductDiscountAmount = useMemo(() => {
+    return orderItems.reduce((sum, item) => {
+      const originalUnitPrice = Number(
+        item.originalUnitPrice ?? item.unitPrice ?? 0,
+      );
+      const saleUnitPrice = Number(item.unitPrice ?? 0);
+      const quantity = Number(item.quantity ?? 0);
+
+      return sum + Math.max(0, originalUnitPrice - saleUnitPrice) * quantity;
+    }, 0);
+  }, [orderItems]);
+
   const totalPrice = useMemo(() => {
     return orderItems.reduce((sum, item) => {
       return sum + Number(item.unitPrice ?? 0) * Number(item.quantity ?? 0);
@@ -276,6 +323,7 @@ const OrderWritePage = () => {
       cartItemNo: item.cartItemNo ?? null,
       productOptionNo: item.productOptionNo,
       quantity: item.quantity,
+      originalUnitPrice: item.originalUnitPrice,
       unitPrice: item.unitPrice,
       itemName: item.itemName,
       itemSize: item.itemSize,
@@ -360,6 +408,16 @@ const OrderWritePage = () => {
 
       // 1. 서버에 주문/결제 준비 요청
       const prepared = await preparePayment(orderRequest);
+
+      sessionStorage.setItem(
+        `orderSummary:${prepared.orderNo}`,
+        JSON.stringify({
+          totalOriginalPrice,
+          totalProductDiscountAmount,
+          couponDiscountAmount: discountAmount,
+          finalPrice,
+        }),
+      );
 
       // 장바구니에서 온 주문이면 orderId 기준으로 cartItemNo 저장
       if (orderSource === "cart" && orderedCartItemNos.length > 0) {
@@ -459,9 +517,21 @@ const OrderWritePage = () => {
 
                 <div className="order-item-list">
                   {orderItems.map((item, index) => {
+                    const originalUnitPrice = Number(
+                      item.originalUnitPrice ?? item.unitPrice ?? 0,
+                    );
+                    const saleUnitPrice = Number(item.unitPrice ?? 0);
                     const itemTotalPrice =
-                      Number(item.unitPrice ?? 0) * Number(item.quantity ?? 0);
-
+                      saleUnitPrice * Number(item.quantity ?? 0);
+                    const itemOriginalTotalPrice =
+                      originalUnitPrice * Number(item.quantity ?? 0);
+                    const itemDiscountAmount = Math.max(
+                      0,
+                      itemOriginalTotalPrice - itemTotalPrice,
+                    );
+                    const isSale =
+                      Number(item.discountRate ?? 0) > 0 &&
+                      saleUnitPrice < originalUnitPrice;
                     return (
                       <div
                         className="order-item-card"
@@ -498,11 +568,38 @@ const OrderWritePage = () => {
                         </div>
 
                         <div className="order-item-price-box">
-                          <p className="unit-price">
-                            {Number(item.unitPrice).toLocaleString()}원
-                          </p>
+                          {isSale && (
+                            <>
+                              <p className="order-item-original-price">
+                                {originalUnitPrice.toLocaleString()}원
+                              </p>
+                              <p className="order-item-sale-line">
+                                <span className="order-item-discount-rate">
+                                  {item.discountRate}% OFF
+                                </span>
+                                <strong className="unit-price">
+                                  {saleUnitPrice.toLocaleString()}원
+                                </strong>
+                              </p>
+                            </>
+                          )}
+
+                          {!isSale && (
+                            <p className="order-item-sale-line">
+                              <strong className="unit-price">
+                                {saleUnitPrice.toLocaleString()}원
+                              </strong>
+                            </p>
+                          )}
+
+                          {itemDiscountAmount > 0 && (
+                            <p className="order-item-discount-amount">
+                              상품 할인 -{itemDiscountAmount.toLocaleString()}원
+                            </p>
+                          )}
+
                           <p className="total-price">
-                            {itemTotalPrice.toLocaleString()}원
+                            합계 {itemTotalPrice.toLocaleString()}원
                           </p>
                         </div>
                       </div>
@@ -754,9 +851,18 @@ const OrderWritePage = () => {
 
                 <div className="summary-detail">
                   <div className="summary-row">
-                    <span>구매상품</span>
-                    <strong>{totalPrice.toLocaleString()}원</strong>
+                    <span>상품 금액</span>
+                    <strong>{totalOriginalPrice.toLocaleString()}원</strong>
                   </div>
+
+                  {totalProductDiscountAmount > 0 && (
+                    <div className="summary-row">
+                      <span>상품 할인</span>
+                      <strong style={{ color: "#c62828" }}>
+                        -{totalProductDiscountAmount.toLocaleString()}원
+                      </strong>
+                    </div>
+                  )}
 
                   <div className="summary-row">
                     <span>배송비</span>
@@ -783,8 +889,8 @@ const OrderWritePage = () => {
                 <div
                   style={{
                     marginBottom: "16px",
-                    marginLeft :"25px",
-                    marginRight :"25px",
+                    marginLeft: "25px",
+                    marginRight: "25px",
                     padding: "12px 14px",
                     backgroundColor: "#f3f3f3",
                     borderRadius: "8px",
@@ -793,7 +899,8 @@ const OrderWritePage = () => {
                     lineHeight: "1.6",
                   }}
                 >
-                  실제 결제가 되지 않는 테스트 결제입니다.<br/>
+                  실제 결제가 되지 않는 테스트 결제입니다.
+                  <br />
                   배송도 이루어지지 않습니다.
                 </div>
 
