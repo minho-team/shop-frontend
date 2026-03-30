@@ -23,6 +23,13 @@ export const getOrderDetail = async (orderNo) => {
   return res.data;
 };
 
+// 결제 대기시
+// 주문 취소 API 호출 함수
+export const cancelOrder = async (orderNo) => {
+  const response = await apiClient.put(`/api/orders/${orderNo}/cancel`);
+  return response.data;
+};
+
 
 //결제 준비
 export const preparePayment = async (orderRequest) => {
