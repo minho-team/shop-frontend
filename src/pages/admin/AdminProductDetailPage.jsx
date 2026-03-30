@@ -1,5 +1,5 @@
 import AdminLayout from "../../components/admin/AdminLayout";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -37,6 +37,7 @@ const AdminProductDetailPage = () => {
 
   const { productNo } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // =========================
   // 1. 기본정보 상태
@@ -122,7 +123,7 @@ const AdminProductDetailPage = () => {
         viewCount: data?.viewCount || 0,
         createdAt: data?.createdAt || "",
         updatedAt: data?.updatedAt || "",
-        description: data.description || "",
+        description: data?.description || "",
       });
     } catch (error) {
       console.error("기본정보 조회 실패:", error);
@@ -575,6 +576,18 @@ const AdminProductDetailPage = () => {
       await deleteAdminProduct(productNo);
 
       alert("상품이 삭제되었습니다.");
+
+      const fromList = location.state?.fromList;
+
+      if (fromList?.searchState) {
+        navigate("/admin/products", {
+          state: {
+            restoredSearch: fromList.searchState,
+          },
+        });
+        return;
+      }
+
       navigate("/admin/products");
     } catch (error) {
       console.error("상품 삭제 실패:", error);
@@ -586,6 +599,17 @@ const AdminProductDetailPage = () => {
   // 27. 상품 목록 페이지 이동
   // =========================
   const handleMoveToList = () => {
+    const fromList = location.state?.fromList;
+
+    if (fromList?.searchState) {
+      navigate("/admin/products", {
+        state: {
+          restoredSearch: fromList.searchState,
+        },
+      });
+      return;
+    }
+
     navigate("/admin/products");
   };
 

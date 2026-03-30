@@ -1,7 +1,7 @@
 import AdminLayout from "../../components/admin/AdminLayout";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAdminProductList } from "../../api/admin/adminProductApi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../../css/admin/AdminProductListPage.css";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
 
@@ -77,29 +77,43 @@ const subCategories = {
   ],
 };
 
-const AdminProductListPage = () => {
-  // 검색 조건 상태
-  const [search, setSearch] = useState({
-    page: 1,
-    size: 10,
-    keyword: "",
-    genderCategoryId: "",
-    mainCategoryId: "",
-    categoryId: "",
-    useYn: "",
-    sameDayDeliveryYn: "",
-    sortBy: "createdAt",
-    sortDirection: "desc",
-  });
+const defaultSearch = {
+  page: 1,
+  size: 10,
+  keyword: "",
+  genderCategoryId: "",
+  mainCategoryId: "",
+  categoryId: "",
+  useYn: "",
+  sameDayDeliveryYn: "",
+  sortBy: "createdAt",
+  sortDirection: "desc",
+};
 
-  // 상품 목록 상태
+const AdminProductListPage = () => {
+  const [search, setSearch] = useState(defaultSearch);
   const [productList, setProductList] = useState([]);
-  // 전체 개수 상태
   const [totalCount, setTotalCount] = useState(0);
-  // 로딩 상태
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const restoredOnceRef = useRef(false);
+
+  // 상세에서 돌아온 검색조건 복원
+  useEffect(() => {
+    const restoredSearch = location.state?.restoredSearch;
+
+    if (restoredSearch && !restoredOnceRef.current) {
+      restoredOnceRef.current = true;
+      setSearch(restoredSearch);
+
+      navigate(location.pathname, {
+        replace: true,
+        state: null,
+      });
+    }
+  }, [location, navigate]);
 
   // 목록 조회 함수
   const fetchProductList = async () => {
@@ -149,26 +163,9 @@ const AdminProductListPage = () => {
     });
   };
 
-  // 검색 버튼 클릭 핸들러
-  const handleSearch = () => {
-    setSearch((prev) => ({
-      ...prev,
-      page: 1,
-    }));
-  };
-
   // 초기화 버튼 클릭 핸들러
   const handleReset = () => {
-    setSearch({
-      page: 1,
-      size: 10,
-      keyword: "",
-      genderCategoryId: "",
-      mainCategoryId: "",
-      categoryId: "",
-      useYn: "",
-      sameDayDeliveryYn: "",
-    });
+    setSearch(defaultSearch);
   };
 
   // 페이지 변경 핸들러
@@ -177,6 +174,17 @@ const AdminProductListPage = () => {
       ...prev,
       page: pageNum,
     }));
+  };
+
+  // 상세 페이지 이동
+  const handleMoveToDetail = (productNo) => {
+    navigate(`/admin/products/detail/${productNo}`, {
+      state: {
+        fromList: {
+          searchState: search,
+        },
+      },
+    });
   };
 
   // 전체 페이지 수 계산
@@ -553,9 +561,7 @@ const AdminProductListPage = () => {
                           <tr
                             key={product.productNo}
                             onClick={() =>
-                              navigate(
-                                `/admin/products/detail/${product.productNo}`,
-                              )
+                              handleMoveToDetail(product.productNo)
                             }
                           >
                             <td>
