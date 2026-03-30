@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getOrderDetail } from '../../api/user/ordersApi';
+import { getOrderDetail, cancelOrder } from '../../api/user/ordersApi';
 import apiClient, { API_SERVER_HOST } from '../../api/common/apiClient';
 import Header from '../../components/user/Header';
 import Footer from '../../components/user/Footer';
@@ -30,33 +30,6 @@ const canWriteReview = (status) => {
     return status === 'PAYMENT_COMPLETED' || status === 'DELIVERED';
 };
 
-const buttonBaseStyle = {
-    display: 'block',
-    width: '100%',
-    padding: '10px 14px',
-    marginBottom: '10px',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontWeight: '500',
-    boxSizing: 'border-box'
-};
-
-const activeButtonStyle = {
-    ...buttonBaseStyle,
-    backgroundColor: '#111',
-    color: '#fff',
-    border: 'none',
-    cursor: 'pointer'
-};
-
-const disabledButtonStyle = {
-    ...buttonBaseStyle,
-    backgroundColor: '#eee',
-    color: '#999',
-    border: '1px solid #ddd',
-    cursor: 'default'
-};
-
 const MyOrderDetailPage = () => {
     const { orderNo } = useParams();
     const navigate = useNavigate();
@@ -74,9 +47,6 @@ const MyOrderDetailPage = () => {
         const fetchDetail = async () => {
             try {
                 const data = await getOrderDetail(orderNo);
-                console.log("주문 상세 데이터 응답:", data);
-                console.log("주문 상품 목록:", data.items);
-
                 setOrderData(data);
 
                 if (data.items) {
@@ -89,7 +59,7 @@ const MyOrderDetailPage = () => {
                                     const res = await apiClient.get(`/api/reviews/check/${item.orderItemNo}`);
                                     reviewStatus[item.orderItemNo] = res.data;
                                 } catch (e) {
-                                    console.error(`리뷰 상태 확인 실패 (No: ${item.orderItemNo}):`, e);
+                                    console.error(`리뷰 상태 확인 실패:`, e);
                                 }
                             }
                         })
@@ -143,127 +113,127 @@ const MyOrderDetailPage = () => {
         });
     };
 
+    const handleCancelOrder = async (orderNo) => {
+        if (!window.confirm("정말 주문을 취소하시겠습니까? 결제 전 주문은 즉시 취소됩니다.")) {
+            return;
+        }
+        try {
+            await cancelOrder(orderNo);
+            alert("주문이 성공적으로 취소되었습니다.");
+            window.location.reload();
+        } catch (err) {
+            console.error("주문 취소 실패:", err);
+            alert(err.response?.data?.message || err.response?.data || "주문 취소 중 오류가 발생했습니다.");
+        }
+    };
+
     if (loading) return <div className="loading-container">정보 로딩 중...</div>;
     if (!orderData || !orderData.order) return <div className="empty-content">주문 내역이 없습니다.</div>;
 
     const orderInfo = orderData.order;
-    const itemCount = orderData.items ? orderData.items.length : 0;
+    const items = orderData.items || [];
+
+    // 금액 계산 로직
+    const totalItemPrice = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+    const couponDiscount = totalItemPrice - orderInfo.totalPrice;
 
     return (
         <div className="mypage-container">
             <Header />
             <div className="mypage-wrapper">
-                <main className="content-area" style={{ paddingTop: '50px' }}>
+                <main className="content-area">
                     <header className="detail-header">
-                        <h3 className="content-title" style={{ margin: 0 }}>주문 상세 정보</h3>
+                        <h3 className="content-title">주문 상세 정보</h3>
                         <button className="btn-back-list" onClick={() => navigate(-1)}>목록으로</button>
                     </header>
 
+                    {/* 주문 요약 정보 */}
                     <div className="order-summary-box">
                         <div className="summary-item"><span>주문번호</span> <strong>{orderInfo.orderNo}</strong></div>
                         <div className="summary-item"><span>주문일자</span> <strong>{new Date(orderInfo.createdAt).toLocaleDateString()}</strong></div>
-                        <div className="summary-item"><span>주문 상품 개수</span> <strong>{itemCount}개</strong></div>
+                        <div className="summary-item"><span>주문 상품 개수</span> <strong>{items.length}개</strong></div>
                         <div className="summary-item"><span>결제 금액</span> <strong>{Number(orderInfo.totalPrice).toLocaleString()}원</strong></div>
                     </div>
 
-                    <div
-                        className="order-items-detail-section"
-                        style={{ marginTop: '50px', borderTop: '2px solid #333', paddingTop: '30px' }}
-                    >
-                        <h4 className="section-title" style={{ fontSize: '1.2rem', marginBottom: '20px' }}>
-                            주문 상품 상세 내역
-                        </h4>
+                    {/* 결제 및 환불 내역 상세 박스 */}
+                    <div className="payment-detail-box">
+                        <h4 className="section-title-small">결제 및 환불 내역 상세</h4>
+                        <div className="payment-info-content">
+                            <div className="info-row">
+                                <span>주문 상품 총액</span>
+                                <span>₩{totalItemPrice.toLocaleString()}</span>
+                            </div>
+                            <div className="info-row discount">
+                                <span>쿠폰 할인 금액</span>
+                                <span className="price-red">- ₩{couponDiscount.toLocaleString()}</span>
+                            </div>
+                            <div className="info-row total-highlight">
+                                <span>{orderInfo.orderStatus.includes('REFUND') ? '최종 환불 예정 금액' : '실제 결제 금액'}</span>
+                                <strong>₩{orderInfo.totalPrice.toLocaleString()}</strong>
+                            </div>
+                        </div>
+                    </div>
 
-                        {orderData.items && orderData.items.map((item) => (
-                            <div
-                                key={item.orderItemNo}
-                                className="item-detail-card"
-                                style={{
-                                    display: 'flex',
-                                    padding: '20px',
-                                    border: '1px solid #eee',
-                                    borderRadius: '8px',
-                                    marginBottom: '15px',
-                                    alignItems: 'center'
-                                }}
-                            >
-                                <img
-                                    src={getImageUrl(item.imageUrl)}
-                                    alt={item.itemName}
-                                    style={{
-                                        width: '100px',
-                                        height: '100px',
-                                        objectFit: 'cover',
-                                        borderRadius: '4px',
-                                        marginRight: '25px'
-                                    }}
-                                />
+                    {/* 주문 상품 상세 내역 */}
+                    <div className="order-items-detail-section">
+                        <h4 className="section-title">주문 상품 상세 내역</h4>
 
-                                <div className="item-info-text" style={{ flex: 1 }}>
-                                    <h5 style={{ margin: '0 0 10px 0', fontSize: '1.1rem' }}>{item.itemName}</h5>
-                                    <p style={{ margin: '5px 0', color: '#666' }}>
-                                        옵션: {item.itemColor} / {item.itemSize}
-                                    </p>
-                                    <p style={{ margin: '5px 0' }}>
-                                        수량: <strong>{item.quantity}</strong>개
-                                    </p>
-                                    <p style={{ margin: '5px 0' }}>
-                                        상태: <strong>{getStatusLabel(item.orderItemStatus)}</strong>
-                                    </p>
+                        {items.map((item) => (
+                            <div key={item.orderItemNo} className="item-detail-card">
+                                <img src={getImageUrl(item.imageUrl)} alt={item.itemName} />
+
+                                <div className="item-info-text">
+                                    <h5>{item.itemName}</h5>
+                                    <p className="item-option">옵션: {item.itemColor} / {item.itemSize}</p>
+                                    <p className="item-quantity">수량: <strong>{item.quantity}</strong>개</p>
+                                    <p className="item-status">상태: <strong>{getStatusLabel(item.orderItemStatus)}</strong></p>
                                 </div>
 
-                                <div className="item-action-area" style={{ textAlign: 'right' }}>
-                                    <p
-                                        style={{
-                                            margin: '0 0 10px 0',
-                                            fontSize: '1.2rem',
-                                            fontWeight: 'bold',
-                                            color: '#d9534f'
-                                        }}
-                                    >
+                                <div className="item-action-area">
+                                    <p className="item-total-price">
                                         ₩{(item.unitPrice * item.quantity).toLocaleString()}
                                     </p>
 
+                                    {/* 1. 결제대기 상태 처리 */}
+                                    {item.orderItemStatus === 'PENDING_PAYMENT' && (
+                                        <div className="pending-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+                                            <button
+                                                onClick={() => navigate('/order/write', {
+                                                    state: {
+                                                        ...orderData,
+                                                        existingOrderNo: orderInfo.orderNo
+                                                    }
+                                                })}
+                                                className="btn-action btn-action-active"
+                                            >
+                                                결제하기
+                                            </button>
+                                            <button
+                                                onClick={() => handleCancelOrder(orderInfo.orderNo)}
+                                                className="btn-action btn-action-danger"
+                                            >
+                                                주문취소
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* 2. 환불 관련 처리 */}
                                     {item.orderItemStatus === 'REFUND_REQUESTED' ? (
-                                        <button
-                                            disabled
-                                            style={disabledButtonStyle}
-                                        >
-                                            환불요청중
-                                        </button>
+                                        <button disabled className="btn-action btn-action-disabled">환불요청중</button>
                                     ) : item.orderItemStatus === 'REFUNDED' ? (
-                                        <button
-                                            disabled
-                                            style={disabledButtonStyle}
-                                        >
-                                            환불완료
-                                        </button>
+                                        <button disabled className="btn-action btn-action-disabled">환불완료</button>
                                     ) : (
                                         canRefund(item.orderItemStatus) && (
-                                            <button
-                                                onClick={() => handleRefundClick(item, orderInfo)}
-                                                style={activeButtonStyle}
-                                            >
-                                                환불하기
-                                            </button>
+                                            <button onClick={() => handleRefundClick(item, orderInfo)} className="btn-action btn-action-active">환불하기</button>
                                         )
                                     )}
 
+                                    {/* 3. 리뷰 관련 처리 */}
                                     {canWriteReview(item.orderItemStatus) && (
                                         reviewedItems[item.orderItemNo] ? (
-                                            <button
-                                                disabled
-                                                style={disabledButtonStyle}
-                                            >
-                                                작성 완료
-                                            </button>
+                                            <button disabled className="btn-action btn-action-disabled">작성 완료</button>
                                         ) : (
-                                            <button
-                                                onClick={() => handleReviewClick(item)}
-                                                style={activeButtonStyle}
-                                            >
-                                                리뷰 작성하기
-                                            </button>
+                                            <button onClick={() => handleReviewClick(item)} className="btn-action btn-action-active">리뷰 작성하기</button>
                                         )
                                     )}
                                 </div>
