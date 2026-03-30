@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../css/user/OrderResultPage.css";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
@@ -33,6 +33,8 @@ const OrderResultPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [orderSummary, setOrderSummary] = useState(null);
+
   const orderResult = location.state;
 
   useEffect(() => {
@@ -42,23 +44,47 @@ const OrderResultPage = () => {
     }
   }, [orderResult, navigate]);
 
-  if (!orderResult) {
-    return null;
-  }
-
   const {
     orderNo,
     totalPrice,
     createdAt,
     ordererName,
     items = [],
-  } = orderResult;
+  } = orderResult ?? {};
 
-  const productPrice = items.reduce((sum, item) => {
+  useEffect(() => {
+    if (!orderNo) return;
+
+    const saved = sessionStorage.getItem(`orderSummary:${orderNo}`);
+    if (!saved) return;
+
+    try {
+      setOrderSummary(JSON.parse(saved));
+    } catch (error) {
+      console.error("주문 요약 불러오기 실패:", error);
+    }
+  }, [orderNo]);
+
+  if (!orderResult) {
+    return null;
+  }
+
+  const saleProductPrice = items.reduce((sum, item) => {
     return sum + Number(item.unitPrice ?? 0) * Number(item.quantity ?? 0);
   }, 0);
 
-  const discountPrice = Math.max(0, productPrice - Number(totalPrice ?? 0));
+  const totalOriginalPrice = Number(
+    orderSummary?.totalOriginalPrice ?? saleProductPrice,
+  );
+
+  const productDiscountPrice = Number(
+    orderSummary?.totalProductDiscountAmount ?? 0,
+  );
+
+  const couponDiscountPrice = Number(
+    orderSummary?.couponDiscountAmount ??
+      Math.max(0, saleProductPrice - Number(totalPrice ?? 0)),
+  );
 
   return (
     <div className="order-result-page">
@@ -120,45 +146,74 @@ const OrderResultPage = () => {
           </div>
 
           <div className="order-item-list">
-            {items.map((item, index) => (
-              <div className="order-item-card" key={index}>
-                <div className="order-item-image-wrap">
-                  {item.imageUrl ? (
-                    <img
-                      src={getImageSrc(item.imageUrl)}
-                      alt={item.itemName}
-                      className="order-item-image"
-                    />
-                  ) : (
-                    <div className="order-item-image no-image">이미지 없음</div>
-                  )}
-                </div>
+            {items.map((item, index) => {
+              const originalUnitPrice = Number(
+                item.originalUnitPrice ?? item.unitPrice ?? 0,
+              );
+              const saleUnitPrice = Number(item.unitPrice ?? 0);
+              const itemTotalPrice = saleUnitPrice * Number(item.quantity ?? 0);
+              const itemOriginalTotalPrice =
+                originalUnitPrice * Number(item.quantity ?? 0);
+              const itemDiscountAmount = Math.max(
+                0,
+                itemOriginalTotalPrice - itemTotalPrice,
+              );
+              const isSale = saleUnitPrice < originalUnitPrice;
 
-                <div className="order-item-info">
-                  <p className="order-item-name">{item.itemName}</p>
-
-                  {item.itemColor || item.itemSize ? (
-                    <p className="order-item-option">
-                      옵션: {item.itemColor || "-"} / {item.itemSize || "-"}
-                    </p>
-                  ) : (
-                    <p className="order-item-option">옵션 없음</p>
-                  )}
-
-                  <p className="order-item-quantity">수량: {item.quantity}개</p>
-                </div>
-
-                <div className="order-item-price-box">
-                  <p className="unit-price">{formatPrice(item.unitPrice)}원</p>
-                  <p className="total-price">
-                    {formatPrice(
-                      Number(item.unitPrice ?? 0) * Number(item.quantity ?? 0),
+              return (
+                <div className="order-item-card" key={index}>
+                  <div className="order-item-image-wrap">
+                    {item.imageUrl ? (
+                      <img
+                        src={getImageSrc(item.imageUrl)}
+                        alt={item.itemName}
+                        className="order-item-image"
+                      />
+                    ) : (
+                      <div className="order-item-image no-image">
+                        이미지 없음
+                      </div>
                     )}
-                    원
-                  </p>
+                  </div>
+
+                  <div className="order-item-info">
+                    <p className="order-item-name">{item.itemName}</p>
+
+                    {item.itemColor || item.itemSize ? (
+                      <p className="order-item-option">
+                        옵션: {item.itemColor || "-"} / {item.itemSize || "-"}
+                      </p>
+                    ) : (
+                      <p className="order-item-option">옵션 없음</p>
+                    )}
+
+                    <p className="order-item-quantity">
+                      수량: {item.quantity}개
+                    </p>
+                  </div>
+
+                  <div className="order-item-price-box">
+                    {isSale && (
+                      <p className="order-item-original-price">
+                        {formatPrice(originalUnitPrice)}원
+                      </p>
+                    )}
+
+                    <p className="unit-price">{formatPrice(saleUnitPrice)}원</p>
+
+                    {itemDiscountAmount > 0 && (
+                      <p className="order-item-discount-amount">
+                        상품 할인 -{formatPrice(itemDiscountAmount)}원
+                      </p>
+                    )}
+
+                    <p className="total-price">
+                      {formatPrice(itemTotalPrice)}원
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -170,20 +225,27 @@ const OrderResultPage = () => {
           <div className="summary-detail">
             <div className="summary-row">
               <span>상품금액</span>
-              <strong>{formatPrice(productPrice)}원</strong>
+              <strong>{formatPrice(totalOriginalPrice)}원</strong>
             </div>
+
+            {productDiscountPrice > 0 && (
+              <div className="summary-row discount-row">
+                <span>상품 할인</span>
+                <strong>{`-${formatPrice(productDiscountPrice)}원`}</strong>
+              </div>
+            )}
 
             <div className="summary-row">
               <span>배송비</span>
               <strong>0원</strong>
             </div>
 
-            <div className="summary-row discount-row">
-              <span>할인/부가결제</span>
-              <strong>
-                {discountPrice > 0 ? `-${formatPrice(discountPrice)}원` : "0원"}
-              </strong>
-            </div>
+            {couponDiscountPrice > 0 && (
+              <div className="summary-row discount-row">
+                <span>쿠폰 할인</span>
+                <strong>{`-${formatPrice(couponDiscountPrice)}원`}</strong>
+              </div>
+            )}
           </div>
 
           <div className="summary-divider"></div>

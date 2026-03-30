@@ -163,6 +163,32 @@
 }
 
 /* 가격 */
+.cart-item-price-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.cart-item-price-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.cart-item-discount-rate {
+  font-size: 12px;
+  font-weight: 700;
+  color: #9f684c;
+}
+
+.cart-item-original-price {
+  font-size: 13px;
+  color: #9a9a9a;
+  text-decoration: line-through;
+}
+
 .cart-item-total-price {
   font-size: 18px;
   font-weight: 700;
@@ -174,6 +200,10 @@
 .cart-col-fee {
   font-size: 13px;
   color: #666666;
+}
+
+.cart-price-cell-discount strong {
+  color: #c62828;
 }
 
 /* 오른쪽 버튼 */
@@ -274,7 +304,7 @@
 .cart-price-summary-head,
 .cart-price-summary-body {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   text-align: center;
 }
 

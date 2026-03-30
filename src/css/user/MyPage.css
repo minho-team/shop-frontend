@@ -511,3 +511,127 @@
   width: 80%;
   left: 10%;
 }
+
+/* ==========================================================================
+   11. 찜 목록 스타일 (Wishlist)
+   ========================================================================== */
+.wishlist-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wishlist-card {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid #ececec;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.wishlist-card:hover {
+  border-color: #111;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+}
+
+.wishlist-image-wrap {
+  width: 120px;
+  height: 150px;
+  background: #fafafa;
+  border: 1px solid #f3f3f3;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.wishlist-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wishlist-no-image {
+  color: #bbb;
+  font-size: 12px;
+}
+
+.wishlist-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wishlist-top-row,
+.wishlist-bottom-row,
+.wishlist-price-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.wishlist-top-row {
+  justify-content: space-between;
+}
+
+.wishlist-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+}
+
+.wishlist-date {
+  font-size: 12px;
+  color: #999;
+}
+
+.wishlist-sale-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+}
+
+.wishlist-original-price {
+  font-size: 13px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.wishlist-discount-rate {
+  font-size: 12px;
+  font-weight: 700;
+  color: #9f684c;
+}
+
+.wishlist-bottom-row {
+  justify-content: space-between;
+  font-size: 13px;
+  color: #666;
+}
+
+.wishlist-delivery-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #111;
+  color: #111;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fff;
+}

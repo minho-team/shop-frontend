@@ -1,0 +1,153 @@
+/* MyPageEditPage.css — MyPage.css 디자인을 그대로 따릅니다 */
+
+.edit-wrapper {
+  width: 100%;
+}
+
+/* 탭 바 */
+.edit-tab-bar {
+  display: flex;
+  border-bottom: 2px solid #111;
+  margin-bottom: 30px;
+}
+
+.edit-tab-btn {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #aaa;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+}
+
+.edit-tab-btn:hover {
+  color: #555;
+}
+
+.edit-tab-btn.active {
+  color: #111;
+  font-weight: 700;
+  border-bottom: 2px solid #111;
+}
+
+/* 폼 영역 */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* 안내 문구 */
+.edit-desc {
+  font-size: 13px;
+  color: #888;
+  line-height: 1.7;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-left: 3px solid #e0e0e0;
+}
+
+/* 각 입력 행 */
+.edit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.edit-row label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.edit-row input {
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  color: #111;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-row input:focus {
+  border-color: #111;
+}
+
+.edit-row input[readonly] {
+  background: #f9f9f9;
+  color: #888;
+  cursor: default;
+}
+
+/* 성별 라디오 그룹 */
+.edit-radio-group {
+  display: flex;
+  gap: 24px;
+  padding-top: 6px;
+}
+
+.edit-radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #444;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.edit-radio-group input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #111;
+  cursor: pointer;
+}
+
+/* 주소 찾기 버튼 */
+.edit-addr-btn {
+  height: 46px;
+  padding: 0 18px;
+  background: #111;
+  color: #fff;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.edit-addr-btn:hover {
+  background: #333;
+}
+
+/* 저장 버튼 영역 */
+.edit-footer {
+  margin-top: 20px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.edit-save-btn {
+  height: 46px;
+  padding: 0 40px;
+  background: #111;
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.edit-save-btn:hover {
+  background: #333;
+}

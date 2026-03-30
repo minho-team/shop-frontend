@@ -63,6 +63,15 @@ const CartPage = () => {
 
   const formatPrice = (price) => Number(price ?? 0).toLocaleString();
 
+  const getOriginalUnitPrice = (item) => Number(item.price ?? 0);
+
+  const getSaleUnitPrice = (item) => {
+    const salePrice = Number(item.salePrice ?? item.price ?? 0);
+    return salePrice > 0 ? salePrice : Number(item.price ?? 0);
+  };
+
+  const getItemDiscountRate = (item) => Number(item.discountRate ?? 0);
+
   const handleChangeQuantity = async (item, nextQuantity) => {
     if (nextQuantity < 1) return;
 
@@ -158,9 +167,25 @@ const CartPage = () => {
     return cartItems.filter((item) => selectedItems.includes(item.cartItemNo));
   }, [cartItems, selectedItems]);
 
+  const totalOriginalPrice = useMemo(() => {
+    return selectedCartItems.reduce((sum, item) => {
+      return sum + getOriginalUnitPrice(item) * Number(item.quantity ?? 0);
+    }, 0);
+  }, [selectedCartItems]);
+
+  const totalProductDiscount = useMemo(() => {
+    return selectedCartItems.reduce((sum, item) => {
+      const originalPrice = getOriginalUnitPrice(item);
+      const salePrice = getSaleUnitPrice(item);
+      const quantity = Number(item.quantity ?? 0);
+
+      return sum + Math.max(0, originalPrice - salePrice) * quantity;
+    }, 0);
+  }, [selectedCartItems]);
+
   const totalProductPrice = useMemo(() => {
     return selectedCartItems.reduce((sum, item) => {
-      return sum + Number(item.price ?? 0) * Number(item.quantity ?? 0);
+      return sum + getSaleUnitPrice(item) * Number(item.quantity ?? 0);
     }, 0);
   }, [selectedCartItems]);
 
@@ -244,8 +269,15 @@ const CartPage = () => {
                 </div>
 
                 {cartItems.map((item) => {
+                  const originalUnitPrice = getOriginalUnitPrice(item);
+                  const saleUnitPrice = getSaleUnitPrice(item);
+                  const itemDiscountRate = getItemDiscountRate(item);
                   const itemTotalPrice =
-                    Number(item.price ?? 0) * Number(item.quantity ?? 0);
+                    saleUnitPrice * Number(item.quantity ?? 0);
+                  const itemOriginalTotalPrice =
+                    originalUnitPrice * Number(item.quantity ?? 0);
+                  const isSale =
+                    itemDiscountRate > 0 && saleUnitPrice < originalUnitPrice;
 
                   const isUpdating = updatingCartItemNo === item.cartItemNo;
                   const isDeleting = deletingCartItemNo === item.cartItemNo;
@@ -322,9 +354,22 @@ const CartPage = () => {
                       </div>
 
                       <div className="cart-col cart-col-price">
-                        <strong className="cart-item-total-price">
-                          {formatPrice(itemTotalPrice)}원
-                        </strong>
+                        <div className="cart-item-price-box">
+                          {isSale && (
+                            <div className="cart-item-price-top">
+                              <span className="cart-item-discount-rate">
+                                {itemDiscountRate}% OFF
+                              </span>
+                              <span className="cart-item-original-price">
+                                {formatPrice(itemOriginalTotalPrice)}원
+                              </span>
+                            </div>
+                          )}
+
+                          <strong className="cart-item-total-price">
+                            {formatPrice(itemTotalPrice)}원
+                          </strong>
+                        </div>
                       </div>
 
                       <div className="cart-col cart-col-delivery">기본배송</div>
@@ -394,6 +439,7 @@ const CartPage = () => {
               <div className="cart-price-summary">
                 <div className="cart-price-summary-head">
                   <div>총 상품금액</div>
+                  <div>상품 할인</div>
                   <div>총 배송비</div>
                   <div>결제예정금액</div>
                 </div>
@@ -401,6 +447,9 @@ const CartPage = () => {
                 <div className="cart-price-summary-body">
                   <div className="cart-price-cell">
                     <strong>{formatPrice(totalProductPrice)}원</strong>
+                  </div>
+                  <div className="cart-price-cell cart-price-cell-discount">
+                    <strong>- {formatPrice(totalProductDiscount)}원</strong>
                   </div>
                   <div className="cart-price-cell">
                     <strong>+ {formatPrice(totalDeliveryFee)}원</strong>

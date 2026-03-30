@@ -205,15 +205,43 @@
   text-align: right;
 }
 
-.unit-price {
+.order-item-original-price {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #9a9a9a;
+  text-decoration: line-through;
+}
+
+.order-item-sale-line {
   margin: 0 0 8px;
-  font-size: 14px;
-  color: #777;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.order-item-discount-rate {
+  font-size: 12px;
+  font-weight: 700;
+  color: #9f684c;
+}
+
+.unit-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+}
+
+.order-item-discount-amount {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #c62828;
 }
 
 .total-price {
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: #111;
 }

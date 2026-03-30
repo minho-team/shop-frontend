@@ -15,11 +15,18 @@ import RecentlyViewed, {
 import "../../css/user/ProductDetailPage.css";
 import "../../css/common/MainProductList.css";
 import Footer from "../../components/user/Footer";
+import { useUser } from "../../context/UserContext";
+import {
+  addWishlist,
+  checkWishlist,
+  removeWishlist,
+} from "../../api/user/wishlistApi";
 import TestNoticeBanner from "../../components/user/TestNoticeBanner";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useUser();
 
   const [product, setProduct] = useState(null);
   const [options, setOptions] = useState([]);
@@ -47,11 +54,13 @@ const ProductDetailPage = () => {
       setRelatedLoading(true);
       try {
         // 상품 정보, 이미지, 관련상품을 동시에 요청
-        const [productRes, imageRes, relatedRes] = await Promise.all([
-          getProductDetail(id),
-          getProductMainAndThumbImages(id),
-          getRelatedProducts(id),
-        ]);
+        const [productRes, imageRes, relatedRes, wishlistRes] =
+          await Promise.all([
+            getProductDetail(id),
+            getProductMainAndThumbImages(id),
+            getRelatedProducts(id),
+            user ? checkWishlist(id) : Promise.resolve({ wished: false }),
+          ]);
 
         // 상세페이지 들어오면 스크롤 맨 위
         window.scrollTo(0, 0);
@@ -61,6 +70,7 @@ const ProductDetailPage = () => {
         setOptions(productRes.options || []);
         setImageData(imageRes);
         setRelatedProducts(Array.isArray(relatedRes) ? relatedRes : []);
+        setIsWished(Boolean(wishlistRes?.wished));
         // 상품 바뀌면 첫 이미지부터 다시 보여주기
         setCurrentImageIndex(0);
         // 상품 바뀌면 옵션 선택 초기화
@@ -92,9 +102,9 @@ const ProductDetailPage = () => {
         }
       } catch (error) {
         console.error("상품 상세 조회 실패:", error);
-
         // 실패하면 관련상품도 빈 배열로 초기화
         setRelatedProducts([]);
+        setIsWished(false);
       } finally {
         // 관련상품 로딩 종료
         setRelatedLoading(false);
@@ -102,7 +112,7 @@ const ProductDetailPage = () => {
     };
 
     fetchDetailData();
-  }, [id]); // id 바뀔 때마다 다시 조회
+  }, [id, user?.memberNo]); // id 바뀔 때마다 다시 조회
 
   const imageList = useMemo(() => {
     if (!imageData?.images) return [];
@@ -187,8 +197,20 @@ const ProductDetailPage = () => {
     }
   };
 
+  const moveLoginPage = () => {
+    alert("로그인이 필요합니다.");
+    navigate("/login", {
+      state: { redirectTo: `/product/detail/${id}` },
+    });
+  };
+
   const handleCart = async () => {
     if (!product) return;
+
+    if (!user) {
+      moveLoginPage();
+      return;
+    }
 
     if (options.length > 0 && !selectedOptionNo) {
       alert("옵션을 선택해주세요.");
@@ -221,8 +243,7 @@ const ProductDetailPage = () => {
 
       // 로그인 안 된 상태면 로그인 페이지로 이동
       if (error.response?.status === 401) {
-        alert("로그인이 필요합니다.");
-        navigate("/login");
+        moveLoginPage();
         return;
       }
 
@@ -231,6 +252,11 @@ const ProductDetailPage = () => {
   };
 
   const handleOrder = () => {
+    if (!user) {
+      moveLoginPage();
+      return;
+    }
+
     if (options.length > 0 && !selectedOptionNo) {
       alert("옵션을 선택해주세요.");
       return;
@@ -257,6 +283,35 @@ const ProductDetailPage = () => {
           : "",
       },
     });
+  };
+
+  const handleWish = async () => {
+    if (!product) return;
+
+    if (!user) {
+      moveLoginPage();
+      return;
+    }
+
+    try {
+      if (isWished) {
+        await removeWishlist(product.productNo);
+        setIsWished(false);
+        return;
+      }
+
+      await addWishlist(product.productNo);
+      setIsWished(true);
+    } catch (error) {
+      console.error("찜 처리 실패:", error);
+
+      if (error.response?.status === 401) {
+        moveLoginPage();
+        return;
+      }
+
+      alert("찜 처리에 실패했습니다.");
+    }
   };
 
   if (!product) {
@@ -458,7 +513,7 @@ const ProductDetailPage = () => {
                 <button
                   type="button"
                   className={`wish-button ${isWished ? "active" : ""}`}
-                  onClick={() => setIsWished((prev) => !prev)}
+                  onClick={handleWish}
                 >
                   {isWished ? "♥ 찜완료" : "♡ 찜"}
                 </button>
@@ -475,7 +530,7 @@ const ProductDetailPage = () => {
                   type="button"
                   className="buy-button"
                   onClick={handleOrder}
-                  style={{marginBottom:"20px"}}
+                  style={{ marginBottom: "20px" }}
                 >
                   구매하기
                 </button>
@@ -483,7 +538,7 @@ const ProductDetailPage = () => {
             </div>
           </section>
 
-          <TestNoticeBanner/>
+          <TestNoticeBanner />
           <section className="product-bottom-section">
             <ProductDetailTabs
               product={product}
