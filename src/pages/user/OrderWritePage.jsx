@@ -172,9 +172,26 @@ const OrderWritePage = () => {
   const orderItems = useMemo(() => {
     if (!orderData) return [];
 
-    return Array.isArray(orderData.cartItems)
-      ? orderData.cartItems.map((item) => toOrderItem(item, true))
-      : [toOrderItem(orderData)];
+    // 결제 대기시 기존 주문 상세에서 데이터가 올 때
+    if (orderData.items && Array.isArray(orderData.items)) {
+      return orderData.items.map((item) => ({
+        productOptionNo: item.productOptionNo,
+        itemName: item.itemName,
+        itemColor: item.itemColor,
+        itemSize: item.itemSize,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        originalUnitPrice: item.unitPrice,
+        imageUrl: item.imageUrl,
+      }));
+    }
+
+    // 결제 대기시 장바구니에서 올 때
+    if (Array.isArray(orderData.cartItems)) {
+      return orderData.cartItems.map((item) => toOrderItem(item, true));
+    }
+
+    return [toOrderItem(orderData)];
   }, [orderData]);
 
   useEffect(() => {
@@ -271,7 +288,7 @@ const OrderWritePage = () => {
       return (
         sum +
         Number(item.originalUnitPrice ?? item.unitPrice ?? 0) *
-          Number(item.quantity ?? 0)
+        Number(item.quantity ?? 0)
       );
     }, 0);
   }, [orderItems]);
@@ -391,7 +408,10 @@ const OrderWritePage = () => {
     try {
       setSubmitting(true);
 
+      const finalOrderNo = orderData?.order?.orderNo || orderData?.orderNo || null;
+
       const orderRequest = {
+        orderNo: finalOrderNo,
         ordererName,
         ordererPhoneNumber: normalizedOrdererPhone,
         ordererEmail: ordererEmail.trim(),
@@ -402,9 +422,10 @@ const OrderWritePage = () => {
         receiverDetailAddress: detailAddress,
         message,
         totalPrice: finalPrice,
-        memberCouponNo: selectedMemberCouponNo || null,
         items: resultItems,
       };
+
+      console.log("서버로 보내는 최종 데이터:", orderRequest);
 
       // 1. 서버에 주문/결제 준비 요청
       const prepared = await preparePayment(orderRequest);
@@ -794,9 +815,8 @@ const OrderWritePage = () => {
                   <div className="coupon-section-header">
                     <span className="coupon-section-title">쿠폰 적용</span>
                     <span
-                      className={`coupon-count-badge${
-                        availableCoupons.length === 0 ? " empty" : ""
-                      }`}
+                      className={`coupon-count-badge${availableCoupons.length === 0 ? " empty" : ""
+                        }`}
                     >
                       {availableCoupons.length > 0
                         ? `${availableCoupons.length}장 보유`
