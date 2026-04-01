@@ -133,7 +133,7 @@ const AdminDashboardPage = () => {
   };
 
   const moveToOrderDetail = (orderNo) => {
-    navigate(`/admin/orders/detail/${orderNo}`);
+    navigate(`/admin/order/detail/${orderNo}`);
   };
 
   const moveToProductList = () => {
