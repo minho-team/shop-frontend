@@ -207,6 +207,18 @@
   color: #d9534f; /* 상품 개별 금액 색상 */
 }
 
+.pending-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.refund-action-section,
+.review-action-section {
+  margin-top: 8px;
+}
+
 /* 6. 버튼 스타일 (공통) */
 .btn-action {
   display: block;
@@ -237,6 +249,27 @@
   color: #999;
   border: 1px solid #ddd;
   cursor: default;
+}
+
+/* 주문 취소 등 위험/경고 버튼 */
+.btn-action-danger {
+  background-color: #ff4d4f;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-action-danger:hover {
+  background-color: #ff7875;
+}
+
+/* 비활성화 상태 보완 */
+.btn-action-disabled {
+  background-color: #eee;
+  color: #999;
+  border: 1px solid #ddd;
+  cursor: not-allowed !important; /* 커서 모양을 금지로 강제 */
+  opacity: 0.6; /* 비활성화 시각 효과 */
 }
 
 /* 7. 기타 유틸리티 */

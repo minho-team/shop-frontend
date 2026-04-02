@@ -11,8 +11,8 @@ export const createOrder = async (orderData) => {
 };
 
 // 내 모든 주문내역 불러오기
-export const getMyOrderList = async (page = 1) => {
-  const res = await apiClient.get(`${prefix}?page=${page}`);
+export const getMyOrderList = async (params) => {
+  const res = await apiClient.get(prefix, { params });
   return res.data;
 };
 
