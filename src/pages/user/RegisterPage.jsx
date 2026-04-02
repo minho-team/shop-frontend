@@ -2,14 +2,19 @@ import { useState } from "react";
 import Header from "../../components/user/Header";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { checkMemberId, register } from "../../api/common/authApi";
+import { checkMemberId, CheckNickName, register } from "../../api/common/authApi";
+
 
 const RegisterPage = () => {
   const nav = useNavigate();
   const [input, setInput] = useState({});
   const [privacyChecked, setPrivacyChecked] = useState(false);
-  const [checkedMessage, setCheckedMessage] = useState("");
+  const [checkedIdMessage, setCheckedIdMessage] = useState("");
   const [availableId, setAvailableId] = useState(false);
+  const [checkedNickNameMessage, setCheckedNickNameMessage] = useState("");
+  const [availableNickName, setAvailableNickName] = useState(false);
+
+
 
   const observeInput = (e) => {
     setInput({
@@ -19,16 +24,27 @@ const RegisterPage = () => {
   };
 
 
+  // 닉네임 중복 확인 함수
+  const CheckAvailabilityNickName = async (nickName) => {
+    const response = await CheckNickName(nickName);
+    if(response[0] === '0'){
+      setAvailableNickName(false)
+    }else{
+      setAvailableNickName(true)
+    }
+    setCheckedNickNameMessage(response[1])
+
+  }
 
   //아이디 중복 확인 함수
-  const CheckAvailability = async (memberId) => {
+  const CheckAvailabilityId = async (memberId) => {
     const response = await checkMemberId(memberId);
     if(response[0]==='0'){
       setAvailableId(false)
     }else{
       setAvailableId(true)
     }
-    setCheckedMessage(response[1]);
+    setCheckedIdMessage(response[1]);
   }
 
   const clickRegisterButton = async () => {
@@ -53,6 +69,11 @@ const RegisterPage = () => {
 
     if (!input.nickName?.trim()) {
       alert("닉네임을 입력해주세요.");
+      return;
+    }
+
+    if (availableNickName === false) {
+      alert("닉네임 중복되었는지 확인해주세요.")
       return;
     }
 
@@ -89,7 +110,7 @@ const RegisterPage = () => {
           <Row className="mb-3">
             <Col md={6}>
               <Form.Group controlId="memberId">
-                <Form.Label>아이디</Form.Label>
+                <Form.Label>아이디(필수)</Form.Label>
                 <Form.Control
                   required
                   onChange={observeInput}
@@ -100,9 +121,9 @@ const RegisterPage = () => {
               </Form.Group>
             </Col>
             <div className="mt-4 mb-4">
-              <Button variant="dark" type="button" onClick={() => CheckAvailability(input.memberId)}>중복확인</Button>
+              <Button variant="dark" type="button" onClick={() => CheckAvailabilityId(input.memberId)}>중복확인</Button>
               <div>
-                <p>{checkedMessage}</p>
+                <p>{checkedIdMessage}</p>
               </div>
             </div>
 
@@ -136,7 +157,7 @@ const RegisterPage = () => {
             </Col>
             <Col md={6}>
               <Form.Group controlId="nickName">
-                <Form.Label>닉네임</Form.Label>
+                <Form.Label>닉네임(필수)</Form.Label>
                 <Form.Control
                   required
                   onChange={observeInput}
@@ -146,12 +167,18 @@ const RegisterPage = () => {
                 />
               </Form.Group>
             </Col>
+            <div className="mt-4 mb-4">
+              <Button variant="dark" type="button" onClick={() => CheckAvailabilityNickName(input.nickName)}>중복확인</Button>
+              <div>
+                <p>{checkedNickNameMessage}</p>
+              </div>
+            </div>
           </Row>
 
           <Row className="mb-3">
             <Col md={6}>
               <Form.Group controlId="email">
-                <Form.Label>이메일</Form.Label>
+                <Form.Label>이메일(선택)</Form.Label>
                 <Form.Control
                   required
                   onChange={observeInput}

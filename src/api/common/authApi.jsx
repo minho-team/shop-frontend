@@ -34,4 +34,9 @@ export const checkMemberId = async (memberId) => {
   return res.data;
 };
 
+export const CheckNickName = async (nickName) =>{
+  const res = await apiClient.post(`${prefix}/checkNickName?nickName=${nickName}`)
+  return res.data;
+}
+
 
