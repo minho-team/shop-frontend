@@ -27,7 +27,7 @@ const canRefund = (status) => {
 };
 
 const canWriteReview = (status) => {
-    return status === 'PAYMENT_COMPLETED' || status === 'DELIVERED';
+    return status === 'DELIVERED';
 };
 
 const MyOrderDetailPage = () => {
@@ -194,16 +194,11 @@ const MyOrderDetailPage = () => {
                                         ₩{(item.unitPrice * item.quantity).toLocaleString()}
                                     </p>
 
-                                    {/* 1. 결제대기 상태 처리 */}
+                                    {/* 1. 결제대기(PENDING_PAYMENT) 상태 */}
                                     {item.orderItemStatus === 'PENDING_PAYMENT' && (
-                                        <div className="pending-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+                                        <div className="pending-actions">
                                             <button
-                                                onClick={() => navigate('/order/write', {
-                                                    state: {
-                                                        ...orderData,
-                                                        existingOrderNo: orderInfo.orderNo
-                                                    }
-                                                })}
+                                                onClick={() => navigate('/order/write', { state: { ...orderData, existingOrderNo: orderInfo.orderNo } })}
                                                 className="btn-action btn-action-active"
                                             >
                                                 결제하기
@@ -217,25 +212,53 @@ const MyOrderDetailPage = () => {
                                         </div>
                                     )}
 
-                                    {/* 2. 환불 관련 처리 */}
-                                    {item.orderItemStatus === 'REFUND_REQUESTED' ? (
-                                        <button disabled className="btn-action btn-action-disabled">환불요청중</button>
-                                    ) : item.orderItemStatus === 'REFUNDED' ? (
-                                        <button disabled className="btn-action btn-action-disabled">환불완료</button>
-                                    ) : (
-                                        canRefund(item.orderItemStatus) && (
-                                            <button onClick={() => handleRefundClick(item, orderInfo)} className="btn-action btn-action-active">환불하기</button>
-                                        )
-                                    )}
+                                    {/* 2. 환불하기(Refund) 처리 영역 */}
+                                    <div className="refund-action-section">
+                                        {item.orderItemStatus === 'REFUND_REQUESTED' ? (
+                                            <button disabled className="btn-action btn-action-disabled">환불요청중</button>
+                                        ) : item.orderItemStatus === 'REFUNDED' ? (
+                                            <button disabled className="btn-action btn-action-disabled">환불완료</button>
+                                        ) : (
+                                            (item.orderItemStatus === 'PAYMENT_COMPLETED' ||
+                                                item.orderItemStatus === 'PREPARING' ||
+                                                item.orderItemStatus === 'SHIPPING' ||
+                                                item.orderItemStatus === 'DELIVERED') && (
+                                                <button
+                                                    onClick={() => handleRefundClick(item, orderInfo)}
+                                                    className={`btn-action ${canRefund(item.orderItemStatus) ? 'btn-action-active' : 'btn-action-disabled'}`}
+                                                    disabled={!canRefund(item.orderItemStatus)}
+                                                    title={!canRefund(item.orderItemStatus) ? "배송 준비 중이거나 배송 중에는 환불이 제한될 수 있습니다." : ""}
+                                                >
+                                                    환불하기
+                                                </button>
+                                            )
+                                        )}
+                                    </div>
 
-                                    {/* 3. 리뷰 관련 처리 */}
-                                    {canWriteReview(item.orderItemStatus) && (
-                                        reviewedItems[item.orderItemNo] ? (
+                                    {/* 3. 리뷰 작성하기(Review) 처리 영역 */}
+                                    <div className="review-action-section">
+                                        {item.orderItemStatus === 'REFUNDED' ? (
+                                            null
+                                        ) : reviewedItems[item.orderItemNo] ? (
+                                            /* 리뷰가 이미 작성된 경우 */
                                             <button disabled className="btn-action btn-action-disabled">작성 완료</button>
                                         ) : (
-                                            <button onClick={() => handleReviewClick(item)} className="btn-action btn-action-active">리뷰 작성하기</button>
-                                        )
-                                    )}
+                                            /* 리뷰 작성이 가능한 상태(결제완료~배송완료) 체크 */
+                                            (item.orderItemStatus === 'PAYMENT_COMPLETED' ||
+                                                item.orderItemStatus === 'PREPARING' ||
+                                                item.orderItemStatus === 'SHIPPING' ||
+                                                item.orderItemStatus === 'DELIVERED') && (
+                                                <button
+                                                    onClick={() => handleReviewClick(item)}
+                                                    className={`btn-action ${canWriteReview(item.orderItemStatus) ? 'btn-action-active' : 'btn-action-disabled'}`}
+                                                    disabled={!canWriteReview(item.orderItemStatus)}
+                                                    title={!canWriteReview(item.orderItemStatus) ? "배송완료 후 작성이 가능합니다" : ""}
+                                                >
+                                                    리뷰 작성하기
+                                                </button>
+                                            )
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ))}

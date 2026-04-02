@@ -101,107 +101,190 @@ const GradeInfo = ({ purchaseCount, currentGrade, memberName }) => {
 // ================================================
 const OrderHistory = ({ user }) => {
   const [pageData, setPageData] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  // 검색 파라미터 상태 관리
+  const [params, setParams] = useState({
+    page: 1,
+    size: 10,
+    searchType: "productName",
+    keyword: "",
+    orderStatus: "",
+    startDate: "",
+    endDate: ""
+  });
+
+  // 기간 필터 설정
+  const setDateRange = (days) => {
+    const today = new Date();
+    const targetDate = new Date();
+    targetDate.setDate(today.getDate() - days);
+
+    setParams({
+      ...params,
+      startDate: targetDate.toISOString().split('T')[0],
+      endDate: today.toISOString().split('T')[0],
+      page: 1
+    });
+  };
+
+  const fetchOrders = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      // params 객체를 백엔드로 전달
+      const data = await getMyOrderList(params);
+      setPageData(data);
+    } catch (err) {
+      console.error("주문 내역 로딩 오류:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, params]);
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      if (!user) return;
-      setLoading(true);
-      try {
-        const data = await getMyOrderList(currentPage);
-        setPageData(data);
-      } catch (err) {
-        console.error("주문 내역 로드 실패:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchOrders();
-  }, [user, currentPage]);
+  }, [fetchOrders]);
 
-  if (loading) return <div className="loading-container">데이터 로드 중...</div>;
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setParams({ ...params, page: 1 });
+    fetchOrders();
+  };
 
-  const {
-    orderList = [],
-    startPage = 0,
-    endPage = 0,
-    prev = false,
-    next = false,
-  } = pageData || {};
+  if (loading && !pageData) return <div className="loading-container">데이터 로드 중...</div>;
+
+  const { orderList = [], startPage = 0, endPage = 0, prev = false, next = false } = pageData || {};
 
   return (
-    <div className="table-responsive">
-      <table className="custom-table">
-        <thead>
-          <tr>
-            <th>주문일자</th>
-            <th>주문번호</th>
-            <th>금액</th>
-            <th>상태</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orderList.length > 0 ? (
-            orderList.map((o) => (
-              <tr key={o.orderNo} className="order-row-hover">
-                <td>
-                  <Link to={`/my/order/detail/${o.orderNo}`} className="table-cell-link">
-                    {new Date(o.createdAt).toLocaleDateString()}
-                  </Link>
-                </td>
-                <td>
-                  <Link to={`/my/order/detail/${o.orderNo}`} className="table-cell-link">
-                    {o.orderNo}
-                  </Link>
-                </td>
-                <td>
-                  <Link to={`/my/order/detail/${o.orderNo}`} className="table-cell-link">
-                    ₩{o.totalPrice?.toLocaleString()}
-                  </Link>
-                </td>
-                <td className={`status-${o.orderStatus?.toLowerCase()}`}>
-                  <Link to={`/my/order/detail/${o.orderNo}`} className="table-cell-link">
-                    {getStatusLabel(o.orderStatus)}
-                  </Link>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="4" className="empty-row">
-                최근 주문 내역이 없습니다.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+    <div className="order-history-container">
+      {/* 검색 및 필터 섹션 */}
+      <section className="order-search-filter">
+        <form onSubmit={handleSearchSubmit}>
+          <div className="filter-group">
+            <label>조회기간</label>
+            <div className="btn-group">
+              <button type="button" className="filter-btn" onClick={() => setDateRange(7)}>최근 일주일</button>
+              <button type="button" className="filter-btn" onClick={() => setParams({ ...params, startDate: "", endDate: "" })}>직접선택</button>
+            </div>
+            <div className="date-picker-wrap">
+              <input type="date" value={params.startDate} onChange={(e) => setParams({ ...params, startDate: e.target.value })} />
+              <span className="tilde">~</span>
+              <input type="date" value={params.endDate} onChange={(e) => setParams({ ...params, endDate: e.target.value })} />
+            </div>
+          </div>
 
+          <div className="filter-group-inline">
+            <div className="select-wrap">
+              <label>주문상태</label>
+              <select value={params.orderStatus} onChange={(e) => setParams({ ...params, orderStatus: e.target.value, page: 1 })}>
+                <option value="">전체 상태</option>
+                <option value="PAID">결제완료</option>
+                <option value="PENDING_PAYMENT">결제대기</option>
+                <option value="CANCELED">주문취소</option>
+                <option value="SHIPPING">배송중</option>
+                <option value="DELIVERED">배송완료</option>
+                <option value="REFUND_REQUESTED">환불요청</option>
+                <option value="REFUNDED">환불완료</option>
+              </select>
+            </div>
+
+            <div className="search-input-wrap">
+              <select value={params.searchType} onChange={(e) => setParams({ ...params, searchType: e.target.value })}>
+                <option value="all">전체</option>
+                <option value="productName">상품명</option>
+                <option value="orderNo">주문번호</option>
+              </select>
+              <input
+                type="text"
+                placeholder="검색어를 입력하세요"
+                value={params.keyword}
+                onChange={(e) => setParams({ ...params, keyword: e.target.value })}
+              />
+              <button type="submit" className="btn-submit">조회</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      {/* 주문 목록 테이블 */}
+      <div className="order-list-table">
+        <table className="custom-table">
+          <thead>
+            <tr>
+              <th className="th-order-no">주문번호</th>
+              <th className="th-product-info">주문정보(상품)</th>
+              <th className="th-status">상태</th>
+              <th className="th-price">금액</th>
+              <th className="th-date">주문일시</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orderList.length > 0 ? (
+              orderList.map((o) => (
+                <tr key={o.orderNo}>
+                  {/* 1. 주문번호 */}
+                  <td className="td-order-no">{o.orderNo}</td>
+
+                  {/* 2. 섬네일이미지-상품명-구매개수 */}
+                  <td className="td-product-info">
+                    <Link to={`/my/order/detail/${o.orderNo}`} className="product-item-flex">
+                      <div className="thumbnail-box">
+                        <img
+                          src={o.mainImageUrl ? `${API_SERVER_HOST}${o.mainImageUrl}` : '/images/no-image.png'}
+                          alt="thumb"
+                          onError={(e) => e.target.src = '/images/no-image.png'}
+                        />
+                      </div>
+                      <div className="info-box">
+                        <p className="product-name">
+                          {o.mainProductName}
+                          {o.totalQuantity > 1 && <span className="extra-qty"> 외 {o.totalQuantity - 1}건</span>}
+                        </p>
+                      </div>
+                    </Link>
+                  </td>
+
+                  {/* 3. 주문상태 */}
+                  <td className={`td-status status-${o.orderStatus?.toLowerCase()}`}>
+                    {getStatusLabel(o.orderStatus)}
+                  </td>
+
+                  {/* 4. 금액 */}
+                  <td className="td-price">₩{o.totalPrice?.toLocaleString()}</td>
+
+                  {/* 5. 주문일시 */}
+                  <td className="td-date">
+                    <div className="date-display">
+                      {new Date(o.createdAt).toLocaleDateString()}
+                      <span className="time-display">{new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="empty-row">조회된 주문 내역이 없습니다.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* 페이징 UI */}
       {pageData && startPage > 0 && (
         <div className="pagination-wrapper">
-          <button
-            className="paging-btn"
-            disabled={!prev}
-            onClick={() => setCurrentPage(startPage - 1)}
-          >
-            &lt;
-          </button>
+          <button className="paging-btn" disabled={!prev} onClick={() => setParams({ ...params, page: startPage - 1 })}> &lt; </button>
           {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map((num) => (
             <button
               key={num}
-              className={`paging-btn ${currentPage === num ? "active" : ""}`}
-              onClick={() => setCurrentPage(num)}
+              className={`paging-btn ${params.page === num ? "active" : ""}`}
+              onClick={() => setParams({ ...params, page: num })}
             >
               {num}
             </button>
           ))}
-          <button
-            className="paging-btn"
-            disabled={!next}
-            onClick={() => setCurrentPage(endPage + 1)}
-          >
-            &gt;
-          </button>
+          <button className="paging-btn" disabled={!next} onClick={() => setParams({ ...params, page: endPage + 1 })}> &gt; </button>
         </div>
       )}
     </div>
