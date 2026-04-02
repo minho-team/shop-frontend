@@ -55,6 +55,8 @@ const AdminMemberDetailPage = lazy(() => import("../pages/admin/AdminMemberDetai
 const AdminMemberEditPage = lazy(() => import("../pages/admin/AdminMemberEditPage"));
 const AdminRefundDetailPage = lazy(() => import("../pages/admin/AdminRefundDetailPage"));
 const AdminDashboardPage = lazy(() => import("../pages/admin/AdminDashboardPage"));
+// 쿠폰 관리 페이지 (관리자 전용) - 쿠폰 생성/삭제/전체 지급
+const AdminCouponManagePage = lazy(() => import("../pages/admin/AdminCouponManagePage"));
 
 // ================================================
 // 로그인 필요 가드 - 비로그인 시 /login 으로 이동
@@ -122,6 +124,8 @@ const AppRouterContent = () => {
         { path: "/admin/member/edit/:memberNo", element: <AdminRouteWrapper Component={AdminMemberEditPage} /> },
         { path: "/admin/refund/detail/:refundNo", element: <AdminRouteWrapper Component={AdminRefundDetailPage} /> },
         { path: "/admin/dashboard", element: <AdminRouteWrapper Component={AdminDashboardPage} /> },
+        // 쿠폰 관리 - 관리자만 접근 가능
+        { path: "/admin/coupons", element: <AdminRouteWrapper Component={AdminCouponManagePage} /> },
 
         // ── 로그인 필요 ───────────────────────────────
         { path: "/cart", element: <ProtectedRouteWrapper Component={CartPage} /> },

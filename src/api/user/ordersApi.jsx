@@ -50,3 +50,9 @@ export const getMyCoupons = async () => {
   const res = await apiClient.get("/api/member/coupons");
   return res.data;
 };
+
+// 0원 주문 직접 확정 (Toss 없이)
+export const confirmFreeOrder = async (payload) => {
+  const res = await apiClient.post(`${API_SERVER_HOST}/api/payments/confirm-free`, payload);
+  return res.data;
+};
