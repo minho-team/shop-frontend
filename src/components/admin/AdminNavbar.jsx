@@ -18,8 +18,9 @@ const AdminNavbar = () => {
             <Link to="/admin/dashboard">대시보드</Link>
           </li>
 
+          {/* 회원 관리 드롭다운 - /admin/member 또는 /admin/coupons 경로에서 활성화 */}
           <li
-            className={`admin-menu-item dropdown ${isActive("/admin/member") ? "active" : ""}`}
+            className={`admin-menu-item dropdown ${isActive("/admin/member") || isActive("/admin/coupons") ? "active" : ""}`}
           >
             <button type="button" className="admin-menu-button">
               회원 관리
@@ -27,6 +28,10 @@ const AdminNavbar = () => {
             <ul className="admin-dropdown-menu">
               <li>
                 <Link to="/admin/members">회원 목록</Link>
+              </li>
+              {/* 쿠폰 관리 페이지 메뉴 추가 */}
+              <li>
+                <Link to="/admin/coupons">쿠폰 관리</Link>
               </li>
             </ul>
           </li>

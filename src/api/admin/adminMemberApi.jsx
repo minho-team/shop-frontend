@@ -101,3 +101,17 @@ export const getAdminMemberCouponHistory = async (memberNo) => {
   const res = await apiClient.get(`${prefix}/${memberNo}/coupons/history`);
   return res.data;
 };
+
+// 전체 회원에게 쿠폰 일괄 지급
+export const issueAdminCouponToAll = async (couponNo, validDays = 30) => {
+  const res = await apiClient.post(`${prefix}/coupons/issue-all`, null, {
+    params: { couponNo, validDays }
+  });
+  return res.data;
+};
+
+// 특정 회원의 리뷰 목록 조회 (관리자용)
+export const getAdminMemberReviews = async (memberNo) => {
+  const res = await apiClient.get(`${prefix}/${memberNo}/reviews`);
+  return res.data;
+};

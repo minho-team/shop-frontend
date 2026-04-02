@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { preparePayment, getMyCoupons } from "../../api/user/ordersApi";
+import { preparePayment, getMyCoupons, confirmFreeOrder } from "../../api/user/ordersApi";
 import "../../css/user/OrderWritePage.css";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
@@ -328,7 +328,8 @@ const OrderWritePage = () => {
     );
     if (!coupon) return 0;
     if (coupon.discountType === "FIXED") return Number(coupon.discountValue);
-    if (coupon.discountType === "RATE")
+    // RATE: 백엔드 표준값 / PERCENT: 호환성 유지 (두 값 모두 정률 할인으로 처리)
+    if (coupon.discountType === "RATE" || coupon.discountType === "PERCENT")
       return Math.floor((totalPrice * Number(coupon.discountValue)) / 100);
     return 0;
   }, [selectedMemberCouponNo, availableCoupons, totalPrice]);
@@ -422,6 +423,8 @@ const OrderWritePage = () => {
         receiverDetailAddress: detailAddress,
         message,
         totalPrice: finalPrice,
+        // 쿠폰 선택 시 memberCouponNo 포함 - 백엔드에서 쿠폰 유효성 검증 및 할인액 재계산에 사용
+        memberCouponNo: selectedMemberCouponNo || null,
         items: resultItems,
       };
 
@@ -456,17 +459,32 @@ const OrderWritePage = () => {
         );
       }
 
-      // prepared 예시:
-      // {
-      //   orderNo: 1,
-      //   orderId: "ORDER_1_20260322",
-      //   orderName: "맨투맨 외 2건",
-      //   amount: 30000,
-      //   customerName: "홍길동",
-      //   customerEmail: "a@a.com",
-      //   customerMobilePhone: "01012341234"
-      // }
+      // ── 0원 결제: Toss 없이 직접 확정 ───────────────
+      if (finalPrice === 0) {
+        const result = await confirmFreeOrder({
+          orderId: prepared.orderId,
+          orderNo: prepared.orderNo,
+          orderedCartItemNos,
+          memberCouponNo: selectedMemberCouponNo || null,
+        });
 
+        sessionStorage.removeItem(`cartOrder:${prepared.orderId}`);
+        sessionStorage.removeItem(`couponOrder:${prepared.orderId}`);
+
+        navigate("/order/result", {
+          state: {
+            orderNo: result.orderNo,
+            totalPrice: result.amount ?? 0,
+            createdAt: result.approvedAt ?? result.createdAt,
+            ordererName: result.ordererName,
+            items: result.items,
+          },
+          replace: true,
+        });
+        return;
+      }
+
+      // ── 일반 결제: 토스 SDK 호출 ─────────────────────
       // 2. 토스 SDK 로드
       const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
 
@@ -905,6 +923,12 @@ const OrderWritePage = () => {
                   <span>총 결제 금액</span>
                   <strong>{finalPrice.toLocaleString()}원</strong>
                 </div>
+
+                {finalPrice === 0 && discountAmount > 0 && (
+                  <div style={{ margin: "0 25px 12px", padding: "10px 14px", background: "#e8f5e9", borderRadius: 8, color: "#2e7d32", fontSize: 13 }}>
+                    쿠폰 할인으로 무료 결제됩니다.
+                  </div>
+                )}
 
                 <div
                   style={{
