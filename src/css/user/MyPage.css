@@ -350,6 +350,46 @@
   text-decoration: none;
 }
 
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed;
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #f4f4f4;
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* 클래스 기반 너비 조절 */
+.th-order-no {
+  width: 15%;
+}
+.th-product-info {
+  width: 45%;
+}
+.th-status {
+  width: 12%;
+}
+.th-price {
+  width: 13%;
+}
+.th-date {
+  width: 15%;
+}
+
+.custom-table th {
+  border-bottom: 1px solid #111;
+  font-weight: 600;
+  color: #111;
+  background-color: #fff;
+  padding: 15px 8px;
+}
+
 /* ==========================================================================
    8. 페이징 버튼 (Pagination)
    ========================================================================== */
@@ -710,4 +750,196 @@
 .coupon-badge.used {
   border-color: #ddd;
   color: #aaa;
+}
+
+/* ==========================================================================
+   13. 주문 내역 검색 및 필터 (Order Search & Filter)
+   ========================================================================== */
+.order-search-filter {
+  background: #fcfcfc;
+  border: 1px solid #eee;
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.filter-group label {
+  width: 80px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.btn-group {
+  display: flex;
+  gap: 5px;
+}
+
+.filter-btn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  border-color: #999;
+  color: #111;
+}
+
+.date-picker-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-picker-wrap input[type="date"] {
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+  color: #444;
+  outline: none;
+}
+
+.tilde {
+  color: #ccc;
+}
+
+.filter-group-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px dashed #eee;
+  padding-top: 15px;
+  margin-top: 15px;
+}
+
+.select-wrap,
+.search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.order-search-filter select {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+  color: #333;
+  outline: none;
+}
+
+.search-input-wrap input[type="text"] {
+  width: 200px;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+  outline: none;
+}
+
+.btn-submit {
+  padding: 6px 20px;
+  background: #111;
+  color: #fff;
+  border: 1px solid #111;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-submit:hover {
+  background: #333;
+}
+
+/* ==========================================================================
+   14. 주문 리스트 상세 아이템 (Order List Item Details)
+   ========================================================================== */
+.td-order-no {
+  font-family: "Courier New", Courier, monospace; /* 주문번호 강조 */
+  font-weight: 500;
+  color: #666;
+}
+
+.td-product-info {
+  text-align: left !important; /* 상품 정보는 왼쪽 정렬 */
+}
+
+.product-item-flex {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.thumbnail-box {
+  width: 64px;
+  height: 64px;
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.thumbnail-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.info-box .product-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111;
+  line-height: 1.4;
+}
+
+.extra-qty {
+  color: #888;
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.td-price {
+  font-weight: 600;
+  color: #111;
+}
+
+.date-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #444;
+}
+
+.time-display {
+  font-size: 11px;
+  color: #999;
+}
+
+/* 상태별 컬러 강조 */
+.status-paid {
+  color: #007bff;
+  font-weight: 600;
+}
+.status-shipping {
+  color: #28a745;
+  font-weight: 600;
+}
+.status-delivered {
+  color: #111;
+  font-weight: 600;
+}
+.status-canceled {
+  color: #ff4d4f;
+  font-weight: 600;
 }
