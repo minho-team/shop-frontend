@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../css/common/RecentlyViewed.css";
 import { API_SERVER_HOST } from "../../api/common/apiClient";
+import { getProductDetail } from "../../api/user/productApi";
 
 const STORAGE_KEY = "recentlyViewed";
 const MAX_ITEMS = 6;
@@ -22,12 +23,30 @@ const RecentlyViewed = () => {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      setItems(stored);
-    } catch (e) {
-      setItems([]);
-    }
+    const fetchAndFilter = async () => {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        if (stored.length === 0) return;
+
+        // 각 상품의 현재 상태를 확인해서 삭제된 상품(use_yn = 'N') 필터링
+        const results = await Promise.allSettled(
+          stored.map((item) => getProductDetail(item.productNo))
+        );
+
+        const activeItems = stored.filter((_, index) => {
+          const result = results[index];
+          if (result.status !== "fulfilled") return false;
+          return result.value?.product?.useYn === "Y";
+        });
+
+        // localStorage도 최신 상태로 업데이트
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(activeItems));
+        setItems(activeItems);
+      } catch (e) {
+        setItems([]);
+      }
+    };
+    fetchAndFilter();
   }, []);
 
   if (items.length === 0) return null;

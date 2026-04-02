@@ -7,7 +7,6 @@ import Footer from "../../components/user/Footer";
 import HomeProductSection from "../../components/user/HomeProductSection";
 import PopularKeywords from "../../components/user/PopularKeywords";
 import RecentlyViewed from "../../components/user/RecentlyViewed";
-import HomeReviewSection from "../../components/user/HomeReviewSection";
 import { getHomeMainData } from "../../api/user/productApi";
 import { useUser } from "../../context/UserContext";
 // ★ 룰렛 모달 import 추가
@@ -32,7 +31,6 @@ const MainHome = () => {
     bestProducts: [],
     saleProducts: [],
     recommendProducts: [],
-    recentReviews: [],
     popularKeywords: [],
   });
   const [loading, setLoading] = useState(false);
@@ -135,8 +133,6 @@ const MainHome = () => {
             loading={loading}
             moreLink="/?sort=new"
           />
-
-          <HomeReviewSection reviews={homeData.recentReviews} />
 
           <RecentlyViewed />
         </>
