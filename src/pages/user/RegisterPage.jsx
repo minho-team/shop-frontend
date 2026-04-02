@@ -23,9 +23,12 @@ const RegisterPage = () => {
   //아이디 중복 확인 함수
   const CheckAvailability = async (memberId) => {
     const response = await checkMemberId(memberId);
-    setCheckedMessage(response);
-    return response;
-
+    if(response[0]==='0'){
+      setAvailableId(false)
+    }else{
+      setAvailableId(true)
+    }
+    setCheckedMessage(response[1]);
   }
 
   const clickRegisterButton = async () => {
