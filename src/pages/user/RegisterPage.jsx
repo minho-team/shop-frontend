@@ -2,12 +2,14 @@ import { useState } from "react";
 import Header from "../../components/user/Header";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { register } from "../../api/common/authApi";
+import { checkMemberId, register } from "../../api/common/authApi";
 
 const RegisterPage = () => {
   const nav = useNavigate();
   const [input, setInput] = useState({});
   const [privacyChecked, setPrivacyChecked] = useState(false);
+  const [checkedMessage, setCheckedMessage] = useState("");
+  const [availableId, setAvailableId] = useState(false);
 
   const observeInput = (e) => {
     setInput({
@@ -16,9 +18,23 @@ const RegisterPage = () => {
     });
   };
 
+
+
+  //아이디 중복 확인 함수
+  const CheckAvailability = async (memberId) => {
+    const response = await checkMemberId(memberId);
+    setCheckedMessage(response);
+    return response;
+
+  }
+
   const clickRegisterButton = async () => {
     if (!input.memberId?.trim()) {
       alert("아이디를 입력해주세요.");
+      return;
+    }
+    if (availableId === false) {
+      alert("아이디가 중복되었는지 확인해주세요.")
       return;
     }
 
@@ -52,6 +68,7 @@ const RegisterPage = () => {
   };
 
   return (
+
     <>
       <Header />
 
@@ -79,6 +96,14 @@ const RegisterPage = () => {
                 />
               </Form.Group>
             </Col>
+            <div className="mt-4 mb-4">
+              <Button variant="dark" type="button" onClick={() => CheckAvailability(input.memberId)}>중복확인</Button>
+              <div>
+                <p>{checkedMessage}</p>
+              </div>
+            </div>
+
+
             <Col md={6}>
               <Form.Group controlId="password">
                 <Form.Label>비밀번호</Form.Label>
