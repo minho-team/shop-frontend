@@ -28,16 +28,15 @@ export const logout = async () => {
   return res.data;
 };
 
-//예시용 코드
-// export const getOne = async(no)=>{
-//     const res = await axios.get(`${prefix}/${no}`)
-//     return res.data
-// }
+//아이디 중복 체크 함수
+export const checkMemberId = async (memberId) => {
+  const res = await apiClient.post(`${prefix}/checkId?memberId=${memberId}`);
+  return res.data;
+};
 
-// export const getList = async (pageParam) =>{
+export const CheckNickName = async (nickName) =>{
+  const res = await apiClient.post(`${prefix}/checkNickName?nickName=${nickName}`)
+  return res.data;
+}
 
-//     const {page,size} = pageParam
-//     const res = await axios.get(`${prefix}/list`,{params:{page:page,size:size}})
-//     return res.data
-// }
 

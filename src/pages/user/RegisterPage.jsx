@@ -2,12 +2,31 @@ import { useState } from "react";
 import Header from "../../components/user/Header";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { register } from "../../api/common/authApi";
+import { checkMemberId, CheckNickName, register } from "../../api/common/authApi";
+
 
 const RegisterPage = () => {
   const nav = useNavigate();
   const [input, setInput] = useState({});
   const [privacyChecked, setPrivacyChecked] = useState(false);
+  const [checkedIdMessage, setCheckedIdMessage] = useState("");
+  const [availableId, setAvailableId] = useState(false);
+  const [checkedNickNameMessage, setCheckedNickNameMessage] = useState("");
+  const [availableNickName, setAvailableNickName] = useState(false);
+
+
+
+  const openPostcode = () => {
+    new window.daum.Postcode({
+      oncomplete: function (data) {
+        setInput((prev) => ({
+          ...prev,
+          zipCode: data.zonecode,
+          basicAddress: data.address,
+        }));
+      },
+    }).open();
+  };
 
   const observeInput = (e) => {
     setInput({
@@ -16,9 +35,37 @@ const RegisterPage = () => {
     });
   };
 
+
+  // 닉네임 중복 확인 함수
+  const CheckAvailabilityNickName = async (nickName) => {
+    const response = await CheckNickName(nickName);
+    if (response[0] === '0') {
+      setAvailableNickName(false)
+    } else {
+      setAvailableNickName(true)
+    }
+    setCheckedNickNameMessage(response[1])
+
+  }
+
+  //아이디 중복 확인 함수
+  const CheckAvailabilityId = async (memberId) => {
+    const response = await checkMemberId(memberId);
+    if (response[0] === '0') {
+      setAvailableId(false)
+    } else {
+      setAvailableId(true)
+    }
+    setCheckedIdMessage(response[1]);
+  }
+
   const clickRegisterButton = async () => {
     if (!input.memberId?.trim()) {
       alert("아이디를 입력해주세요.");
+      return;
+    }
+    if (availableId === false) {
+      alert("아이디가 중복되었는지 확인해주세요.")
       return;
     }
 
@@ -37,6 +84,11 @@ const RegisterPage = () => {
       return;
     }
 
+    if (availableNickName === false) {
+      alert("닉네임 중복되었는지 확인해주세요.")
+      return;
+    }
+
     if (!privacyChecked) {
       alert("개인정보처리방침을 확인해주세요.");
       return;
@@ -52,6 +104,7 @@ const RegisterPage = () => {
   };
 
   return (
+
     <>
       <Header />
 
@@ -62,8 +115,11 @@ const RegisterPage = () => {
         <p>본 사이트는 포트폴리오 용 테스트 웹페이지입니다.</p>
         <p style={{ color: "#666", fontSize: "14px" }}>
           회원가입 시 입력한 정보는 회원 식별, 주문/배송/환불 기능 테스트를
-          위해 처리됩니다. 자세한 내용은 개인정보처리방침을 확인해 주세요.
+          위해 처리됩니다.<br /> 자세한 내용은 개인정보처리방침을 확인해 주세요.
         </p>
+
+        <h3 className="mt-5">필수사항</h3>
+        <hr className="my-4" />
 
         <Form>
           <Row className="mb-3">
@@ -79,6 +135,16 @@ const RegisterPage = () => {
                 />
               </Form.Group>
             </Col>
+            <Col md={2}>
+              <Button style={{ "marginTop": "30px" }} variant="dark" type="button" onClick={() => CheckAvailabilityId(input.memberId)}>중복확인</Button>
+            </Col>
+            <Col md={4} >
+              <p style={{ "marginTop": "35px" }}>{checkedIdMessage}</p>
+            </Col>
+
+          </Row>
+
+          <Row style={{ "marginBottom": "20px" }}>
             <Col md={6}>
               <Form.Group controlId="password">
                 <Form.Label>비밀번호</Form.Label>
@@ -91,6 +157,7 @@ const RegisterPage = () => {
                 />
               </Form.Group>
             </Col>
+
           </Row>
 
           <Row className="mb-3">
@@ -106,6 +173,9 @@ const RegisterPage = () => {
                 />
               </Form.Group>
             </Col>
+
+          </Row>
+          <Row>
             <Col md={6}>
               <Form.Group controlId="nickName">
                 <Form.Label>닉네임</Form.Label>
@@ -118,7 +188,23 @@ const RegisterPage = () => {
                 />
               </Form.Group>
             </Col>
+            <Col md={2}>
+              <div className="mt-4 mb-4">
+                <Button style={{ "marginTop": "8px" }} variant="dark" type="button" onClick={() => CheckAvailabilityNickName(input.nickName)}>중복확인</Button>
+              </div>
+            </Col>
+            <Col>
+              <div>
+                <p style={{ "marginTop": "40px" }}>{checkedNickNameMessage}</p>
+              </div>
+            </Col>
+
           </Row>
+
+
+
+          <h3 className="mt-5">선택사항</h3>
+          <hr className="my-4" />
 
           <Row className="mb-3">
             <Col md={6}>
@@ -152,17 +238,32 @@ const RegisterPage = () => {
               <Form.Group controlId="zipCode">
                 <Form.Label>우편번호</Form.Label>
                 <Form.Control
+                  className="mb-3"
+                  value={input.zipCode || ""}
                   onChange={observeInput}
                   name="zipCode"
                   type="text"
-                  placeholder="우편번호 입력"
                 />
               </Form.Group>
             </Col>
+            <Col>
+              <Button
+                type="button"
+                variant="dark"
+                style={{ marginTop: "32px" }}
+                onClick={openPostcode}>
+                
+
+                주소검색
+              </Button>
+            </Col>
+
+
             <Col md={8}>
               <Form.Group controlId="basicAddress">
                 <Form.Label>기본주소</Form.Label>
                 <Form.Control
+                  value={input.basicAddress || ""}
                   onChange={observeInput}
                   name="basicAddress"
                   type="text"
@@ -207,7 +308,7 @@ const RegisterPage = () => {
 
           <hr className="my-4" />
 
-          <h5 className="mb-3">환불 계좌 정보(선택)</h5>
+          <h5 className="mb-3">환불 계좌 정보</h5>
 
           <Row className="mb-4">
             <Col md={4}>
@@ -280,7 +381,7 @@ const RegisterPage = () => {
             회원가입
           </Button>
         </Form>
-      </Container>
+      </Container >
     </>
   );
 };
