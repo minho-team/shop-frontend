@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Header from "../../components/user/Header";
 import { useUser } from "../../context/UserContext";
 import "../../css/user/MyPage.css";
@@ -98,10 +98,12 @@ const GradeInfo = ({ totalSpent, currentGrade, memberName }) => {
 const OrderHistory = ({ user }) => {
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
+  const urlPage = parseInt(searchParams.get("page")) || 1;
 
   // 검색 파라미터 상태 관리
   const [params, setParams] = useState({
-    page: 1,
+    page: urlPage,
     size: 10,
     searchType: "productName",
     keyword: "",
@@ -156,48 +158,61 @@ const OrderHistory = ({ user }) => {
     <div className="order-history-container">
       {/* 검색 및 필터 섹션 */}
       <section className="order-search-filter">
-        <form onSubmit={handleSearchSubmit}>
-          <div className="filter-group">
-            <label>조회기간</label>
-            <div className="btn-group">
-              <button type="button" className="filter-btn" onClick={() => setDateRange(7)}>최근 일주일</button>
-              <button type="button" className="filter-btn" onClick={() => setParams({ ...params, startDate: "", endDate: "" })}>직접선택</button>
-            </div>
-            <div className="date-picker-wrap">
-              <input type="date" value={params.startDate} onChange={(e) => setParams({ ...params, startDate: e.target.value })} />
-              <span className="tilde">~</span>
-              <input type="date" value={params.endDate} onChange={(e) => setParams({ ...params, endDate: e.target.value })} />
+        <form onSubmit={handleSearchSubmit} className="filter-form">
+          {/* 첫 번째 줄: 조회기간 */}
+          <div className="filter-row">
+            <div className="filter-label">조회기간</div>
+            <div className="filter-content-wrap">
+              <div className="btn-group-attached">
+                <button
+                  type="button"
+                  className={`filter-btn ${params.startDate && !params.endDate === false ? 'active' : ''}`}
+                  onClick={() => setDateRange(7)}
+                >
+                  최근 일주일
+                </button>
+                <button
+                  type="button"
+                  className={`filter-btn ${!params.startDate ? 'active' : ''}`}
+                  onClick={() => setParams({ ...params, startDate: "", endDate: "" })}
+                >
+                  직접선택
+                </button>
+              </div>
+              <div className="date-picker-wrap">
+                <input type="date" value={params.startDate} onChange={(e) => setParams({ ...params, startDate: e.target.value })} />
+                <span className="tilde">~</span>
+                <input type="date" value={params.endDate} onChange={(e) => setParams({ ...params, endDate: e.target.value })} />
+              </div>
             </div>
           </div>
 
-          <div className="filter-group-inline">
-            <div className="select-wrap">
-              <label>주문상태</label>
-              <select value={params.orderStatus} onChange={(e) => setParams({ ...params, orderStatus: e.target.value, page: 1 })}>
+          {/* 두 번째 줄: 주문상태 + 검색어 */}
+          <div className="filter-row">
+            <div className="filter-label">주문상태</div>
+            <div className="filter-content-wrap">
+              <select className="status-select" value={params.orderStatus} onChange={(e) => setParams({ ...params, orderStatus: e.target.value, page: 1 })}>
                 <option value="">전체 상태</option>
                 <option value="PAID">결제완료</option>
                 <option value="PENDING_PAYMENT">결제대기</option>
                 <option value="CANCELED">주문취소</option>
                 <option value="SHIPPING">배송중</option>
                 <option value="DELIVERED">배송완료</option>
-                <option value="REFUND_REQUESTED">환불요청</option>
-                <option value="REFUNDED">환불완료</option>
               </select>
-            </div>
 
-            <div className="search-input-wrap">
-              <select value={params.searchType} onChange={(e) => setParams({ ...params, searchType: e.target.value })}>
-                <option value="all">전체</option>
-                <option value="productName">상품명</option>
-                <option value="orderNo">주문번호</option>
-              </select>
-              <input
-                type="text"
-                placeholder="검색어를 입력하세요"
-                value={params.keyword}
-                onChange={(e) => setParams({ ...params, keyword: e.target.value })}
-              />
-              <button type="submit" className="btn-submit">조회</button>
+              <div className="search-combined-group">
+                <select value={params.searchType} onChange={(e) => setParams({ ...params, searchType: e.target.value })}>
+                  <option value="productName">상품명</option>
+                  <option value="orderNo">주문번호</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="검색어를 입력하세요"
+                  value={params.keyword}
+                  onChange={(e) => setParams({ ...params, keyword: e.target.value })}
+                />
+                <button type="submit" className="btn-submit">조회</button>
+              </div>
             </div>
           </div>
         </form>
@@ -205,6 +220,7 @@ const OrderHistory = ({ user }) => {
 
       {/* 주문 목록 테이블 */}
       <div className="order-list-table">
+        {loading && <div className="loading-indicator">로딩 중...</div>}
         <table className="custom-table">
           <thead>
             <tr>
@@ -224,7 +240,11 @@ const OrderHistory = ({ user }) => {
 
                   {/* 2. 섬네일이미지-상품명-구매개수 */}
                   <td className="td-product-info">
-                    <Link to={`/my/order/detail/${o.orderNo}`} className="product-item-flex">
+                    <Link
+                      to={`/my/order/detail/${o.orderNo}`}
+                      state={{ fromPage: params.page }}
+                      className="product-item-flex"
+                    >
                       <div className="thumbnail-box">
                         <img
                           src={o.mainImageUrl ? `${API_SERVER_HOST}${o.mainImageUrl}` : '/images/no-image.png'}

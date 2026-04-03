@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getOrderDetail, cancelOrder } from '../../api/user/ordersApi';
 import apiClient, { API_SERVER_HOST } from '../../api/common/apiClient';
 import Header from '../../components/user/Header';
@@ -33,9 +33,18 @@ const canWriteReview = (status) => {
 const MyOrderDetailPage = () => {
     const { orderNo } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [orderData, setOrderData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [reviewedItems, setReviewedItems] = useState({});
+    const fromPage = location.state?.fromPage || 1;
+
+    // 원래 있었던 페이지 번호를 가지고 목록으로 이동
+    const handleBackToList = () => {
+        navigate(`/mypage?page=${fromPage}`, {
+            state: { activeMenu: "주문내역조회" }
+        });
+    };
 
     const getImageUrl = (url) => {
         if (!url) return '/default-product.png';
@@ -144,7 +153,7 @@ const MyOrderDetailPage = () => {
                 <main className="content-area">
                     <header className="detail-header">
                         <h3 className="content-title">주문 상세 정보</h3>
-                        <button className="btn-back-list" onClick={() => navigate(-1)}>목록으로</button>
+                        <button className="btn-back-list" onClick={handleBackToList}>목록으로</button>
                     </header>
 
                     {/* 주문 요약 정보 */}
