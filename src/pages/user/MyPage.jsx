@@ -13,12 +13,12 @@ import MyPageEditPage from "./MyPageEditPage";
 // 헬퍼 함수 (Helper Functions)
 // ================================================
 
-// 구매 횟수 기반 등급 계산
-const getGrade = (count) => {
-  if (count >= 30) return "VVIP";
-  if (count >= 20) return "VIP";
-  if (count >= 10) return "GOLD";
-  if (count >= 5) return "SILVER";
+// 누적 금액 기반 등급 계산
+const getGradeByAmount = (amount) => {
+  if (amount >= 1000000) return "VVIP";
+  if (amount >= 500000) return "VIP";
+  if (amount >= 300000) return "GOLD";
+  if (amount >= 100000) return "SILVER";
   return "BASIC";
 };
 
@@ -45,12 +45,12 @@ const formatDate = (d) => (!d ? "-" : new Date(d).toLocaleDateString("ko-KR"));
 // ================================================
 // [컴포넌트] 등급 혜택 안내 (Grade Info)
 // ================================================
-const GradeInfo = ({ purchaseCount, currentGrade, memberName }) => {
+const GradeInfo = ({ totalSpent, currentGrade, memberName }) => {
   const grades = [
-    { name: "VVIP", condition: "30회 이상", benefit: "10% 할인 쿠폰 + 무료배송" },
-    { name: "VIP", condition: "20회 이상", benefit: "7% 할인 쿠폰 + 무료배송" },
-    { name: "GOLD", condition: "10회 이상", benefit: "5% 할인 쿠폰" },
-    { name: "SILVER", condition: "5회 이상", benefit: "3% 할인 쿠폰" },
+    { name: "VVIP", condition: "100만원 이상", benefit: "10% 할인 쿠폰 + 무료배송" },
+    { name: "VIP", condition: "50만원 이상", benefit: "7% 할인 쿠폰 + 무료배송" },
+    { name: "GOLD", condition: "30만원 이상", benefit: "5% 할인 쿠폰" },
+    { name: "SILVER", condition: "10만원 이상", benefit: "3% 할인 쿠폰" },
     { name: "BASIC", condition: "기본 등급", benefit: "신규가입 혜택 제공" },
   ];
 
@@ -58,8 +58,9 @@ const GradeInfo = ({ purchaseCount, currentGrade, memberName }) => {
     <div className="grade-info-wrapper">
       <div className="current-status-box">
         <p>
-          현재 <strong>{memberName}</strong>님의 누적 구매 횟수는{" "}
-          <strong>{purchaseCount}회</strong>이며,
+          현재 <strong>{memberName}</strong>님의 누적 구매 금액은{" "}
+          {/* 금액 적용 */}
+          <strong className="highlight-price">{totalSpent.toLocaleString()}원</strong>이며,
         </p>
         <p>
           적용된 멤버쉽 등급은{" "}
@@ -73,19 +74,14 @@ const GradeInfo = ({ purchaseCount, currentGrade, memberName }) => {
         <thead>
           <tr>
             <th>등급명</th>
-            <th>조건</th>
+            <th>조건 (누적금액)</th>
             <th>혜택</th>
           </tr>
         </thead>
         <tbody>
           {grades.map((g) => (
-            <tr
-              key={g.name}
-              className={currentGrade === g.name ? "row-highlight" : ""}
-            >
-              <td>
-                <strong>{g.name}</strong>
-              </td>
+            <tr key={g.name} className={currentGrade === g.name ? "row-highlight" : ""}>
+              <td><strong>{g.name}</strong></td>
               <td>{g.condition}</td>
               <td>{g.benefit}</td>
             </tr>
@@ -673,25 +669,26 @@ const MyPage = () => {
   const [activeMenu, setActiveMenu] = useState("주문내역조회");
   const navigate = useNavigate();
 
-  const purchaseCount = Number(user?.purchaseCount) || 0;
-  const currentGrade = user?.grade || getGrade(purchaseCount);
+  const totalSpent = Number(user?.totalSpent || user?.totalPriceSum || 0);
+  const currentGrade = user?.grade || getGradeByAmount(totalSpent);
 
+  // 금액 기반 프로그레스 바 계산
   const getProgress = () => {
-    if (purchaseCount >= 30) return 100;
-    const targets = [5, 10, 20, 30];
-    const nextTarget = targets.find((t) => t > purchaseCount) || 30;
+    if (totalSpent >= 1000000) return 100;
+    const targets = [100000, 300000, 500000, 1000000];
+    const nextTarget = targets.find((t) => t > totalSpent) || 1000000;
     const prevTarget = targets[targets.indexOf(nextTarget) - 1] || 0;
 
-    const segmentProgress = ((purchaseCount - prevTarget) / (nextTarget - prevTarget)) * 100;
+    const segmentProgress = ((totalSpent - prevTarget) / (nextTarget - prevTarget)) * 100;
     return Math.min(segmentProgress, 100);
   };
 
+  // 다음 등급까지 남은 금액 계산
   const getNextGradeInfo = () => {
-    if (purchaseCount < 5) return 5 - purchaseCount;
-    if (purchaseCount < 10) return 10 - purchaseCount;
-    if (purchaseCount < 20) return 20 - purchaseCount;
-    if (purchaseCount < 30) return 30 - purchaseCount;
-    return 0;
+    const targets = [100000, 300000, 500000, 1000000];
+    const nextTarget = targets.find((t) => t > totalSpent);
+    if (!nextTarget) return null;
+    return nextTarget - totalSpent;
   };
 
   if (userLoading) return <div className="loading-container">정보 로딩 중...</div>;
@@ -710,19 +707,20 @@ const MyPage = () => {
           </div>
 
           <div className="grade-badge">
-            <span className="label">Grade (등급)</span>
+            <span className="label">Membership Status</span>
             <div className="grade-display-wrapper">
               <span className={`badge-box badge-${currentGrade.toLowerCase()}`}>
                 {currentGrade}
               </span>
               <div className="grade-text-group">
                 <strong className={`grade-text-${currentGrade.toLowerCase()}`}>
-                  {currentGrade}
+                  {currentGrade} Member
                 </strong>
                 {currentGrade !== "VVIP" && (
                   <>
                     <span className="next-grade-info">
-                      다음 등급까지 {getNextGradeInfo()}회 남음
+                      {/* 금액 포맷팅 적용 */}
+                      다음 등급까지 <strong>{getNextGradeInfo()?.toLocaleString()}원</strong> 남음
                     </span>
                     <div className="progress-bar-container">
                       <div
@@ -775,7 +773,7 @@ const MyPage = () => {
             {activeMenu === "쿠폰내역조회" && <CouponHistory user={user} />}
             {activeMenu === "등급 혜택 안내" && (
               <GradeInfo
-                purchaseCount={purchaseCount}
+                totalSpent={totalSpent}
                 currentGrade={currentGrade}
                 memberName={user?.memberName}
               />
