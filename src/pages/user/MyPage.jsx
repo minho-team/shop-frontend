@@ -716,15 +716,21 @@ const MyPage = () => {
                 <strong className={`grade-text-${currentGrade.toLowerCase()}`}>
                   {currentGrade} Member
                 </strong>
-                {currentGrade !== "VVIP" && (
+                {currentGrade === "VVIP" ? (
+                  <>
+                    <span className="max-grade-text">최고 등급 달성</span>
+                    <div className="progress-bar-container">
+                      <div className="progress-fill fill-vvip" style={{ width: "100%" }}></div>
+                    </div>
+                  </>
+                ) : (
                   <>
                     <span className="next-grade-info">
-                      {/* 금액 포맷팅 적용 */}
                       다음 등급까지 <strong>{getNextGradeInfo()?.toLocaleString()}원</strong> 남음
                     </span>
                     <div className="progress-bar-container">
                       <div
-                        className="progress-fill"
+                        className={`progress-fill fill-${currentGrade.toLowerCase()}`}
                         style={{ width: `${getProgress()}%` }}
                       ></div>
                     </div>
