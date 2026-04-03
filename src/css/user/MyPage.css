@@ -390,6 +390,15 @@
   padding: 15px 8px;
 }
 
+.order-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed;
+  min-height: 600px;
+  background-color: #fff;
+}
+
 /* ==========================================================================
    8. 페이징 버튼 (Pagination)
    ========================================================================== */
@@ -398,6 +407,7 @@
   justify-content: center;
   align-items: center;
   margin-top: 40px;
+  margin-bottom: 80px;
   gap: 8px;
 }
 
@@ -440,13 +450,12 @@
    9. 기타 유틸리티 (Loading, Empty Status)
    ========================================================================== */
 .loading-container,
-.empty-row,
-.empty-content {
-  padding: 100px 0;
+.empty-row {
+  padding: 300px 0;
   text-align: center;
   color: #bbb;
   font-size: 14px;
-  font-weight: 400;
+  background-color: #fff;
 }
 
 .empty-content p {
@@ -756,103 +765,114 @@
    13. 주문 내역 검색 및 필터 (Order Search & Filter)
    ========================================================================== */
 .order-search-filter {
-  background: #fcfcfc;
+  background: #fdfdfd;
   border: 1px solid #eee;
-  padding: 25px;
+  padding: 25px 30px;
   margin-bottom: 30px;
 }
 
-.filter-group {
+.filter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.filter-row {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 15px;
 }
 
-.filter-group label {
+.filter-label {
   width: 80px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: #333;
+  flex-shrink: 0;
 }
 
-.btn-group {
-  display: flex;
-  gap: 5px;
-}
-
-.filter-btn {
-  padding: 6px 12px;
-  border: 1px solid #ddd;
-  background: #fff;
-  font-size: 12px;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.filter-btn:hover {
-  border-color: #999;
-  color: #111;
-}
-
-.date-picker-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.date-picker-wrap input[type="date"] {
-  padding: 5px 8px;
-  border: 1px solid #ddd;
-  font-size: 12px;
-  color: #444;
-  outline: none;
-}
-
-.tilde {
-  color: #ccc;
-}
-
-.filter-group-inline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px dashed #eee;
-  padding-top: 15px;
-  margin-top: 15px;
-}
-
-.select-wrap,
-.search-input-wrap {
+.filter-content-wrap {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.order-search-filter select {
-  padding: 6px 10px;
-  border: 1px solid #ddd;
-  font-size: 12px;
-  color: #333;
-  outline: none;
+.btn-group-attached {
+  display: flex;
+  gap: 18px;
 }
 
-.search-input-wrap input[type="text"] {
-  width: 200px;
-  padding: 6px 10px;
-  border: 1px solid #ddd;
+.btn-group-attached .filter-btn {
+  border: 1px solid #ddd !important;
+  background: #fff;
+  color: #666;
+  padding: 7px 15px;
   font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 !important;
+  border-right: 1px solid #ddd !important;
+}
+
+.btn-group-attached .filter-btn.active {
+  background: #111 !important;
+  border: 1px solid #111 !important;
+  color: #fff !important;
+  font-weight: 600;
+  border-radius: 2px;
+}
+
+.btn-group-attached .filter-btn:first-child {
+  border-right: none;
+}
+
+.btn-group-attached .filter-btn:not(:first-child) {
+  margin-left: -1px;
+}
+
+.btn-group-attached .filter-btn:hover {
+  background: #f9f9f9;
+  border-color: #bbb;
+  z-index: 1;
+}
+
+.btn-group-attached .filter-btn:hover:not(.active) {
+  background: #f8f8f8;
+  border-color: #bbb !important;
+}
+
+.search-combined-group {
+  display: flex;
+  margin-left: 10px;
+}
+
+.search-combined-group select,
+.search-combined-group input {
+  border: 1px solid #ddd;
+  border-right: none;
+  height: 36px;
   outline: none;
+  font-size: 12px;
+}
+
+.search-combined-group select {
+  padding: 0 10px;
+  width: 90px;
+}
+
+.search-combined-group input {
+  width: 250px;
+  padding: 0 12px;
 }
 
 .btn-submit {
-  padding: 6px 20px;
+  height: 36px;
+  padding: 0 25px;
   background: #111;
   color: #fff;
   border: 1px solid #111;
-  font-size: 12px;
   font-weight: 600;
+  font-size: 13px;
   cursor: pointer;
 }
 
@@ -860,6 +880,46 @@
   background: #333;
 }
 
+.status-select,
+.date-picker-wrap input[type="date"] {
+  height: 36px;
+  border: 1px solid #ddd;
+  padding: 0 10px;
+  font-size: 12px;
+  outline: none;
+}
+
+.date-picker-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 5px;
+}
+
+.tilde {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.order-list-table {
+  min-height: 600px;
+  background-color: #fff;
+  position: relative;
+}
+
+.loading-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  padding: 0;
+}
 /* ==========================================================================
    14. 주문 리스트 상세 아이템 (Order List Item Details)
    ========================================================================== */
@@ -942,4 +1002,9 @@
 .status-canceled {
   color: #ff4d4f;
   font-weight: 600;
+}
+.order-list-table {
+  min-height: 750px;
+  background-color: #fff;
+  display: block;
 }
