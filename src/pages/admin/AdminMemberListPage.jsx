@@ -38,21 +38,19 @@ const AdminMemberListPage = () => {
   // 상태 필터 ("전체" 또는 "ACTIVE" / "DORMANT" / "SUSPENDED")
   const [statusFilter, setStatusFilter] = useState("전체");
 
-  // 검색어 입력값 (input에 연결)
+  // ① 검색값 분리 — 타이핑마다 API 호출 방지
+  // searchInput: input에 바인딩된 타이핑 추적용
   const [searchInput, setSearchInput] = useState("");
-
-  // 실제 API 호출에 사용되는 검색어 (검색 버튼 클릭 시 적용)
+  // appliedKeyword: 버튼 클릭 시에만 갱신 → useEffect 재실행 → API 호출
   const [appliedKeyword, setAppliedKeyword] = useState("");
 
   // 로딩 상태
   const [loading, setLoading] = useState(false);
 
-  // ================================================
-  // 필터, 검색어, 페이지 변경 시 목록 재조회
-  // ================================================
+  // appliedKeyword가 바뀔 때만 fetchList 실행 → API 한 번만 호출
   useEffect(() => {
     fetchList();
-  }, [statusFilter, appliedKeyword, currentPage]);
+  }, [statusFilter, appliedKeyword, currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchList = async () => {
     setLoading(true);
@@ -60,7 +58,7 @@ const AdminMemberListPage = () => {
       const data = await getAdminMemberList({
         page: currentPage,
         size: PAGE_SIZE,
-        // "전체"면 파라미터 생략 → 서버에서 전체 조회
+        // ③ 상태 필터 — "전체"면 null로 넘겨 파라미터 생략 → WHERE 조건 없이 전체 조회
         status: statusFilter === "전체" ? null : statusFilter,
         keyword: appliedKeyword,
       });
@@ -80,7 +78,7 @@ const AdminMemberListPage = () => {
     setCurrentPage(1);
   };
 
-  // 검색 실행 (버튼 클릭 또는 엔터키)
+  // 버튼 클릭 시 appliedKeyword 갱신 → useEffect 발동 → API 호출
   const handleSearch = () => {
     setAppliedKeyword(searchInput);
     setCurrentPage(1);

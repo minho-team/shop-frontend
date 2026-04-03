@@ -4,8 +4,8 @@ const prefix = "/api/admin/member";
 
 export const getAdminMemberList = async ({ page = 1, size = 5, status, keyword } = {}) => {
   const params = { page, size };
-  if (status) params.status = status;
-  if (keyword && keyword.trim()) params.keyword = keyword.trim();
+  if (status) params.status = status;             // ③ null이면 파라미터 생략 → 전체 조회
+  if (keyword && keyword.trim()) params.keyword = keyword.trim(); // ② 빈값이면 생략 → MyBatis <if> 조건 제외
   const res = await apiClient.get(`${prefix}/list`, { params });
   return res.data;
 };
