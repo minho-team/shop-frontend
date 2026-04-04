@@ -26,6 +26,9 @@ const AdminRefundDetailPage = () => {
   const { refundNo } = useParams();
   const navigate = useNavigate();
 
+
+
+
   const [refundDetail, setRefundDetail] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -42,7 +45,7 @@ const AdminRefundDetailPage = () => {
     }
   };
 
-  const decideRefund = async(refundNo,status)=>{
+  const decideRefund = async (refundNo, status) => {
 
     //확인을 누르면 isConfirm에 true가 들어감
     const isConfirm = window.confirm(
@@ -50,9 +53,12 @@ const AdminRefundDetailPage = () => {
     );
 
     //취소 눌렀으면 그냥 함수 종료
-    if(!isConfirm) return;
+    if (!isConfirm) return;
 
-    const data = await callDecideRefund(refundNo,status);
+
+    const data = await callDecideRefund(refundNo, status);
+
+    await fetchRefundDetail();
   }
 
   useEffect(() => {
@@ -77,6 +83,13 @@ const AdminRefundDetailPage = () => {
 
     return reasonDetail ? `${reasonLabel} - ${reasonDetail}` : reasonLabel;
   };
+
+
+  //거절이나 완료가 된 상태라면(환불처리가 끝난 상태라면 true)
+const isFinished =
+  refundDetail?.refundStatus === 'COMPLETED' ||
+  refundDetail?.refundStatus === 'REJECTED';
+
 
   if (loading) {
     return (
@@ -190,19 +203,21 @@ const AdminRefundDetailPage = () => {
             </table>
           </div>
 
-          <div className="detail-card">
-            <h3>환불 의사 결정</h3>
-            <div className="status-edit-box">
 
-              <button onClick={()=>decideRefund(refundNo,'APPROVED')}>
-                승인
-              </button>
-              <button onClick={()=>decideRefund(refundNo,'REJECTED')}>
-                거절
-              </button>
+
+          {!isFinished &&
+            <div className="detail-card">
+              <h3>환불 의사 결정</h3>
+              <div className="status-edit-box">
+                <button onClick={() => decideRefund(refundNo, 'APPROVED')}> 승인 </button>
+                <button onClick={() => decideRefund(refundNo, 'REJECTED')}> 거절 </button>
+              </div>
             </div>
+          }
 
-          </div>
+
+
+
         </div>
       </AdminLayout>
     </>
