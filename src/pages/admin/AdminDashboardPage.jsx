@@ -370,11 +370,11 @@ const AdminDashboardPage = () => {
                     <div className="admin-dashboard-top-rank">{index + 1}</div>
 
                     <div className="admin-dashboard-top-name">
-                      {product.name}
+                      {product.productName}
                     </div>
 
                     <div className="admin-dashboard-top-sales">
-                      {formatNumber(product.totalSalesCount)}개 판매
+                      {formatNumber(product.totalSoldQuantity)}개 판매
                     </div>
 
                     <button
