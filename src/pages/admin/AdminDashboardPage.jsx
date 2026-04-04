@@ -31,6 +31,9 @@ const AdminDashboardPage = () => {
     lowStockCount: 0,
     refundRequestCount: 0,
 
+    currentWeekSales: 0,
+    weekOverWeekRate: null,
+
     salesChartList: [],
     topProductList: [],
     recentOrderList: [],
@@ -62,6 +65,9 @@ const AdminDashboardPage = () => {
           lowStockCount: data?.lowStockCount ?? 0,
           refundRequestCount: data?.refundRequestCount ?? 0,
 
+          currentWeekSales: data?.currentWeekSales ?? 0,
+          weekOverWeekRate: data?.weekOverWeekRate ?? null,
+
           salesChartList: data?.salesChartList ?? [],
           topProductList: data?.topProductList ?? [],
           recentOrderList: data?.recentOrderList ?? [],
@@ -80,6 +86,21 @@ const AdminDashboardPage = () => {
 
   const formatNumber = (v) => Number(v || 0).toLocaleString();
   const formatPrice = (v) => `${Number(v || 0).toLocaleString()}원`;
+  const formatSalesYAxis = (value) => {
+    const amount = Number(value || 0);
+
+    if (amount === 0) return "0";
+    if (amount < 10000) return amount.toLocaleString();
+
+    return `${Math.round(amount / 10000)}만`;
+  };
+
+  const formatWeekOverWeek = (rate) => {
+    if (rate === null || rate === undefined) return "신규";
+
+    return `${rate > 0 ? "+" : ""}${Number(rate).toFixed(1)}%`;
+  };
+
   const formatDateTime = (dateTime) => {
     if (!dateTime) return "-";
 
@@ -98,6 +119,28 @@ const AdminDashboardPage = () => {
     return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
   };
 
+  const averageDailySales = useMemo(() => {
+    const chartList = dashboard.salesChartList ?? [];
+    if (chartList.length === 0) return 0;
+
+    const total = chartList.reduce(
+      (sum, item) => sum + Number(item?.sales || 0),
+      0,
+    );
+    return Math.round(total / chartList.length);
+  }, [dashboard.salesChartList]);
+
+  const highestSalesDay = useMemo(() => {
+    const chartList = dashboard.salesChartList ?? [];
+    if (chartList.length === 0) return null;
+
+    return chartList.reduce((maxItem, currentItem) => {
+      return Number(currentItem?.sales || 0) > Number(maxItem?.sales || 0)
+        ? currentItem
+        : maxItem;
+    }, chartList[0]);
+  }, [dashboard.salesChartList]);
+
   const getCardClassName = (label) => {
     if (label.includes("총환불") || label.includes("환불 요청")) {
       return "admin-dashboard-card is-danger";
@@ -105,6 +148,17 @@ const AdminDashboardPage = () => {
 
     if (label.includes("재고 부족")) {
       return "admin-dashboard-card is-warning";
+    }
+
+    if (
+      label.includes("전체 회원 수") ||
+      label.includes("오늘 신규 회원 수")
+    ) {
+      return "admin-dashboard-card is-soft-positive";
+    }
+
+    if (label.includes("판매중 상품 수") || label.includes("금월 주문 수")) {
+      return "admin-dashboard-card is-soft-info";
     }
 
     if (
@@ -275,76 +329,116 @@ const AdminDashboardPage = () => {
         <div className="admin-dashboard-grid-row">
           <section className="admin-dashboard-panel admin-dashboard-chart-panel">
             <div className="admin-dashboard-panel-header">
-              <h3 className="admin-dashboard-panel-title">최근 7일 매출</h3>
+              <h3 className="admin-dashboard-panel-title">최근 7일 매출 추이</h3>
             </div>
 
-            <div className="admin-dashboard-recharts-wrap">
-              {dashboard.salesChartList.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={dashboard.salesChartList}
-                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      stroke="#e5e7eb"
-                    />
-
-                    <XAxis
-                      dataKey="label"
-                      tick={{ fontSize: 12, fill: "#6b7280" }}
-                      axisLine={{ stroke: "#d1d5db" }}
-                      tickLine={false}
-                    />
-
-                    <YAxis
-                      tickFormatter={(value) =>
-                        `${Number(value).toLocaleString()}`
-                      }
-                      tick={{ fontSize: 12, fill: "#6b7280" }}
-                      axisLine={false}
-                      tickLine={false}
-                      width={55}
-                    />
-
-                    <Tooltip
-                      formatter={(value) => [
-                        `${Number(value).toLocaleString()}원`,
-                        "매출",
-                      ]}
-                      labelFormatter={(label) => `${label}`}
-                      contentStyle={{
-                        borderRadius: "10px",
-                        border: "1px solid #e5e7eb",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-                      }}
-                    />
-
-                    {/* 막대 */}
-                    <Bar
-                      dataKey="sales"
-                      fill="#2563eb"
-                      radius={[8, 8, 0, 0]}
-                      maxBarSize={40}
-                    />
-
-                    {/* 추세선 */}
-                    <Line
-                      type="monotone"
-                      dataKey="sales"
-                      stroke="#f97316"
-                      strokeWidth={3}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="admin-dashboard-empty">
-                  최근 7일 매출 데이터가 없습니다.
+            <div className="admin-dashboard-sales-layout">
+              <div className="admin-dashboard-sales-summary">
+                <div className="admin-dashboard-sales-main">
+                  <span className="admin-dashboard-sales-label">
+                    최근 7일 총매출
+                  </span>
+                  <strong className="admin-dashboard-sales-value">
+                    {formatPrice(dashboard.currentWeekSales)}
+                  </strong>
                 </div>
-              )}
+
+                <div className="admin-dashboard-sales-chip">
+                  전주 대비 {formatWeekOverWeek(dashboard.weekOverWeekRate)}
+                </div>
+
+                <div className="admin-dashboard-sales-subgrid">
+                  <div className="admin-dashboard-sales-subcard">
+                    <span className="admin-dashboard-sales-label">
+                      일 평균 매출
+                    </span>
+                    <strong className="admin-dashboard-sales-subvalue">
+                      {formatPrice(averageDailySales)}
+                    </strong>
+                  </div>
+
+                  <div className="admin-dashboard-sales-subcard">
+                    <span className="admin-dashboard-sales-label">
+                      최고 매출일
+                    </span>
+                    <strong className="admin-dashboard-sales-subvalue is-compact">
+                      {highestSalesDay?.label ?? "-"}
+                    </strong>
+                    <span className="admin-dashboard-sales-submeta">
+                      {highestSalesDay
+                        ? formatPrice(highestSalesDay.sales)
+                        : "-"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-dashboard-recharts-wrap">
+                {dashboard.salesChartList.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={dashboard.salesChartList}
+                      margin={{ top: 10, right: 16, left: 12, bottom: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        vertical={false}
+                        stroke="#e5e7eb"
+                      />
+
+                      <XAxis
+                        dataKey="label"
+                        tick={{ fontSize: 12, fill: "#6b7280" }}
+                        axisLine={{ stroke: "#d1d5db" }}
+                        tickLine={false}
+                      />
+
+                      <YAxis
+                        tickFormatter={formatSalesYAxis}
+                        tick={{ fontSize: 12, fill: "#6b7280" }}
+                        axisLine={false}
+                        tickLine={false}
+                        width={64}
+                      />
+
+                      <Tooltip
+                        formatter={(value) => [formatPrice(value), "매출"]}
+                        labelFormatter={(label) => `${label}`}
+                        contentStyle={{
+                          borderRadius: "10px",
+                          border: "1px solid #e5e7eb",
+                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+                        }}
+                      />
+
+                      <Bar
+                        dataKey="sales"
+                        fill="#22a383"
+                        radius={[8, 8, 0, 0]}
+                        maxBarSize={36}
+                      />
+
+                      <Line
+                        type="monotone"
+                        dataKey="sales"
+                        stroke="#173d34"
+                        strokeWidth={3}
+                        dot={{
+                          r: 4,
+                          fill: "#ffffff",
+                          stroke: "#22a383",
+                          strokeWidth: 2,
+                        }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="admin-dashboard-empty">
+                    최근 7일 매출 데이터가 없습니다.
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 
