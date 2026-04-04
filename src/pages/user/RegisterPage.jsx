@@ -190,8 +190,11 @@ const RegisterPage = () => {
                 />
               </Form.Group>
             </Col>
-            <Col md={4}>
-              {isSame ?(<p>비밀번호가 일치합니다.</p>):(<p>비밀번호가 일치하지 않습니다.</p>)}
+            <Col md={4} style={{"marginTop":"40px"}}>
+              {isSame ?
+              (<p style={{"color":"green", "fontWeight":"bold" }}>비밀번호가 일치합니다.</p>)
+              :
+              (<p style={{"color":"orange", "fontWeight":"bold" }}>비밀번호가 일치하지 않습니다.</p>)}
             </Col>
 
           </Row>
