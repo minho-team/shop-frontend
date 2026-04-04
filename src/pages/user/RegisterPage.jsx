@@ -13,6 +13,7 @@ const RegisterPage = () => {
   const [availableId, setAvailableId] = useState(false);
   const [checkedNickNameMessage, setCheckedNickNameMessage] = useState("");
   const [availableNickName, setAvailableNickName] = useState(false);
+  const [isSame,setIsSame] = useState(false);
 
 
 
@@ -59,6 +60,18 @@ const RegisterPage = () => {
     setCheckedIdMessage(response[1]);
   }
 
+  //비밀번호 확인 메서드
+  const checkSamePassword = (e)=>{
+
+
+    if(input.password !== e.target.value){
+      setIsSame(false);
+    }else{
+      setIsSame(true);
+    }
+
+  }
+
   const clickRegisterButton = async () => {
     if (!input.memberId?.trim()) {
       alert("아이디를 입력해주세요.");
@@ -66,6 +79,11 @@ const RegisterPage = () => {
     }
     if (availableId === false) {
       alert("아이디가 중복되었는지 확인해주세요.")
+      return;
+    }
+
+    if (isSame === false) {
+      alert("두 입력 칸의 비밀번호가 일치하지 않습니다.")
       return;
     }
 
@@ -97,7 +115,7 @@ const RegisterPage = () => {
     try {
       const data = await register(input);
       console.log(data);
-      nav("/");
+      nav("/registerResult", { replace: true });
     } catch (err) {
       console.log(err);
     }
@@ -156,6 +174,24 @@ const RegisterPage = () => {
                   placeholder="비밀번호 입력"
                 />
               </Form.Group>
+            </Col>
+
+          </Row>
+          <Row style={{ "marginBottom": "20px" }}>
+            <Col md={6}>
+              <Form.Group controlId="password">
+                <Form.Label>비밀번호 확인</Form.Label>
+                <Form.Control
+                  required
+                  onChange={checkSamePassword}
+                  name="password"
+                  type="password"
+                  placeholder="비밀번호 입력"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              {isSame ?(<p>비밀번호가 일치합니다.</p>):(<p>비밀번호가 일치하지 않습니다.</p>)}
             </Col>
 
           </Row>
@@ -252,7 +288,7 @@ const RegisterPage = () => {
                 variant="dark"
                 style={{ marginTop: "32px" }}
                 onClick={openPostcode}>
-                
+
 
                 주소검색
               </Button>

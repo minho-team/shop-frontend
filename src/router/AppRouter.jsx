@@ -36,6 +36,7 @@ const TempPaymentSuccessPage = lazy(
 const PaymentFailPage = lazy(() => import("../pages/user/PaymentFailPage"));
 const PrivacyPolicyPage = lazy(() => import("../pages/user/PrivacyPolicyPage"));
 const RoulettePage = lazy(() => import("../pages/user/RoulettePage"));
+const RegisterResultPage = lazy(() => import("../pages/user/RegisterResultPage"));
 
 // ================================================
 // 관리자 페이지
@@ -137,6 +138,7 @@ const AppRouterContent = () => {
     { path: "/faq/detail/:id", element: <FaqDetailPage /> },
     { path: "/member/kakao", element: <KakaoRedirectPage /> },
     { path: "/privacy", element: <PrivacyPolicyPage /> },
+    { path: "/registerResult", element: <RegisterResultPage /> },
 
     // ── 관리자 전용 ───────────────────────────────
     {
