@@ -14,10 +14,16 @@ export const getAdminRefundDetail = async (refundNo) => {
   return res.data;
 };
 
-// 관리자 환불 상태 업데이트
-export const updateAdminRefundStatus = async (refundNo, refundStatus) => {
-  const res = await apiClient.put(`${prefix}/${refundNo}/status`, {
-    refundStatus,
-  });
+//관리자 환불 승인/거절
+export const callDecideRefund = async (refundNo, status) => {
+  const res = await apiClient.put(`${prefix}/${refundNo}`, { status })
   return res.data;
-};
+}
+
+// // 관리자 환불 상태 업데이트
+// export const updateAdminRefundStatus = async (refundNo, refundStatus) => {
+//   const res = await apiClient.put(`${prefix}/${refundNo}/status`, {
+//     refundStatus,
+//   });
+//   return res.data;
+// };
