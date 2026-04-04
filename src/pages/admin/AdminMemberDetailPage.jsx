@@ -1259,7 +1259,7 @@ const AdminMemberDetailPage = () => {
                   </thead>
                   <tbody>
                     {memberCoupons.slice((memberCouponPage - 1) * COUPON_PAGE_SIZE, memberCouponPage * COUPON_PAGE_SIZE).map((c) => {
-                      // 만료 여부 판단: endAt이 현재 시각보다 이전이면 만료
+                      // ③ 만료 여부 프론트 계산 — 서버 재요청 없이 직접 판단
                       const isExpired = c.endAt && new Date(c.endAt) < new Date();
                       return (
                       <tr key={c.memberCouponNo} style={{ opacity: isExpired ? 0.6 : 1 }}>
