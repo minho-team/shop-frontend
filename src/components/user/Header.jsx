@@ -235,14 +235,15 @@ const Header = () => {
   return (
     <header className="header-wrapper">
       <div className="top-banner">
-        <span className={`top-banner-text ${noticeFade ? "fade-in" : "fade-out"}`}>
+        <span
+          className={`top-banner-text ${noticeFade ? "fade-in" : "fade-out"}`}
+        >
           {NOTICES[noticeIndex]}
         </span>
       </div>
 
       <Container fluid className="utility-row">
         <div className="utility-inner">
-
           {/* 왼쪽: 항상 고정 메뉴 */}
           <Nav className="utility-left">
             <Nav.Link as={Link} to="/cart" className="utility-link">
@@ -272,7 +273,7 @@ const Header = () => {
                 {isAdmin && (
                   <Nav.Link
                     as={Link}
-                    to="/admin/home"
+                    to="/admin/dashboard"
                     className="utility-link admin-page-btn"
                   >
                     관리자 페이지로
@@ -291,16 +292,34 @@ const Header = () => {
               </>
             )}
           </Nav>
-
         </div>
       </Container>
 
       <Container fluid className="brand-row">
-        <Link to="/" className="brand-center" style={{ display: "inline-flex", alignItems: "center", gap: "14px" }}>
-          <div className="brand-logo-image" style={{ transform: "translateY(-6px)", display: "flex", alignItems: "center" }}>
+        <Link
+          to="/"
+          className="brand-center"
+          style={{ display: "inline-flex", alignItems: "center", gap: "14px" }}
+        >
+          <div
+            className="brand-logo-image"
+            style={{
+              transform: "translateY(-6px)",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
             <img src="/images/logo.png" alt="ERDIN 로고" />
           </div>
-          <div className="brand-copy" style={{ display: "flex", flexDirection: "column", justifyContent: "center", gap: "7px" }}>
+          <div
+            className="brand-copy"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              gap: "7px",
+            }}
+          >
             <strong>ERDIN</strong>
             <span>SELECT SHOP</span>
           </div>
@@ -358,16 +377,22 @@ const Header = () => {
         </Container>
 
         {openMenu === "/men" &&
-          renderMegaMenu(menCategories, menSectionIds, 1, [
-            "/images/menu-men-1.jpg",
-            "/images/menu-men-2.jpg",
-          ], "mega-men")}
+          renderMegaMenu(
+            menCategories,
+            menSectionIds,
+            1,
+            ["/images/menu-men-1.jpg", "/images/menu-men-2.jpg"],
+            "mega-men",
+          )}
 
         {openMenu === "/women" &&
-          renderMegaMenu(womenCategories, womenSectionIds, 2, [
-            "/images/menu-women-1.jpg",
-            "/images/menu-women-2.jpg",
-          ], "mega-women")}
+          renderMegaMenu(
+            womenCategories,
+            womenSectionIds,
+            2,
+            ["/images/menu-women-1.jpg", "/images/menu-women-2.jpg"],
+            "mega-women",
+          )}
       </div>
     </header>
   );
