@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { confirmPayment } from "../../api/user/ordersApi";
+import LoadingPage from "./LoadingPage";
 
 const TempPaymentSuccessPage = () => {
   const [searchParams] = useSearchParams();
@@ -61,7 +62,7 @@ const TempPaymentSuccessPage = () => {
     run();
   }, [searchParams, navigate]);
 
-  return <div>결제 승인 처리 중...</div>;
+  return <LoadingPage/>;
 };
 
 export default TempPaymentSuccessPage;

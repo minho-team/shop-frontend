@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import apiClient from "../../api/common/apiClient";
 import { useUser } from "../../context/UserContext";
+import LoadingPage from "./LoadingPage";
 
 
 const KakaoRedirectPage = () => {
@@ -39,7 +40,7 @@ const KakaoRedirectPage = () => {
     kakaoLogin();
   }, [searchParams, fetchMe, navigate]);
 
-  return <div>카카오 로그인 처리중...</div>;
+  return <LoadingPage/>;
 };
 
 export default KakaoRedirectPage;

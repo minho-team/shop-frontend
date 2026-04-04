@@ -1,0 +1,112 @@
+.loading-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* 캐릭터 전체 */
+.walker {
+  position: relative;
+  width: 100px;
+  height: 160px;
+  margin-bottom: 40px;
+}
+
+/* 머리 */
+.head {
+  width: 30px;
+  height: 30px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 35px;
+}
+
+/* 몸 */
+.body {
+  width: 6px;
+  height: 50px;
+  background: #fff;
+  position: absolute;
+  top: 30px;
+  left: 47px;
+}
+
+/* 팔 */
+.arm {
+  width: 5px;
+  height: 40px;
+  background: #fff;
+  position: absolute;
+  top: 35px;
+  transform-origin: top center;
+}
+
+.arm.left {
+  left: 30px;
+}
+
+.arm.right {
+  left: 55px;
+}
+
+/* 쇼핑백 */
+.bag {
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  position: absolute;
+  bottom: -20px;
+  left: -6px;
+  border-radius: 2px;
+}
+
+/* 다리 */
+.leg {
+  width: 5px;
+  height: 45px;
+  background: #fff;
+  position: absolute;
+  top: 75px;
+  transform-origin: top center;
+}
+
+.leg.left {
+  left: 38px;
+}
+
+.leg.right {
+  left: 52px;
+}
+
+/* 텍스트 */
+.loading-text {
+  color: #fff;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+/* 점 애니메이션 */
+.dot {
+  animation: blink 1.4s infinite;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%, 80%, 100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+}
