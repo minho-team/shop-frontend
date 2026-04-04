@@ -2,8 +2,8 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
+  callDecideRefund,
   getAdminRefundDetail,
-  updateAdminRefundStatus,
 } from "../../api/admin/adminRefundApi";
 import "../../css/admin/AdminRefundDetail.css";
 
@@ -27,16 +27,13 @@ const AdminRefundDetailPage = () => {
   const navigate = useNavigate();
 
   const [refundDetail, setRefundDetail] = useState(null);
-  const [refundStatus, setRefundStatus] = useState("REQUESTED");
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
 
   const fetchRefundDetail = async () => {
     try {
       setLoading(true);
       const data = await getAdminRefundDetail(refundNo);
       setRefundDetail(data);
-      setRefundStatus(data.refundStatus || "REQUESTED");
     } catch (error) {
       console.error("환불 상세 조회 실패:", error);
       alert("환불 상세를 불러오지 못했습니다.");
@@ -45,23 +42,23 @@ const AdminRefundDetailPage = () => {
     }
   };
 
+  const decideRefund = async(refundNo,status)=>{
+
+    //확인을 누르면 isConfirm에 true가 들어감
+    const isConfirm = window.confirm(
+      status === 'APPROVED' ? '승인하시겠습니까?' : '거절하시겠습니까?'
+    );
+
+    //취소 눌렀으면 그냥 함수 종료
+    if(!isConfirm) return;
+
+    const data = await callDecideRefund(refundNo,status);
+  }
+
   useEffect(() => {
     fetchRefundDetail();
   }, [refundNo]);
 
-  const handleSaveStatus = async () => {
-    try {
-      setSaving(true);
-      const result = await updateAdminRefundStatus(refundNo, refundStatus);
-      alert(result.message || "환불 상태가 변경되었습니다.");
-      fetchRefundDetail();
-    } catch (error) {
-      console.error("환불 상태 변경 실패:", error);
-      alert("환불 상태 변경에 실패했습니다.");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const getRefundReasonLabel = (reason) => {
     if (!reason || !String(reason).trim()) {
@@ -194,29 +191,17 @@ const AdminRefundDetailPage = () => {
           </div>
 
           <div className="detail-card">
-            <h3>환불 상태 변경</h3>
+            <h3>환불 의사 결정</h3>
             <div className="status-edit-box">
-              <select
-                value={refundStatus}
-                onChange={(e) => setRefundStatus(e.target.value)}
-              >
-                <option value="REQUESTED">환불요청</option>
-                <option value="REJECTED">거절</option>
-                <option value="COMPLETED">환불완료</option>
-              </select>
 
-              <button onClick={handleSaveStatus} disabled={saving}>
-                {saving ? "저장 중..." : "저장"}
+              <button onClick={()=>decideRefund(refundNo,'APPROVED')}>
+                승인
+              </button>
+              <button onClick={()=>decideRefund(refundNo,'REJECTED')}>
+                거절
               </button>
             </div>
 
-            <p className="status-guide">
-              현재 헤더 상태:{" "}
-              <strong>
-                {statusLabelMap[refundDetail.refundStatus] ||
-                  refundDetail.refundStatus}
-              </strong>
-            </p>
           </div>
         </div>
       </AdminLayout>
