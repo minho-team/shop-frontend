@@ -5,7 +5,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
 import KakaoLoginComponent from "../../components/user/KakaoLoginComponent";
 import { login } from "../../api/common/authApi";
-import Loading from "./Loading";
+import Loading from "./LoadingPage";
 
 const LoginPage = () => {
   const nav = useNavigate();

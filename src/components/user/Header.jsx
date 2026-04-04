@@ -75,8 +75,10 @@ const womenSectionIds = {
 
 const NOTICES = [
   "🎉 신규회원 가입 시 3,000원 할인쿠폰 즉시 지급!",
-  "🎁 회원가입시 룰렛으로 최대 1만원 할인쿠폰 증정",
+  "🎁 매일 1회 룰렛으로 최대 1만원 할인쿠폰 증정",
 ];
+
+
 
 const Header = () => {
   const [openMenu, setOpenMenu] = useState(null);
@@ -92,6 +94,11 @@ const Header = () => {
   const location = useLocation();
 
   const isAdmin = user?.roles?.includes("ROLE_ADMIN");
+
+  const clickMemberId = () =>{
+
+    nav("/mypage")
+  }
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -279,7 +286,7 @@ const Header = () => {
                     관리자 페이지로
                   </Nav.Link>
                 )}
-                <span className="utility-link utility-user-text">
+                <span className="utility-link utility-user-text" onClick={clickMemberId}>
                   {user.memberId}님
                 </span>
                 <Nav.Link

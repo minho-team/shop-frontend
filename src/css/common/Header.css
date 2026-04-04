@@ -70,6 +70,10 @@
   word-break: keep-all;
 }
 
+.utility-user-text {
+  cursor: pointer;
+}
+
 .utility-link:hover { color: var(--color-text) !important; }
 
 .brand-row {
