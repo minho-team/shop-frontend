@@ -36,6 +36,10 @@ const RegisterPage = () => {
     });
   };
 
+  const checkPasswordMessage = isSame ?
+  <p style={{"color":"green", "fontWeight":"bold" }}>비밀번호가 일치합니다</p>
+    :
+  <p style={{"color":"orange", "fontWeight":"bold" }}>비밀번호가 일치하지 않습니다'</p>;
 
   // 닉네임 중복 확인 함수
   const CheckAvailabilityNickName = async (nickName) => {
@@ -184,17 +188,15 @@ const RegisterPage = () => {
                 <Form.Control
                   required
                   onChange={checkSamePassword}
-                  name="password"
                   type="password"
                   placeholder="비밀번호 입력"
                 />
               </Form.Group>
             </Col>
             <Col md={4} style={{"marginTop":"40px"}}>
-              {isSame ?
-              (<p style={{"color":"green", "fontWeight":"bold" }}>비밀번호가 일치합니다.</p>)
-              :
-              (<p style={{"color":"orange", "fontWeight":"bold" }}>비밀번호가 일치하지 않습니다.</p>)}
+            {input.password && 
+              <p>{checkPasswordMessage}</p>
+            }
             </Col>
 
           </Row>
