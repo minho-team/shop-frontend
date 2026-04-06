@@ -109,14 +109,23 @@ const ReviewWritePage = () => {
             </select>
           </div>
 
-          <div className="form-row mt-20">
-            <div className="form-col">
-              <label className="label-title">키 (cm)</label>
-              <input type="number" name="userHeight" value={reviewData.userHeight} onChange={handleChange} placeholder="예: 178" className="custom-input" required />
+          <div className="form-section mt-20">
+            <div className="label-header">
+              <label className="label-title">신체 정보</label>
+              <span className="info-text">
+                * 키, 몸무게는 필수 입력란입니다. 공개를 원치 않으시면 1로 표기해주십시오.
+              </span>
             </div>
-            <div className="form-col">
-              <label className="label-title">몸무게 (kg)</label>
-              <input type="number" name="userWeight" value={reviewData.userWeight} onChange={handleChange} placeholder="예: 72" className="custom-input" required />
+
+            <div className="form-row">
+              <div className="form-col">
+                <label className="label-title">키 (cm)</label>
+                <input type="number" name="userHeight" value={reviewData.userHeight} onChange={handleChange} placeholder="예: 178" className="custom-input" required />
+              </div>
+              <div className="form-col">
+                <label className="label-title">몸무게 (kg)</label>
+                <input type="number" name="userWeight" value={reviewData.userWeight} onChange={handleChange} placeholder="예: 72" className="custom-input" required />
+              </div>
             </div>
           </div>
 
@@ -133,12 +142,12 @@ const ReviewWritePage = () => {
           </div>
 
           <div className="form-section mt-30">
-            <label className="label-title">리뷰 제목</label>
+            <label className="label-title">리뷰 제목 (필수)</label>
             <input type="text" name="title" value={reviewData.title} onChange={handleChange} placeholder="제목을 입력해주세요" className="custom-input" required />
           </div>
 
           <div className="form-section mt-20">
-            <label className="label-title">상세 후기</label>
+            <label className="label-title">상세 후기 (필수)</label>
             <textarea name="content" value={reviewData.content} onChange={handleChange} rows="8" placeholder="다른 구매자들에게 도움이 될 수 있도록 솔직한 후기를 남겨주세요." className="custom-textarea" required />
           </div>
 

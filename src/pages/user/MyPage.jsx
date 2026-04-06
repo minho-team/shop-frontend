@@ -25,7 +25,7 @@ const getGradeByAmount = (amount) => {
 // 주문 상태 한글 변환
 const getStatusLabel = (orderStatus, refundStatus) => {
   if (refundStatus === "REFUND_REQUESTED") return "결제완료(환불요청중)";
-  if (refundStatus === "COMPLETED") return "환불완료";
+  if (refundStatus === "COMPLETED" || refundStatus === "REFUNDED") return "환불완료";
   if (refundStatus === "REJECTED") return "환불 거절됨";
   if (refundStatus === "APPROVED") return "환불 승인됨";
 
@@ -239,47 +239,57 @@ const OrderHistory = ({ user }) => {
           <tbody>
             {orderList.length > 0 ? (
               orderList.map((o) => (
-                <tr key={o.orderNo}>
+                <tr key={o.orderNo} className="order-row-hover">
                   {/* 1. 주문번호 */}
-                  <td className="td-order-no">{o.orderNo}</td>
+                  <td className="td-no-padding">
+                    <Link to={`/my/order/detail/${o.orderNo}`} state={{ fromPage: params.page }} className="table-cell-link td-order-no text-center">
+                      {o.orderNo}
+                    </Link>
+                  </td>
 
-                  {/* 2. 섬네일이미지-상품명-구매개수 */}
-                  <td className="td-product-info">
-                    <Link
-                      to={`/my/order/detail/${o.orderNo}`}
-                      state={{ fromPage: params.page }}
-                      className="product-item-flex"
-                    >
-                      <div className="thumbnail-box">
-                        <img
-                          src={o.mainImageUrl ? `${API_SERVER_HOST}${o.mainImageUrl}` : '/images/no-image.png'}
-                          alt="thumb"
-                          onError={(e) => e.target.src = '/images/no-image.png'}
-                        />
-                      </div>
-                      <div className="info-box">
-                        <p className="product-name">
-                          {o.mainProductName}
-                          {o.totalQuantity > 1 && <span className="extra-qty"> 외 {o.totalQuantity - 1}건</span>}
-                        </p>
+                  {/* 2. 상품정보 */}
+                  <td className="td-no-padding td-product-info">
+                    <Link to={`/my/order/detail/${o.orderNo}`} state={{ fromPage: params.page }} className="table-cell-link left-align">
+                      <div className="product-item-flex">
+                        <div className="thumbnail-box">
+                          <img
+                            src={o.mainImageUrl ? `${API_SERVER_HOST}${o.mainImageUrl}` : '/images/no-image.png'}
+                            alt="thumb"
+                            onError={(e) => { e.target.onerror = null; e.target.src = '/images/no-image.png'; }}
+                          />
+                        </div>
+                        <div className="info-box">
+                          <p className="product-name">
+                            {o.mainProductName}
+                            {o.totalQuantity > 1 && <span className="extra-qty"> 외 {o.totalQuantity - 1}건</span>}
+                          </p>
+                        </div>
                       </div>
                     </Link>
                   </td>
 
-                  {/* 3. 주문상태 */}
-                  <td className={`td-status status-${(o.refundStatus || o.orderStatus)?.toLowerCase()}`}>
-                    {getStatusLabel(o.orderStatus, o.refundStatus)}
+                  {/* 3. 상태 */}
+                  <td className="td-no-padding">
+                    <Link to={`/my/order/detail/${o.orderNo}`} state={{ fromPage: params.page }} className={`table-cell-link text-center td-status status-${(o.refundStatus || o.orderStatus)?.toLowerCase()}`}>
+                      {getStatusLabel(o.orderStatus, o.refundStatus)}
+                    </Link>
                   </td>
 
                   {/* 4. 금액 */}
-                  <td className="td-price">₩{o.totalPrice?.toLocaleString()}</td>
+                  <td className="td-no-padding">
+                    <Link to={`/my/order/detail/${o.orderNo}`} state={{ fromPage: params.page }} className="table-cell-link text-center td-price">
+                      ₩{o.totalPrice?.toLocaleString()}
+                    </Link>
+                  </td>
 
                   {/* 5. 주문일시 */}
-                  <td className="td-date">
-                    <div className="date-display">
-                      {new Date(o.createdAt).toLocaleDateString()}
-                      <span className="time-display">{new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
+                  <td className="td-no-padding">
+                    <Link to={`/my/order/detail/${o.orderNo}`} state={{ fromPage: params.page }} className="table-cell-link col-align text-center td-date">
+                      <div className="date-display">
+                        {new Date(o.createdAt).toLocaleDateString()}
+                        <span className="time-display">{new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                    </Link>
                   </td>
                 </tr>
               ))
@@ -387,41 +397,63 @@ const ReviewHistory = ({ user }) => {
           {currentReviews.length > 0 ? (
             currentReviews.map((r) => (
               <tr key={r.reviewNo} className="order-row-hover">
-                <td className="text-center">
-                  {new Date(r.createdAt).toLocaleDateString()}
-                </td>
-                <td className="text-center">
-                  <Link to={`/product/detail/${r.productNo}`} className="product-link">
-                    {r.itemName}
+                {/* 1. 작성일 */}
+                <td className="td-no-padding">
+                  <Link to={`/product/detail/${r.productNo}`} className="table-cell-link text-center">
+                    {new Date(r.createdAt).toLocaleDateString()}
                   </Link>
                 </td>
-                <td className="text-center">
-                  <div className="review-title-text">{r.title}</div>
-                  <div className="review-content-text">{r.content}</div>
+
+                {/* 2. 상품정보 */}
+                <td className="td-no-padding product-info-column">
+                  <Link to={`/product/detail/${r.productNo}`} className="table-cell-link left-align">
+                    <div className="product-info-wrapper">
+                      <img
+                        src={r.imageUrl ? `${API_SERVER_HOST}/upload/${r.imageUrl}` : '/default-product.png'}
+                        alt={r.itemName}
+                        className="review-product-img"
+                        onError={(e) => { e.target.onerror = null; e.target.src = '/default-product.png'; }}
+                      />
+                      <div className="product-info-text">
+                        <span className="order-no-label">주문번호: {r.orderNo || '정보없음'}</span>
+                        <span className="product-link-text">{r.itemName}</span>
+                      </div>
+                    </div>
+                  </Link>
                 </td>
-                <td className="text-center">{"⭐".repeat(r.rating)}</td>
+
+                {/* 3. 내용 */}
+                <td className="td-no-padding">
+                  <Link to={`/product/detail/${r.productNo}`} className="table-cell-link col-align text-center">
+                    <div className="review-title-text">{r.title}</div>
+                    <div className="review-content-text">{r.content}</div>
+                  </Link>
+                </td>
+
+                {/* 4. 별점 */}
+                <td className="td-no-padding">
+                  <Link to={`/product/detail/${r.productNo}`} className="table-cell-link text-center">
+                    {"⭐".repeat(r.rating)}
+                  </Link>
+                </td>
+
+                {/* 5. 관리 */}
                 <td className="text-center">
                   <div className="review-action-btns">
-                    <button className="btn-mini" onClick={() => handleEdit(r)}>
-                      수정
-                    </button>
-                    <button className="btn-mini btn-del" onClick={() => handleDelete(r.reviewNo)}>
-                      삭제
-                    </button>
+                    <button className="btn-mini" onClick={() => handleEdit(r)}>수정</button>
+                    <button className="btn-mini btn-del" onClick={() => handleDelete(r.reviewNo)}>삭제</button>
                   </div>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="5" className="empty-row">
-                작성한 리뷰가 없습니다.
-              </td>
+              <td colSpan="5" className="empty-row">작성한 리뷰가 없습니다.</td>
             </tr>
           )}
         </tbody>
       </table>
-      {/* 5. 요청하신 페이징 UI 코드 삽입 */}
+      {/* 페이징 UI 코드 */}
       {totalItems > 0 && (
         <div className="pagination-wrapper">
           <button
