@@ -1008,3 +1008,24 @@
   background-color: #fff;
   display: block;
 }
+
+/* 환불 및 취소 요청 상태 컬러 */
+.status-refund_requested {
+  color: #ff4d4f !important;
+  font-weight: 600;
+}
+
+.status-refunded {
+  color: #888888 !important; /* 완료된 상태 */
+  font-weight: 600;
+}
+
+.status-cancel_requested {
+  color: #fa8c16 !important;
+  font-weight: 600;
+}
+
+.td-status {
+  white-space: nowrap;
+  font-size: 12px;
+}

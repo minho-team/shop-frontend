@@ -23,8 +23,13 @@ const getGradeByAmount = (amount) => {
 };
 
 // 주문 상태 한글 변환
-const getStatusLabel = (status) => {
-  switch (status) {
+const getStatusLabel = (orderStatus, refundStatus) => {
+  if (refundStatus === "REFUND_REQUESTED") return "결제완료(환불요청중)";
+  if (refundStatus === "COMPLETED") return "환불완료";
+  if (refundStatus === "REJECTED") return "환불 거절됨";
+  if (refundStatus === "APPROVED") return "환불 승인됨";
+
+  switch (orderStatus) {
     case "PENDING_PAYMENT": return "결제대기";
     case "PAYMENT_COMPLETED": return "결제완료";
     case "PREPARING": return "배송준비중";
@@ -32,10 +37,7 @@ const getStatusLabel = (status) => {
     case "DELIVERED": return "배송완료";
     case "CANCEL_REQUESTED": return "취소요청";
     case "CANCELED": return "주문취소";
-    case "REJECTED": return "환불 거절됨";
-    case "REFUND_REQUESTED": return "환불요청중";
-    case "REFUNDED": return "환불완료";
-    default: return status || "상태미정";
+    default: return orderStatus || "상태미정";
   }
 };
 
@@ -198,6 +200,9 @@ const OrderHistory = ({ user }) => {
                 <option value="CANCELED">주문취소</option>
                 <option value="SHIPPING">배송중</option>
                 <option value="DELIVERED">배송완료</option>
+                <option value="REFUND_REQUESTED">환불요청중</option>
+                <option value="REFUNDED">환불완료</option>
+                <option value="CANCEL_REQUESTED">취소요청</option>
               </select>
 
               <div className="search-combined-group">
@@ -262,8 +267,8 @@ const OrderHistory = ({ user }) => {
                   </td>
 
                   {/* 3. 주문상태 */}
-                  <td className={`td-status status-${o.orderStatus?.toLowerCase()}`}>
-                    {getStatusLabel(o.orderStatus)}
+                  <td className={`td-status status-${(o.refundStatus || o.orderStatus)?.toLowerCase()}`}>
+                    {getStatusLabel(o.orderStatus, o.refundStatus)}
                   </td>
 
                   {/* 4. 금액 */}
