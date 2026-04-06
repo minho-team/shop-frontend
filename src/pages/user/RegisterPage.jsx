@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../../components/user/Header";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { checkMemberId, CheckNickName, register } from "../../api/common/authApi";
-
+import { checkEmail, checkMemberId, CheckNickName, register } from "../../api/common/authApi";
 
 const RegisterPage = () => {
   const nav = useNavigate();
@@ -12,10 +11,24 @@ const RegisterPage = () => {
   const [checkedIdMessage, setCheckedIdMessage] = useState("");
   const [availableId, setAvailableId] = useState(false);
   const [checkedNickNameMessage, setCheckedNickNameMessage] = useState("");
+  const [checkedEmailMessage, setCheckedEmailMessage] = useState("");
   const [availableNickName, setAvailableNickName] = useState(false);
-  const [isSame,setIsSame] = useState(false);
+  const [availableEmail, setAvailableEmail] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSame, setIsSame] = useState(false);
 
+  const isIdValid = input.memberId && input.memberId.trim() !== "";
+  const isNicknameValid = input.nickName && input.nickName.trim() !== "";
+  const isEmailValid = input.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email);
 
+  useEffect(() => {
+    if (!password || !confirmPassword) {
+      setIsSame(false);
+      return;
+    }
+    setIsSame(password === confirmPassword);
+  }, [password, confirmPassword]);
 
   const openPostcode = () => {
     new window.daum.Postcode({
@@ -36,10 +49,24 @@ const RegisterPage = () => {
     });
   };
 
+  const handlePassword = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+
+    setInput({
+      ...input,
+      password: value,
+    });
+  };
+
+  const handleConfirmPassword = (e) => {
+    setConfirmPassword(e.target.value);
+  };
+
   const checkPasswordMessage = isSame ?
-  <p style={{"color":"green", "fontWeight":"bold" }}>비밀번호가 일치합니다</p>
+    <p style={{ color: "green", fontWeight: "bold" }}>비밀번호가 일치합니다</p>
     :
-  <p style={{"color":"orange", "fontWeight":"bold" }}>비밀번호가 일치하지 않습니다'</p>;
+    <p style={{ color: "orange", fontWeight: "bold" }}>비밀번호가 일치하지 않습니다</p>;
 
   // 닉네임 중복 확인 함수
   const CheckAvailabilityNickName = async (nickName) => {
@@ -50,6 +77,17 @@ const RegisterPage = () => {
       setAvailableNickName(true)
     }
     setCheckedNickNameMessage(response[1])
+  }
+
+  //이메일 중복 확인 함수
+  const CheckAvailabilityEmail = async (email) => {
+    const response = await checkEmail(email);
+    if (response[0] === '0') {
+      setAvailableEmail(false)
+    } else {
+      setAvailableEmail(true)
+    }
+    setCheckedEmailMessage(response[1])
 
   }
 
@@ -62,18 +100,6 @@ const RegisterPage = () => {
       setAvailableId(true)
     }
     setCheckedIdMessage(response[1]);
-  }
-
-  //비밀번호 확인 메서드
-  const checkSamePassword = (e)=>{
-
-
-    if(input.password !== e.target.value){
-      setIsSame(false);
-    }else{
-      setIsSame(true);
-    }
-
   }
 
   const clickRegisterButton = async () => {
@@ -107,9 +133,10 @@ const RegisterPage = () => {
     }
 
     if (availableNickName === false) {
-      alert("닉네임 중복되었는지 확인해주세요.")
+      alert("닉네임이 중복되었는지 확인해주세요.")
       return;
     }
+
 
     if (!privacyChecked) {
       alert("개인정보처리방침을 확인해주세요.");
@@ -126,7 +153,6 @@ const RegisterPage = () => {
   };
 
   return (
-
     <>
       <Header />
 
@@ -158,47 +184,47 @@ const RegisterPage = () => {
               </Form.Group>
             </Col>
             <Col md={2}>
-              <Button style={{ "marginTop": "30px" }} variant="dark" type="button" onClick={() => CheckAvailabilityId(input.memberId)}>중복확인</Button>
+              <Button style={{ marginTop: "30px" }} variant="dark" type="button" onClick={() => CheckAvailabilityId(input.memberId)}
+                disabled={!isIdValid}
+              >중복확인</Button>
             </Col>
-            <Col md={4} >
-              <p style={{ "marginTop": "35px" }}>{checkedIdMessage}</p>
+            <Col md={4}>
+              <p style={{ marginTop: "35px" }}>{checkedIdMessage}</p>
             </Col>
-
           </Row>
 
-          <Row style={{ "marginBottom": "20px" }}>
+          <Row style={{ marginBottom: "20px" }}>
             <Col md={6}>
               <Form.Group controlId="password">
                 <Form.Label>비밀번호</Form.Label>
                 <Form.Control
                   required
-                  onChange={observeInput}
+                  onChange={handlePassword}
                   name="password"
                   type="password"
                   placeholder="비밀번호 입력"
                 />
               </Form.Group>
             </Col>
-
           </Row>
-          <Row style={{ "marginBottom": "20px" }}>
+
+          <Row style={{ marginBottom: "20px" }}>
             <Col md={6}>
               <Form.Group controlId="password">
                 <Form.Label>비밀번호 확인</Form.Label>
                 <Form.Control
                   required
-                  onChange={checkSamePassword}
+                  onChange={handleConfirmPassword}
                   type="password"
                   placeholder="비밀번호 입력"
                 />
               </Form.Group>
             </Col>
-            <Col md={4} style={{"marginTop":"40px"}}>
-            {input.password && 
-              <p>{checkPasswordMessage}</p>
-            }
+            <Col md={4} style={{ marginTop: "40px" }}>
+              {password && confirmPassword &&
+                <p>{checkPasswordMessage}</p>
+              }
             </Col>
-
           </Row>
 
           <Row className="mb-3">
@@ -214,8 +240,8 @@ const RegisterPage = () => {
                 />
               </Form.Group>
             </Col>
-
           </Row>
+
           <Row>
             <Col md={6}>
               <Form.Group controlId="nickName">
@@ -231,18 +257,17 @@ const RegisterPage = () => {
             </Col>
             <Col md={2}>
               <div className="mt-4 mb-4">
-                <Button style={{ "marginTop": "8px" }} variant="dark" type="button" onClick={() => CheckAvailabilityNickName(input.nickName)}>중복확인</Button>
+                <Button style={{ marginTop: "8px" }} variant="dark" type="button" onClick={() => CheckAvailabilityNickName(input.nickName)}
+                  disabled={!isNicknameValid}
+                >중복확인</Button>
               </div>
             </Col>
             <Col>
               <div>
-                <p style={{ "marginTop": "40px" }}>{checkedNickNameMessage}</p>
+                <p style={{ marginTop: "40px" }}>{checkedNickNameMessage}</p>
               </div>
             </Col>
-
           </Row>
-
-
 
           <h3 className="mt-5">선택사항</h3>
           <hr className="my-4" />
@@ -260,6 +285,21 @@ const RegisterPage = () => {
                 />
               </Form.Group>
             </Col>
+
+            <Col>
+              <Button
+                style={{ marginTop: "32px" }}
+                variant="dark" type="button"
+                onClick={() => CheckAvailabilityEmail(input.email)}
+                disabled={!isEmailValid}
+              >중복확인</Button>
+            </Col>
+            <Col md={4}>
+              <p style={{ marginTop: "35px" }}>{checkedEmailMessage}</p>
+            </Col>
+
+          </Row>
+          <Row>
             <Col md={6}>
               <Form.Group controlId="phoneNumber">
                 <Form.Label>전화번호</Form.Label>
@@ -272,6 +312,7 @@ const RegisterPage = () => {
                 />
               </Form.Group>
             </Col>
+
           </Row>
 
           <Row className="mb-3">
@@ -293,12 +334,9 @@ const RegisterPage = () => {
                 variant="dark"
                 style={{ marginTop: "32px" }}
                 onClick={openPostcode}>
-
-
                 주소검색
               </Button>
             </Col>
-
 
             <Col md={8}>
               <Form.Group controlId="basicAddress">
@@ -422,7 +460,7 @@ const RegisterPage = () => {
             회원가입
           </Button>
         </Form>
-      </Container >
+      </Container>
     </>
   );
 };

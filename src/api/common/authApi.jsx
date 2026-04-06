@@ -34,8 +34,15 @@ export const checkMemberId = async (memberId) => {
   return res.data;
 };
 
+//닉네임 중복 체크 함수
 export const CheckNickName = async (nickName) =>{
   const res = await apiClient.post(`${prefix}/checkNickName?nickName=${nickName}`)
+  return res.data;
+}
+
+//이메일 중복 체크 함수
+export const checkEmail = async (email) =>{
+  const res = await apiClient.post(`${prefix}/checkEmail?email=${email}`)
   return res.data;
 }
 
