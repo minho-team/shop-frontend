@@ -40,6 +40,20 @@
   font-size: 14px;
 }
 
+.label-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.info-text {
+  font-size: 12px;
+  color: #888;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+}
+
 .custom-input,
 .custom-textarea,
 .custom-select {
@@ -107,18 +121,27 @@
   margin-top: 50px;
   display: flex;
   gap: 15px;
+  align-items: stretch;
+}
+
+.btn-cancel,
+.btn-submit {
+  flex: 1;
+  padding: 15px;
+  font-size: 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-cancel {
-  flex: 1;
-  padding: 15px;
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 15px;
   color: #333;
-  transition: background-color 0.2s ease;
 }
 
 .btn-cancel:hover {
@@ -126,18 +149,13 @@
 }
 
 .btn-submit {
-  flex: 2;
-  padding: 15px;
   background: #111;
   color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 15px;
+  border: 1px solid #111;
   font-weight: 500;
-  transition: background-color 0.2s ease;
 }
 
 .btn-submit:hover {
   background: #333;
+  border-color: #333;
 }
