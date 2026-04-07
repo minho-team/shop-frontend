@@ -1,23 +1,23 @@
 /* 탭 네비게이션 공통 스타일 */
- 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
- 
+
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap");
+
 :root {
   --tab-bg: #fff;
   --tab-border: #e0e0e0;
   --tab-active-color: #1a1a1a;
   --tab-inactive-color: #999;
   --tab-accent: #c9a882;
-  --tab-font: 'Noto Sans KR', sans-serif;
-  --tab-title-font: 'Cormorant Garamond', serif;
+  --tab-font: "Noto Sans KR", sans-serif;
+  --tab-title-font: "Cormorant Garamond", serif;
 }
- 
+
 .pdt-wrapper {
   width: 100%;
   font-family: var(--tab-font);
   margin-top: 60px;
 }
- 
+
 /* 탭 네비게이션 */
 .pdt-tab-nav {
   display: flex;
@@ -28,7 +28,7 @@
   top: 0;
   z-index: 10;
 }
- 
+
 .pdt-tab-btn {
   flex: 1;
   padding: 18px 0;
@@ -44,13 +44,13 @@
   transition: all 0.2s ease;
   position: relative;
 }
- 
+
 .pdt-tab-btn:last-child {
   border-right: none;
 }
- 
+
 .pdt-tab-btn::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -1px;
   left: 0;
@@ -59,35 +59,41 @@
   background: #1a1a1a;
   transition: width 0.3s ease;
 }
- 
+
 .pdt-tab-btn:hover {
   color: #1a1a1a;
 }
- 
+
 .pdt-tab-btn:hover::after {
   width: 100%;
 }
- 
+
 .pdt-tab-btn--active {
   color: #1a1a1a;
   font-weight: 700;
 }
- 
+
 .pdt-tab-btn--active::after {
   width: 100%;
 }
- 
+
 /* 탭 콘텐츠 */
 .pdt-tab-content {
   padding: 0;
   animation: fadeIn 0.3s ease;
 }
- 
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
- 
+
 /* 플레이스홀더  */
 .pdt-placeholder {
   display: flex;
@@ -95,9 +101,72 @@
   justify-content: center;
   min-height: 220px;
 }
- 
+
 .pdt-placeholder-text {
   color: #bbb;
   font-size: 13px;
   letter-spacing: 0.04em;
+}
+
+/* ==========================================================================
+   구매후기(Review) 탭 전용 스타일
+   ========================================================================== */
+
+/* 1. 리뷰 텍스트 레이아웃 파괴 방지 */
+.review-content-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 10px 0;
+  box-sizing: border-box;
+}
+
+.review-detail-body {
+  /* 긴 숫자/영문 강제 줄바꿈 */
+  word-break: break-all;
+  overflow-wrap: break-word;
+  white-space: pre-wrap; /* 줄바꿈(엔터) 기호 유지 */
+
+  /* 2. 3줄 제한 */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  /* 3. 미래 표준 방식 */
+  line-clamp: 3;
+
+  font-size: 14px;
+  line-height: 1.6;
+  color: #444;
+}
+
+/* 3. 더보기/접기 버튼 */
+.review-detail-more-btn {
+  display: inline-block;
+  background: none;
+  border: none;
+  padding: 8px 0;
+  margin-top: 10px;
+  font-family: var(--tab-font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tab-inactive-color);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.review-detail-more-btn:hover {
+  color: var(--tab-active-color);
+}
+
+/* 4. 리뷰 아이템 구분선 */
+.review-item-wrapper {
+  border-bottom: 1px solid var(--tab-border);
+  padding: 30px 0;
+}
+
+.review-item-wrapper:last-child {
+  border-bottom: none;
 }

@@ -56,8 +56,54 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
+.review-detail-body {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: #555;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: break-word;
+
+  display: block !important;
+  overflow: visible !important;
+  max-height: none !important;
+
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+}
+
+/* 접혀있는 상태 (기본값) */
+.review-detail-body.clamped {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 3 !important;
+
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* ── 자세히 보기 / 접기 버튼 ── */
+.review-detail-more-btn {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #a09890;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.review-detail-more-btn:hover {
+  color: #1a1a1a;
+}
 .review-title {
   margin: 0;
   font-size: 15px;
