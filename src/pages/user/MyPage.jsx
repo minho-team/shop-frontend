@@ -409,7 +409,13 @@ const ReviewHistory = ({ user }) => {
                   <Link to={`/product/detail/${r.productNo}`} className="table-cell-link left-align">
                     <div className="product-info-wrapper">
                       <img
-                        src={r.imageUrl ? `${API_SERVER_HOST}${r.imageUrl}` : '/default-product.png'}
+                        src={
+                          r.productMainImage
+                            ? (r.productMainImage.startsWith('/')
+                              ? `${API_SERVER_HOST}${r.productMainImage}`
+                              : `${API_SERVER_HOST}/upload/${r.productMainImage}`)
+                            : '/default-product.png'
+                        }
                         alt={r.itemName}
                         className="review-product-img"
                         onError={(e) => { e.target.onerror = null; e.target.src = '/default-product.png'; }}
