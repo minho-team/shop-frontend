@@ -100,7 +100,7 @@ const AdminOrderDetailPage = () => {
 
   const handleGoList = () => {
     const queryString = location.search || "";
-    nav(`/admin/order${queryString}`);
+    nav(`/admin/orders${queryString}`);
   };
 
   const orderSummary = useMemo(() => {
