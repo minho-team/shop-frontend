@@ -22,6 +22,13 @@ const ReviewWritePage = () => {
     sizeRating: 'NORMAL'
   });
 
+  const handleContentChange = (e) => {
+    const { name, value } = e.target;
+    if (value.length > 1000) return;
+
+    setReviewData(prev => ({ ...prev, [name]: value }));
+  };
+
   const [imageFile, setImageFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -49,6 +56,29 @@ const ReviewWritePage = () => {
       setImageFile(file);
       setPreviewUrl(URL.createObjectURL(file));
     }
+  };
+
+  const ReviewContent = ({ text }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const limit = 150;
+
+    if (text.length <= limit) {
+      return <p className="review-text-view">{text}</p>;
+    }
+
+    return (
+      <div className="review-text-container">
+        <p className={`review-text-view ${!isExpanded ? 'clamped' : ''}`}>
+          {text}
+        </p>
+        <button
+          className="more-view-btn"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? '접기 ▲' : '자세히 보기 ▼'}
+        </button>
+      </div>
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -147,8 +177,21 @@ const ReviewWritePage = () => {
           </div>
 
           <div className="form-section mt-20">
-            <label className="label-title">상세 후기 (필수)</label>
-            <textarea name="content" value={reviewData.content} onChange={handleChange} rows="8" placeholder="다른 구매자들에게 도움이 될 수 있도록 솔직한 후기를 남겨주세요." className="custom-textarea" required />
+            <div className="label-header">
+              <label className="label-title">상세 후기 (필수)</label>
+              <span className="char-count">{reviewData.content.length} / 1000</span>
+            </div>
+            <div className="textarea-wrapper">
+              <textarea
+                name="content"
+                value={reviewData.content}
+                onChange={handleContentChange}
+                rows="8"
+                placeholder="내용을 입력해주세요. (최대 1000자)"
+                className="custom-textarea"
+                required
+              />
+            </div>
           </div>
 
           <div className="form-section mt-20">

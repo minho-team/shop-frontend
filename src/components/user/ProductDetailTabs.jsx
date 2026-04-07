@@ -6,6 +6,31 @@ import ProductRelatedTab from "./tabs/ProductRelatedTab";
 import ProductReviewTab from "./tabs/ProductReviewTab";
 import "../../css/common/ProductDetailTabs.css";
 
+// 리뷰 content의 text 창 이탈 방지
+const ReviewContent = ({ content }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isLong = content && content.length > 150;
+
+  return (
+    <div className="review-content-container">
+      {/* 텍스트 영역: 줄 제한 제어 */}
+      <div className={`review-detail-body ${!isExpanded ? 'clamped' : ''}`}>
+        {content}
+      </div>
+      {/* 긴 글을 자세히 볼 수 있는 기능 */}
+      {isLong && (
+        <button
+          type="button"
+          className="review-detail-more-btn"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? '접기 ▲' : '자세히 보기 ▼'}
+        </button>
+      )}
+    </div>
+  );
+};
+
 const TAB_LIST = [
   { key: "info", label: "상품정보" },
   { key: "size", label: "사이즈" },

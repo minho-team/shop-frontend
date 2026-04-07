@@ -2,6 +2,28 @@ import { useEffect, useState } from "react";
 import apiClient, { API_SERVER_HOST } from "../../../api/common/apiClient";
 import "../../../css/common/ProductReviewTab.css";
 
+const ReviewContentItem = ({ content }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isLong = content && content.length > 150;
+
+  return (
+    <div className="review-content-container">
+      <div className={`review-detail-body ${!isExpanded ? 'clamped' : ''}`}>
+        {content}
+      </div>
+      {isLong && (
+        <button
+          type="button"
+          className="review-detail-more-btn"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? '접기 ▲' : '자세히 보기 ▼'}
+        </button>
+      )}
+    </div>
+  );
+};
+
 const getReviewImageSrc = (imageUrl) => {
   if (!imageUrl) return "";
   if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
@@ -68,7 +90,7 @@ export default function ProductReviewTab({ productId }) {
             <div className="review-body">
               <div className="review-body-text">
                 <h4 className="review-title">{rev.title}</h4>
-                <p className="review-text">{rev.content}</p>
+                <ReviewContentItem content={rev.content} />
               </div>
 
               {rev.imageUrl && (
