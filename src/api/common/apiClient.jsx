@@ -18,7 +18,6 @@ apiClient.interceptors.request.use(
       "API Request:",
       request.method?.toUpperCase(),
       request.url,
-      request.data || request.params,
     );
     return request;
   },
@@ -72,7 +71,7 @@ apiClient.interceptors.response.use(
     }
 
     // 401이고 아직 재시도 안 했으면
-    if ((error.response.status === 401 || error.response.status === 403)  && !originalRequest._retry) {
+    if ((error.response.status === 401 || error.response.status === 403) && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
