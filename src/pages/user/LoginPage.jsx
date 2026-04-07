@@ -40,12 +40,10 @@ const LoginPage = () => {
       console.log(data);
       nav(redirectTo, { replace: true });
     } catch (err) {
-      if(err.response.status===887){
-        alert('존재하지 않는 아이디입니다.')
-      }else if(err.response.status===888){
-        alert('정지된 회원입니다. 전화로 문의해 주시거나 다른 아이디로 로그인해주세요.')
-      }else if(err.response.status===401){
+      if(err.response.status===401 || err.response.status===887 ){
         alert(`아이디 또는 비밀번호가 올바르지 않습니다.`)
+      }else if(err.response.status===888){
+        alert(`정지된 회원입니다. 전화로 문의해 주시거나 다른 아이디로 로그인해주세요.`)
       }
       console.log(err);
     }
