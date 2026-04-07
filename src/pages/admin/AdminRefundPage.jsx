@@ -8,6 +8,7 @@ const statusLabelMap = {
   APPROVED: "승인완료",
   REJECTED: "거절",
   COMPLETED: "환불완료",
+  REFUND_FAILED: "환불실패"
 };
 
 const PAGE_BLOCK_SIZE = 5;
