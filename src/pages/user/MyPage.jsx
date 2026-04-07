@@ -409,7 +409,7 @@ const ReviewHistory = ({ user }) => {
                   <Link to={`/product/detail/${r.productNo}`} className="table-cell-link left-align">
                     <div className="product-info-wrapper">
                       <img
-                        src={r.imageUrl ? `${API_SERVER_HOST}/upload/${r.imageUrl}` : '/default-product.png'}
+                        src={r.imageUrl ? `${API_SERVER_HOST}${r.imageUrl}` : '/default-product.png'}
                         alt={r.itemName}
                         className="review-product-img"
                         onError={(e) => { e.target.onerror = null; e.target.src = '/default-product.png'; }}
@@ -764,28 +764,35 @@ const MyPage = () => {
           </div>
 
           <div className="grade-badge">
-            <span className="label">Membership Status</span>
+            <span className="label">Membership</span>
+
             <div className="grade-display-wrapper">
-              <span className={`badge-box badge-${currentGrade.toLowerCase()}`}>
-                {currentGrade}
-              </span>
+              {/* 1. 등급 뱃지 */}
+              <div className="badge-side">
+                <span className={`badge-box badge-${currentGrade.toLowerCase()}`}>
+                  {currentGrade}
+                </span>
+              </div>
+
+              {/* 2. 등급 정보 텍스트 그룹 */}
               <div className="grade-text-group">
-                <strong className={`grade-text-${currentGrade.toLowerCase()}`}>
+                <strong className={`grade-text-main grade-text-${currentGrade.toLowerCase()}`}>
                   {currentGrade} Member
                 </strong>
+
+                {/* VVIP가 아닐 때만 다음 등급 정보를 보여줌 */}
                 {currentGrade !== "VVIP" && (
-                  <>
+                  <div className="next-grade-container">
                     <span className="next-grade-info">
-                      {/* 금액 포맷팅 적용 */}
                       다음 등급까지 <strong>{getNextGradeInfo()?.toLocaleString()}원</strong> 남음
                     </span>
                     <div className="progress-bar-container">
                       <div
-                        className="progress-fill"
+                        className="progress-fill fill-color"
                         style={{ width: `${getProgress()}%` }}
                       ></div>
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
