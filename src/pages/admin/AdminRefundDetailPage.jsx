@@ -26,10 +26,6 @@ const refundReasonLabelMap = {
 const AdminRefundDetailPage = () => {
   const { refundNo } = useParams();
   const navigate = useNavigate();
-
-
-
-
   const [refundDetail, setRefundDetail] = useState(null);
   const [loading, setLoading] = useState(false);
 
